@@ -1,0 +1,110 @@
+{
+  "bundle_id": "hnf.turn_taking",
+  "version": "1.0.0",
+  "author": "Human Not Found",
+  "description": "Rules for who speaks next in a group discussion (speaker picks next, raise hands, least active next), and a participation measure that leaves moderators out.",
+  "permissions": [
+    "read_shared_state",
+    "read_private_actions",
+    "write_state",
+    "emit_event"
+  ],
+  "components": [
+    {
+      "id": "hnf.turn_taking.least_active",
+      "family": "procedure",
+      "entrypoint": "least_active",
+      "description": "Least active next",
+      "about": {
+        "summary": "Always gives the floor to the group member who has said the least so far, a policy that balances participation without asking anyone.",
+        "how_it_works": "At the start and after every turn the rule invites the group member with the fewest words in this step (discussion.invite); ties are broken at random with the run's seed, so it is reproducible. Participants whose role is 'moderator' are outside the group: they are never put in the rotation and are left out of the counts, and after each group member's message every moderator is asked privately whether it wants to speak next (turn.request); a yes gives it the next turn. After each turn the rule publishes turn.status with every group member's messages and words in this step, which the AI moderator reads. Use it with a Discussion whose turns are set to procedure.",
+        "actions": [
+          {
+            "type": "discussion.message",
+            "description": "The invited member posts a message (offered by the Discussion activity)."
+          },
+          {
+            "type": "turn.request",
+            "description": "Moderators only: say whether to step in before the next member."
+          }
+        ],
+        "ends_when": "When the configured number of turns has been taken (unless 'End the step' is off)."
+      },
+      "config_schema": {
+        "type": "object",
+        "properties": {
+          "action_type": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120,
+            "title": "Action that ends a turn",
+            "default": "discussion.message"
+          },
+          "max_turns": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 200,
+            "title": "Turns before the step ends",
+            "default": 12
+          },
+          "finish": {
+            "type": "boolean",
+            "title": "End the step when the discussion is over",
+            "default": true
+          }
+        },
+        "required": [
+          "action_type",
+          "max_turns",
+          "finish"
+        ],
+        "additionalProperties": false
+      }
+    },
+    {
+      "id": "hnf.turn_taking.group_balance",
+      "family": "evaluator",
+      "entrypoint": "group_balance",
+      "description": "Group participation balance",
+      "about": {
+        "summary": "How evenly the group members contributed to the discussion, leaving moderators out, so groups with and without a moderator compare the same people.",
+        "how_it_works": "Counts the discussion messages and their words of every participant whose role is not 'moderator', including members who said nothing. Evenness is the normalized entropy of the members' shares of words: 1 when everyone wrote the same amount, 0 when one person wrote everything.",
+        "outputs": [
+          {
+            "label": "Evenness",
+            "unit": "0 to 1",
+            "description": "Normalized entropy of the group members' shares of words."
+          },
+          {
+            "label": "Details",
+            "description": "Messages and words per group member, and the evenness of message counts."
+          }
+        ]
+      },
+      "config_schema": {
+        "type": "object",
+        "properties": {
+          "action_type": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120,
+            "title": "Message action type",
+            "default": "discussion.message"
+          },
+          "step": {
+            "type": "string",
+            "maxLength": 120,
+            "title": "Step (empty: whole run)",
+            "default": "",
+            "x-hnf-reference": "step"
+          }
+        },
+        "required": [
+          "action_type",
+          "step"
+        ],
+        "additionalProperties": false
+      }
+    }
+  ]
+}
