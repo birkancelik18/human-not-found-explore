@@ -1,0 +1,129 @@
+{
+  "bundle_id": "hnf.idea_generation",
+  "version": "1.0.0",
+  "author": "Human Not Found",
+  "description": "Idea generation (brainstorming) alone or in groups, and a count of unique ideas.",
+  "permissions": [
+    "read_shared_state",
+    "read_private_actions",
+    "write_state",
+    "emit_event"
+  ],
+  "components": [
+    {
+      "id": "hnf.idea_generation.ideas",
+      "family": "mechanic",
+      "entrypoint": "idea_generation",
+      "description": "Idea generation",
+      "about": {
+        "summary": "Participants list ideas in response to a prompt over several rounds, seeing each other's ideas or working alone.",
+        "how_it_works": "Each round every participant submits a list of new ideas at the same time. With ideas visible, everyone sees what the others submitted (an interacting group); without, each participant works alone and the ideas are only pooled for analysis (a nominal group). Rounds stand in for the time of a brainstorming session.",
+        "actions": [
+          {
+            "type": "ideas.submit",
+            "description": "Submit a list of new ideas."
+          }
+        ],
+        "ends_when": "When everyone has submitted ideas in the last round (unless 'End the step' is off)."
+      },
+      "config_schema": {
+        "type": "object",
+        "properties": {
+          "prompt": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 4000,
+            "title": "Brainstorming prompt",
+            "default": "Think of as many ways as you can to make your town greener."
+          },
+          "rounds": {
+            "type": "integer",
+            "title": "Rounds",
+            "default": 3,
+            "minimum": 1,
+            "maximum": 50
+          },
+          "max_ideas": {
+            "type": "integer",
+            "title": "Most ideas per submission",
+            "default": 5,
+            "minimum": 1,
+            "maximum": 20
+          },
+          "visible": {
+            "type": "boolean",
+            "title": "Participants see each other's ideas",
+            "default": true
+          },
+          "sample_ideas": {
+            "type": "array",
+            "title": "Sample ideas (used by the free test model)",
+            "minItems": 1,
+            "maxItems": 20,
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 500
+            },
+            "default": [
+              "Plant trees along main streets",
+              "Add protected bike lanes",
+              "Start a community composting program"
+            ]
+          },
+          "finish": {
+            "type": "boolean",
+            "title": "End the step when every round is over",
+            "default": true
+          }
+        },
+        "required": [
+          "prompt",
+          "rounds",
+          "max_ideas",
+          "visible",
+          "sample_ideas",
+          "finish"
+        ],
+        "additionalProperties": false
+      }
+    },
+    {
+      "id": "hnf.idea_generation.ideas_count",
+      "family": "evaluator",
+      "entrypoint": "ideas",
+      "description": "Ideas",
+      "about": {
+        "summary": "The number of unique ideas produced by the group, and per participant.",
+        "how_it_works": "Reads every idea submitted (including private ones). Ideas are compared after lowering capitals, removing punctuation and extra spaces, so exact repeats count once. The group value is the number of unique ideas across all participants, which for a nominal group is the pooled count of non-redundant ideas. Ideas that say the same thing in different words are counted separately.",
+        "outputs": [
+          {
+            "label": "Unique ideas",
+            "unit": "ideas",
+            "description": "Unique ideas across the group."
+          },
+          {
+            "label": "Details",
+            "description": "Unique and submitted ideas per participant, total submitted, and mean unique ideas per participant."
+          }
+        ]
+      },
+      "config_schema": {
+        "type": "object",
+        "properties": {
+          "step": {
+            "type": "string",
+            "maxLength": 120,
+            "title": "Step (empty: whole run)",
+            "default": "",
+            "x-hnf-reference": "step"
+          }
+        },
+        "required": [
+          "step"
+        ],
+        "additionalProperties": false
+      }
+    }
+  ]
+}

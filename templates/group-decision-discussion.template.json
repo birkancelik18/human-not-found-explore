@@ -1,0 +1,216 @@
+{
+  "format": "hnf.template.v1",
+  "name": "Group decision after discussion (choice dilemma)",
+  "author": "Human Not Found",
+  "description": "Original study: Siegel, J., Dubrovsky, V., Kiesler, S., & McGuire, T. W. (1986). Group processes in computer-mediated communication. Organizational Behavior and Human Decision Processes, 37(2), 157-187. Groups of three made individual choices on choice-dilemma problems, then discussed each problem face to face or through a computer and reached a group decision; the studies compared participation, choice shift and behavior across these media. Group decision tasks appear in 19 of the 500 studies in our survey. This template keeps the computer-mediated sequence for one group of three: each member answers a choice dilemma privately, the group discusses it in text over three rounds, and the group then votes until it agrees (up to three votes). The choice dilemma is new, not one of the original items, and there is no face-to-face condition. Participants are simulated: each is a Model participant, using the free test model until you choose a model, so the first runs only check the design; with the test model every participant takes the sample answer.",
+  "created_at": "2026-11-18T01:13:22.375+00:00",
+  "spec": {
+    "components": [],
+    "conditions": [
+      {
+        "id": "main",
+        "label": "Main",
+        "overrides": []
+      }
+    ],
+    "description": "Private choice, discussion, then a unanimous group decision on a choice dilemma.",
+    "environment": {
+      "initial_state": {
+        "private_by_participant": {},
+        "shared": {}
+      }
+    },
+    "execution": {
+      "max_actions_per_run": 40,
+      "max_estimated_cost_usd_per_run": 2.0,
+      "max_memory_events": 40,
+      "max_model_calls_per_run": 80,
+      "max_wall_seconds_per_run": 3600,
+      "repetitions_per_condition": 10,
+      "seed": 1
+    },
+    "experiment_id": "group-decision-discussion",
+    "measurements": [
+      {
+        "evaluator": {
+          "config": {
+            "step": "alone"
+          },
+          "id": "hnf.questionnaire.summary",
+          "version": "1.0.0"
+        },
+        "id": "private",
+        "label": "Private choices",
+        "scope": "run"
+      },
+      {
+        "evaluator": {
+          "config": {
+            "action_type": "discussion.message",
+            "step": "discuss"
+          },
+          "id": "hnf.group_discussion.participation_balance",
+          "version": "1.0.0"
+        },
+        "id": "balance",
+        "label": "Participation balance",
+        "scope": "run"
+      }
+    ],
+    "participants": [
+      {
+        "agent": {
+          "config": {
+            "instructions": "",
+            "model_ref": "default",
+            "persona": ""
+          },
+          "id": "hnf.participants.model",
+          "version": "1.0.0"
+        },
+        "display_name": "Participant 1",
+        "enabled": true,
+        "id": "p1",
+        "private_context": {},
+        "role": "participant"
+      },
+      {
+        "agent": {
+          "config": {
+            "instructions": "",
+            "model_ref": "default",
+            "persona": ""
+          },
+          "id": "hnf.participants.model",
+          "version": "1.0.0"
+        },
+        "display_name": "Participant 2",
+        "enabled": true,
+        "id": "p2",
+        "private_context": {},
+        "role": "participant"
+      },
+      {
+        "agent": {
+          "config": {
+            "instructions": "",
+            "model_ref": "default",
+            "persona": ""
+          },
+          "id": "hnf.participants.model",
+          "version": "1.0.0"
+        },
+        "display_name": "Participant 3",
+        "enabled": true,
+        "id": "p3",
+        "private_context": {},
+        "role": "participant"
+      }
+    ],
+    "research": {
+      "hypotheses": [],
+      "question": "Does the group's decision differ from its members' private choices?"
+    },
+    "schema_version": "2.0.0",
+    "steps": [
+      {
+        "components": [
+          {
+            "config": {
+              "finish": true,
+              "items": [
+                {
+                  "id": "odds",
+                  "max": 7,
+                  "min": 1,
+                  "options": [
+                    "1 in 10",
+                    "3 in 10",
+                    "5 in 10",
+                    "7 in 10",
+                    "9 in 10",
+                    "Sam should not take it, whatever the chance"
+                  ],
+                  "prompt": "Lowest acceptable chance of success",
+                  "type": "choice"
+                }
+              ],
+              "prompt": "Sam is a mid-career engineer with a secure, adequately paid job at a large company. A small new firm offers Sam a job with a much higher salary and a share in the business if it succeeds, but the firm may fail within a year. What is the lowest chance that the new firm succeeds at which Sam should take the job?",
+              "visibility": "private"
+            },
+            "id": "hnf.questionnaire.questionnaire",
+            "version": "1.0.0"
+          }
+        ],
+        "id": "alone",
+        "title": "Choose alone"
+      },
+      {
+        "components": [
+          {
+            "config": {
+              "finish": true,
+              "prompt": "Sam is a mid-career engineer with a secure, adequately paid job at a large company. A small new firm offers Sam a job with a much higher salary and a share in the business if it succeeds, but the firm may fail within a year. What is the lowest chance that the new firm succeeds at which Sam should take the job? Discuss with your group and try to agree.",
+              "rounds": 3,
+              "sample": "I think Sam should only move if the new firm is fairly likely to succeed.",
+              "turns": "free"
+            },
+            "id": "hnf.group_discussion.discussion",
+            "version": "1.0.0"
+          }
+        ],
+        "id": "discuss",
+        "title": "Discuss"
+      },
+      {
+        "components": [
+          {
+            "config": {
+              "finish": true,
+              "leader": "",
+              "max_ballots": 3,
+              "options": [
+                "1 in 10",
+                "3 in 10",
+                "5 in 10",
+                "7 in 10",
+                "9 in 10",
+                "Sam should not take it, whatever the chance"
+              ],
+              "prompt": "Sam is a mid-career engineer with a secure, adequately paid job at a large company. A small new firm offers Sam a job with a much higher salary and a share in the business if it succeeds, but the firm may fail within a year. What is the lowest chance that the new firm succeeds at which Sam should take the job? Give the group's answer.",
+              "rule": "unanimity",
+              "visible": true
+            },
+            "id": "hnf.group_decision.decision",
+            "version": "1.0.0"
+          }
+        ],
+        "id": "decide",
+        "title": "Decide as a group"
+      }
+    ],
+    "title": "Group decision after discussion"
+  },
+  "packages": [
+    {
+      "bundle_id": "hnf.group_decision",
+      "version": "1.0.0",
+      "digest": "4ea5ecc2adecf0084876e377efe07a28ad6c6b23d21f3dfd8d6a192bcf31918c"
+    },
+    {
+      "bundle_id": "hnf.group_discussion",
+      "version": "1.0.0",
+      "digest": "8635dc4a94885045a34cc5d9d3027f32f9e802a32ec07f49041ed2e47bc7403a"
+    },
+    {
+      "bundle_id": "hnf.participants",
+      "version": "1.0.0",
+      "digest": "3eba369193895ce162da928faffcb34ce74512a9c74d86bf2acc252f11fbcaee"
+    },
+    {
+      "bundle_id": "hnf.questionnaire",
+      "version": "1.0.0",
+      "digest": "9d1c1b477a6ed605f1fcaf202dd43d997491b305e660ab9812218505c65f9c7b"
+    }
+  ]
+}

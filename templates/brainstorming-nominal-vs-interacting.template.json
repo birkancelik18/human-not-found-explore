@@ -1,0 +1,159 @@
+{
+  "format": "hnf.template.v1",
+  "name": "Brainstorming: nominal versus interacting groups",
+  "author": "Human Not Found",
+  "description": "Original study: Diehl, M., & Stroebe, W. (1987). Productivity loss in brainstorming groups: Toward the solution of a riddle. Journal of Personality and Social Psychology, 53(3), 497-509. Participants generated ideas on a problem either in interacting groups of four or alone; the ideas of four people working alone were pooled as a 'nominal group' and their non-redundant ideas counted. The studies examined why interacting groups produce fewer ideas than nominal groups. Idea generation appears in 48 of the 500 studies in our survey. In this template both conditions have four participants who submit lists of ideas over three rounds (standing in for the session time): in the interacting condition everyone sees the others' ideas; in the nominal condition each works alone and only the analysis pools the ideas. Participants do not speak or wait for each other, so this design does not reproduce production blocking. The brainstorming problem is new, not the original. Participants are simulated: each is a Model participant, using the free test model until you choose a model, so the first runs only check the design; with the test model every participant takes the sample answer.",
+  "created_at": "2026-11-18T01:13:22.325+00:00",
+  "spec": {
+    "components": [
+      {
+        "config": {
+          "finish": true,
+          "max_ideas": 5,
+          "prompt": "How could your town reduce the amount of waste it sends to landfill? Give as many ideas as you can; quantity counts and no idea is too unusual.",
+          "rounds": 3,
+          "sample_ideas": [
+            "Charge households by the bag for rubbish",
+            "Open a repair cafe",
+            "Ban single-use plastic bags in shops"
+          ],
+          "visible": true
+        },
+        "id": "hnf.idea_generation.ideas",
+        "version": "1.0.0"
+      }
+    ],
+    "conditions": [
+      {
+        "id": "interacting",
+        "label": "Interacting group of 4",
+        "overrides": []
+      },
+      {
+        "id": "nominal",
+        "label": "Alone (nominal group of 4)",
+        "overrides": [
+          {
+            "path": "/components/0/config/visible",
+            "value": false
+          }
+        ]
+      }
+    ],
+    "description": "Four participants generate ideas alone (nominal) or seeing each other's ideas (interacting).",
+    "environment": {
+      "initial_state": {
+        "private_by_participant": {},
+        "shared": {}
+      }
+    },
+    "execution": {
+      "max_actions_per_run": 20,
+      "max_estimated_cost_usd_per_run": 2.0,
+      "max_memory_events": 40,
+      "max_model_calls_per_run": 40,
+      "max_wall_seconds_per_run": 3600,
+      "repetitions_per_condition": 10,
+      "seed": 1
+    },
+    "experiment_id": "brainstorming-nominal-vs-interacting",
+    "measurements": [
+      {
+        "evaluator": {
+          "config": {
+            "step": ""
+          },
+          "id": "hnf.idea_generation.ideas_count",
+          "version": "1.0.0"
+        },
+        "id": "ideas",
+        "label": "Unique ideas",
+        "scope": "run"
+      }
+    ],
+    "participants": [
+      {
+        "agent": {
+          "config": {
+            "instructions": "",
+            "model_ref": "default",
+            "persona": ""
+          },
+          "id": "hnf.participants.model",
+          "version": "1.0.0"
+        },
+        "display_name": "Participant 1",
+        "enabled": true,
+        "id": "p1",
+        "private_context": {},
+        "role": "participant"
+      },
+      {
+        "agent": {
+          "config": {
+            "instructions": "",
+            "model_ref": "default",
+            "persona": ""
+          },
+          "id": "hnf.participants.model",
+          "version": "1.0.0"
+        },
+        "display_name": "Participant 2",
+        "enabled": true,
+        "id": "p2",
+        "private_context": {},
+        "role": "participant"
+      },
+      {
+        "agent": {
+          "config": {
+            "instructions": "",
+            "model_ref": "default",
+            "persona": ""
+          },
+          "id": "hnf.participants.model",
+          "version": "1.0.0"
+        },
+        "display_name": "Participant 3",
+        "enabled": true,
+        "id": "p3",
+        "private_context": {},
+        "role": "participant"
+      },
+      {
+        "agent": {
+          "config": {
+            "instructions": "",
+            "model_ref": "default",
+            "persona": ""
+          },
+          "id": "hnf.participants.model",
+          "version": "1.0.0"
+        },
+        "display_name": "Participant 4",
+        "enabled": true,
+        "id": "p4",
+        "private_context": {},
+        "role": "participant"
+      }
+    ],
+    "research": {
+      "hypotheses": [],
+      "question": "Do interacting groups produce fewer unique ideas than the same number of people working alone?"
+    },
+    "schema_version": "2.0.0",
+    "title": "Brainstorming: nominal vs interacting"
+  },
+  "packages": [
+    {
+      "bundle_id": "hnf.idea_generation",
+      "version": "1.0.0",
+      "digest": "0e7cc7f505c089e607e0604eba1fcc2d70b02fab0a16b65aa2e4a6235cdfe7d6"
+    },
+    {
+      "bundle_id": "hnf.participants",
+      "version": "1.0.0",
+      "digest": "3eba369193895ce162da928faffcb34ce74512a9c74d86bf2acc252f11fbcaee"
+    }
+  ]
+}

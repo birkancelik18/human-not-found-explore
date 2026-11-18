@@ -1,0 +1,153 @@
+{
+  "format": "hnf.template.v1",
+  "name": "Finitely repeated prisoner's dilemma",
+  "author": "Human Not Found",
+  "description": "Original study: Andreoni, J., & Miller, J. H. (1993). Rational cooperation in the finitely repeated prisoner's dilemma: Experimental evidence. The Economic Journal, 103(418), 570-585. Pairs played a prisoner's dilemma for a known, fixed number of rounds; the study compared fixed partners with re-matched strangers to test whether people cooperate early in a finitely repeated game to build a reputation. Prisoner's dilemma games appear in 43 of the 500 studies in our survey. This template runs one ten-round game with a fixed partner (the partners design), with payoffs of 7 each for mutual cooperation, 4 each for mutual defection, and 12 and 0 when one defects; the original repeated such games many times. Participants are simulated: each is a Model participant, using the free test model until you choose a model, so the first runs only check the design; with the test model every participant takes the sample answer.",
+  "created_at": "2026-11-18T01:13:22.352+00:00",
+  "spec": {
+    "components": [
+      {
+        "config": {
+          "cooperative_move": "Cooperate",
+          "finish": true,
+          "moves": [
+            "Cooperate",
+            "Defect"
+          ],
+          "payoffs": [
+            {
+              "column": "Cooperate",
+              "column_payoff": 7,
+              "row": "Cooperate",
+              "row_payoff": 7
+            },
+            {
+              "column": "Defect",
+              "column_payoff": 12,
+              "row": "Cooperate",
+              "row_payoff": 0
+            },
+            {
+              "column": "Cooperate",
+              "column_payoff": 0,
+              "row": "Defect",
+              "row_payoff": 12
+            },
+            {
+              "column": "Defect",
+              "column_payoff": 4,
+              "row": "Defect",
+              "row_payoff": 4
+            }
+          ],
+          "prompt": "You will play 10 rounds with the same partner. Points are converted to money at the end.",
+          "rounds": 10
+        },
+        "id": "hnf.economic_games.matrix",
+        "version": "1.0.0"
+      }
+    ],
+    "conditions": [
+      {
+        "id": "main",
+        "label": "Main",
+        "overrides": []
+      }
+    ],
+    "description": "Two partners play ten rounds of a prisoner's dilemma.",
+    "environment": {
+      "initial_state": {
+        "private_by_participant": {},
+        "shared": {}
+      }
+    },
+    "execution": {
+      "max_actions_per_run": 40,
+      "max_estimated_cost_usd_per_run": 2.0,
+      "max_memory_events": 40,
+      "max_model_calls_per_run": 80,
+      "max_wall_seconds_per_run": 3600,
+      "repetitions_per_condition": 10,
+      "seed": 1
+    },
+    "experiment_id": "repeated-prisoners-dilemma",
+    "measurements": [
+      {
+        "evaluator": {
+          "config": {
+            "step": ""
+          },
+          "id": "hnf.economic_games.cooperation_rate",
+          "version": "1.0.0"
+        },
+        "id": "cooperation",
+        "label": "Cooperation rate",
+        "scope": "run"
+      },
+      {
+        "evaluator": {
+          "config": {
+            "step": ""
+          },
+          "id": "hnf.economic_games.payoffs",
+          "version": "1.0.0"
+        },
+        "id": "payoffs",
+        "label": "Earnings",
+        "scope": "run"
+      }
+    ],
+    "participants": [
+      {
+        "agent": {
+          "config": {
+            "instructions": "",
+            "model_ref": "default",
+            "persona": ""
+          },
+          "id": "hnf.participants.model",
+          "version": "1.0.0"
+        },
+        "display_name": "Participant 1",
+        "enabled": true,
+        "id": "p1",
+        "private_context": {},
+        "role": "participant"
+      },
+      {
+        "agent": {
+          "config": {
+            "instructions": "",
+            "model_ref": "default",
+            "persona": ""
+          },
+          "id": "hnf.participants.model",
+          "version": "1.0.0"
+        },
+        "display_name": "Participant 2",
+        "enabled": true,
+        "id": "p2",
+        "private_context": {},
+        "role": "participant"
+      }
+    ],
+    "research": {
+      "hypotheses": [],
+      "question": "How does cooperation change over a known, finite number of rounds?"
+    },
+    "schema_version": "2.0.0",
+    "title": "Repeated prisoner's dilemma"
+  },
+  "packages": [
+    {
+      "bundle_id": "hnf.economic_games",
+      "version": "1.0.0",
+      "digest": "008657757b690dbe46899ffe376576d8598f30ddf8194702e2f4ddb48e054e6b"
+    },
+    {
+      "bundle_id": "hnf.participants",
+      "version": "1.0.0",
+      "digest": "3eba369193895ce162da928faffcb34ce74512a9c74d86bf2acc252f11fbcaee"
+    }
+  ]
+}

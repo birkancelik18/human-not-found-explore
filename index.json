@@ -1,5 +1,2131 @@
 {
   "format": "hnf.explore-index.v1",
-  "packages": [],
-  "templates": []
+  "packages": [
+    {
+      "path": "packages/hnf.economic_games-1.0.0.hnf.json",
+      "digest": "sha256:386e03f1a3025b93efb1c8c8de3a5f077616163797b25ba2ce3489fa9f47ac3d",
+      "added_at": "2026-11-18T01:14:36+00:00",
+      "manifest": {
+        "bundle_id": "hnf.economic_games",
+        "version": "1.0.0",
+        "author": "Human Not Found",
+        "description": "Economic games: dictator, trust, ultimatum, public goods and payoff-matrix games, with measures of amounts, cooperation, payoffs and acceptance.",
+        "permissions": [
+          "read_shared_state",
+          "read_private_actions",
+          "write_state",
+          "emit_event"
+        ],
+        "components": [
+          {
+            "id": "hnf.economic_games.give",
+            "family": "mechanic",
+            "entrypoint": "give",
+            "description": "Give and transfer",
+            "about": {
+              "summary": "A sender decides how much of an endowment to give to a receiver: the dictator game, or the trust game with a multiplier and a return step.",
+              "how_it_works": "Participants are paired: by listed order (1st sends to 2nd, 3rd to 4th, and so on) or, with roles set to participant role, senders are participants whose role is 'sender' and receivers those whose role is 'receiver'. An unpaired participant sits out. Each sender privately chooses an amount from 0 to the endowment; only the pair sees it. The amount is multiplied by the multiplier (1 for the dictator game). With the return step on, the receiver then chooses how much of what arrived to send back. Sender earns endowment minus amount sent plus amount returned; receiver earns their own endowment plus amount received minus amount returned. After each pair finishes, the activity publishes the result (econ.result), and repeats for the configured number of rounds.",
+              "actions": [
+                {
+                  "type": "give.send",
+                  "description": "Sender: choose an amount from 0 to the endowment to send."
+                },
+                {
+                  "type": "give.return",
+                  "description": "Receiver (return step only): choose how much of the received amount to send back."
+                }
+              ],
+              "ends_when": "When every pair has finished the last round (unless 'End the step' is off)."
+            },
+            "config_schema": {
+              "type": "object",
+              "properties": {
+                "prompt": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 4000,
+                  "title": "Instructions",
+                  "default": "You are taking part in a decision study with real stakes."
+                },
+                "endowment": {
+                  "type": "number",
+                  "title": "Sender's endowment",
+                  "default": 10,
+                  "minimum": 0
+                },
+                "multiplier": {
+                  "type": "number",
+                  "title": "Multiplier on the amount sent",
+                  "default": 1,
+                  "minimum": 0
+                },
+                "return_step": {
+                  "type": "boolean",
+                  "title": "Receiver can send money back (trust game)",
+                  "default": false
+                },
+                "receiver_endowment": {
+                  "type": "number",
+                  "title": "Receiver's own endowment",
+                  "default": 0,
+                  "minimum": 0
+                },
+                "rounds": {
+                  "type": "integer",
+                  "title": "Rounds",
+                  "default": 1,
+                  "minimum": 1,
+                  "maximum": 50
+                },
+                "roles": {
+                  "type": "string",
+                  "enum": [
+                    "order",
+                    "participant_role"
+                  ],
+                  "title": "How roles are assigned",
+                  "default": "order"
+                },
+                "finish": {
+                  "type": "boolean",
+                  "title": "End the step when the game is over",
+                  "default": true
+                }
+              },
+              "required": [
+                "prompt",
+                "endowment",
+                "multiplier",
+                "return_step",
+                "receiver_endowment",
+                "rounds",
+                "roles",
+                "finish"
+              ],
+              "additionalProperties": false
+            }
+          },
+          {
+            "id": "hnf.economic_games.ultimatum",
+            "family": "mechanic",
+            "entrypoint": "ultimatum",
+            "description": "Offer and respond",
+            "about": {
+              "summary": "A proposer offers a split of an endowment and a responder accepts or rejects it: the ultimatum game, with optional counter-offers.",
+              "how_it_works": "Participants are paired by listed order or by the roles 'proposer' and 'responder'. The proposer privately offers the responder an amount from 0 to the endowment; only the pair sees it. The responder accepts or rejects. If accepted, the responder gets the offer and the proposer keeps the rest. If rejected, both get nothing, unless counter-offers are allowed: then the responder makes a counter-offer to the proposer, who accepts or rejects it, up to the configured number of counter-offers. The final outcome is published as econ.result.",
+              "actions": [
+                {
+                  "type": "ultimatum.offer",
+                  "description": "Proposer: offer the other person an amount from 0 to the endowment."
+                },
+                {
+                  "type": "ultimatum.respond",
+                  "description": "Responder: accept or reject the offer."
+                }
+              ],
+              "ends_when": "When every pair has accepted an offer or rejected the last allowed one (unless 'End the step' is off)."
+            },
+            "config_schema": {
+              "type": "object",
+              "properties": {
+                "prompt": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 4000,
+                  "title": "Instructions",
+                  "default": "You are taking part in a decision study with real stakes."
+                },
+                "endowment": {
+                  "type": "number",
+                  "title": "Amount to split",
+                  "default": 10,
+                  "minimum": 0
+                },
+                "counter_offers": {
+                  "type": "integer",
+                  "title": "Counter-offers allowed after a rejection",
+                  "default": 0,
+                  "minimum": 0,
+                  "maximum": 10
+                },
+                "roles": {
+                  "type": "string",
+                  "enum": [
+                    "order",
+                    "participant_role"
+                  ],
+                  "title": "How roles are assigned",
+                  "default": "order"
+                },
+                "finish": {
+                  "type": "boolean",
+                  "title": "End the step when the game is over",
+                  "default": true
+                }
+              },
+              "required": [
+                "prompt",
+                "endowment",
+                "counter_offers",
+                "roles",
+                "finish"
+              ],
+              "additionalProperties": false
+            }
+          },
+          {
+            "id": "hnf.economic_games.pool",
+            "family": "mechanic",
+            "entrypoint": "pool",
+            "description": "Contribute to a pool",
+            "about": {
+              "summary": "Group members decide how much of an endowment to put in a shared pool that is multiplied and split equally: the public goods game, with an optional punishment stage.",
+              "how_it_works": "All enabled participants form one group. Each round every member privately chooses how many tokens (0 to the endowment) to contribute. The pool is multiplied by the multiplier and shared equally; each member earns what they kept plus their share. Members then see everyone's contributions and their earnings (in the next round's instructions, and as a shared event). With punishment on, after the contributions are shown each member may assign deduction points to each other member: each point costs the giver the punishment cost and reduces the receiver's earnings by the punishment effect. Earnings can go below zero. Each round's result is published as econ.result.",
+              "actions": [
+                {
+                  "type": "pool.contribute",
+                  "description": "Choose how many tokens to put in the pool."
+                },
+                {
+                  "type": "pool.punish",
+                  "description": "Punishment stage only: assign deduction points to each other member."
+                }
+              ],
+              "ends_when": "After the last round (unless 'End the step' is off)."
+            },
+            "config_schema": {
+              "type": "object",
+              "properties": {
+                "prompt": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 4000,
+                  "title": "Instructions",
+                  "default": "You are a member of a group in a decision study."
+                },
+                "endowment": {
+                  "type": "integer",
+                  "title": "Endowment per round (tokens)",
+                  "default": 20,
+                  "minimum": 0,
+                  "maximum": 1000
+                },
+                "multiplier": {
+                  "type": "number",
+                  "title": "Multiplier on the pool",
+                  "default": 1.6,
+                  "minimum": 0
+                },
+                "rounds": {
+                  "type": "integer",
+                  "title": "Rounds",
+                  "default": 10,
+                  "minimum": 1,
+                  "maximum": 50
+                },
+                "punishment": {
+                  "type": "boolean",
+                  "title": "Add a punishment stage after each round",
+                  "default": false
+                },
+                "punishment_cost": {
+                  "type": "number",
+                  "title": "Cost of one deduction point to the giver",
+                  "default": 1,
+                  "minimum": 0
+                },
+                "punishment_effect": {
+                  "type": "number",
+                  "title": "Earnings removed from the receiver per point",
+                  "default": 3,
+                  "minimum": 0
+                },
+                "max_points": {
+                  "type": "integer",
+                  "title": "Most points one member can give another per round",
+                  "default": 10,
+                  "minimum": 0,
+                  "maximum": 100
+                },
+                "finish": {
+                  "type": "boolean",
+                  "title": "End the step when the game is over",
+                  "default": true
+                }
+              },
+              "required": [
+                "prompt",
+                "endowment",
+                "multiplier",
+                "rounds",
+                "punishment",
+                "punishment_cost",
+                "punishment_effect",
+                "max_points",
+                "finish"
+              ],
+              "additionalProperties": false
+            }
+          },
+          {
+            "id": "hnf.economic_games.matrix",
+            "family": "mechanic",
+            "entrypoint": "matrix",
+            "description": "Payoff-matrix game",
+            "about": {
+              "summary": "Two players choose a move at the same time and earn what a payoff table says, over several rounds: the prisoner's dilemma by default.",
+              "how_it_works": "Participants are paired by listed order (1st with 2nd, and so on); the first of a pair is the row player. Each round both choose one of the moves privately. When both have chosen, each earns the amount the payoff table gives for that pair of moves, and both see the outcome in the next round's instructions and as a shared econ.result event. The table must have an entry for every pair of moves. The cooperative move, if set, is what the cooperation rate counts. The default table is a prisoner's dilemma: both cooperate 3 each, both defect 1 each, a defector against a cooperator 5 and 0.",
+              "actions": [
+                {
+                  "type": "matrix.choose",
+                  "description": "Choose one of the moves."
+                }
+              ],
+              "ends_when": "After the last round (unless 'End the step' is off)."
+            },
+            "config_schema": {
+              "type": "object",
+              "properties": {
+                "prompt": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 4000,
+                  "title": "Instructions",
+                  "default": "You are playing a game with another participant."
+                },
+                "moves": {
+                  "type": "array",
+                  "title": "Moves",
+                  "minItems": 2,
+                  "maxItems": 10,
+                  "uniqueItems": true,
+                  "items": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 60
+                  },
+                  "default": [
+                    "Cooperate",
+                    "Defect"
+                  ]
+                },
+                "payoffs": {
+                  "type": "array",
+                  "title": "Payoff table",
+                  "minItems": 1,
+                  "maxItems": 100,
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "row": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 60,
+                        "title": "Row player's move"
+                      },
+                      "column": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 60,
+                        "title": "Column player's move"
+                      },
+                      "row_payoff": {
+                        "type": "number",
+                        "title": "Row player earns"
+                      },
+                      "column_payoff": {
+                        "type": "number",
+                        "title": "Column player earns"
+                      }
+                    },
+                    "required": [
+                      "row",
+                      "column",
+                      "row_payoff",
+                      "column_payoff"
+                    ],
+                    "additionalProperties": false
+                  },
+                  "default": [
+                    {
+                      "row": "Cooperate",
+                      "column": "Cooperate",
+                      "row_payoff": 3,
+                      "column_payoff": 3
+                    },
+                    {
+                      "row": "Cooperate",
+                      "column": "Defect",
+                      "row_payoff": 0,
+                      "column_payoff": 5
+                    },
+                    {
+                      "row": "Defect",
+                      "column": "Cooperate",
+                      "row_payoff": 5,
+                      "column_payoff": 0
+                    },
+                    {
+                      "row": "Defect",
+                      "column": "Defect",
+                      "row_payoff": 1,
+                      "column_payoff": 1
+                    }
+                  ]
+                },
+                "cooperative_move": {
+                  "type": "string",
+                  "maxLength": 60,
+                  "title": "Cooperative move (counted by the cooperation rate)",
+                  "default": "Cooperate"
+                },
+                "rounds": {
+                  "type": "integer",
+                  "title": "Rounds",
+                  "default": 10,
+                  "minimum": 1,
+                  "maximum": 100
+                },
+                "finish": {
+                  "type": "boolean",
+                  "title": "End the step when the game is over",
+                  "default": true
+                }
+              },
+              "required": [
+                "prompt",
+                "moves",
+                "payoffs",
+                "cooperative_move",
+                "rounds",
+                "finish"
+              ],
+              "additionalProperties": false
+            }
+          },
+          {
+            "id": "hnf.economic_games.amounts_given",
+            "family": "evaluator",
+            "entrypoint": "amounts_given",
+            "description": "Amounts given",
+            "about": {
+              "summary": "The mean amount sent, returned, offered, contributed or assigned as punishment in the economic games, with its distribution.",
+              "how_it_works": "Reads the results the economic games publish and keeps the amounts of the chosen kind: sent (give and transfer), returned (trust return step), offered (offer and respond, every offer including counter-offers), contributed (public goods) or punishment (points assigned in the punishment stage), or all of them.",
+              "outputs": [
+                {
+                  "label": "Mean amount",
+                  "unit": "amount",
+                  "description": "Mean of the selected amounts."
+                },
+                {
+                  "label": "Details",
+                  "description": "Count, mean share of what was available, means by kind, role and round, and the sorted distribution."
+                }
+              ]
+            },
+            "config_schema": {
+              "type": "object",
+              "properties": {
+                "kind": {
+                  "type": "string",
+                  "title": "Which amounts",
+                  "enum": [
+                    "all",
+                    "sent",
+                    "returned",
+                    "offered",
+                    "contributed",
+                    "punishment"
+                  ],
+                  "default": "all"
+                },
+                "step": {
+                  "type": "string",
+                  "maxLength": 120,
+                  "title": "Step (empty: whole run)",
+                  "default": "",
+                  "x-hnf-reference": "step"
+                }
+              },
+              "required": [
+                "kind",
+                "step"
+              ],
+              "additionalProperties": false
+            }
+          },
+          {
+            "id": "hnf.economic_games.cooperation_rate",
+            "family": "evaluator",
+            "entrypoint": "cooperation_rate",
+            "description": "Cooperation rate",
+            "about": {
+              "summary": "How cooperative choices were: the share of cooperative moves in payoff-matrix games, or the mean contribution as a share of the endowment in public goods games.",
+              "how_it_works": "Reads the results the economic games publish. A payoff-matrix choice counts 1 if it is the game's cooperative move and 0 otherwise. A public goods contribution counts its share of the endowment (0 to 1). The value is the mean over all these decisions.",
+              "outputs": [
+                {
+                  "label": "Cooperation rate",
+                  "unit": "0 to 1",
+                  "description": "Mean cooperation over all decisions."
+                },
+                {
+                  "label": "Details",
+                  "description": "Number of decisions, and the rate per participant and per round."
+                }
+              ]
+            },
+            "config_schema": {
+              "type": "object",
+              "properties": {
+                "step": {
+                  "type": "string",
+                  "maxLength": 120,
+                  "title": "Step (empty: whole run)",
+                  "default": "",
+                  "x-hnf-reference": "step"
+                }
+              },
+              "required": [
+                "step"
+              ],
+              "additionalProperties": false
+            }
+          },
+          {
+            "id": "hnf.economic_games.payoffs",
+            "family": "evaluator",
+            "entrypoint": "payoffs",
+            "description": "Payoffs",
+            "about": {
+              "summary": "Earnings per participant across the economic games, with group efficiency and inequality.",
+              "how_it_works": "Adds up each participant's earnings over every result the economic games publish. Efficiency is the total earned divided by the most the participants could have earned together. Inequality is the Gini coefficient of the participants' totals (0: equal).",
+              "outputs": [
+                {
+                  "label": "Mean earnings",
+                  "unit": "per participant",
+                  "description": "Mean total earnings per participant."
+                },
+                {
+                  "label": "Details",
+                  "description": "Earnings per participant, total, efficiency (0 to 1) and Gini inequality."
+                }
+              ]
+            },
+            "config_schema": {
+              "type": "object",
+              "properties": {
+                "step": {
+                  "type": "string",
+                  "maxLength": 120,
+                  "title": "Step (empty: whole run)",
+                  "default": "",
+                  "x-hnf-reference": "step"
+                }
+              },
+              "required": [
+                "step"
+              ],
+              "additionalProperties": false
+            }
+          },
+          {
+            "id": "hnf.economic_games.acceptance_rate",
+            "family": "evaluator",
+            "entrypoint": "acceptance_rate",
+            "description": "Acceptance rate",
+            "about": {
+              "summary": "The share of offers accepted in the offer-and-respond (ultimatum) game.",
+              "how_it_works": "Counts every response to an offer or counter-offer and the share that were accepted, and reports the mean accepted and rejected offer.",
+              "outputs": [
+                {
+                  "label": "Acceptance rate",
+                  "unit": "0 to 1",
+                  "description": "Accepted responses divided by all responses."
+                },
+                {
+                  "label": "Details",
+                  "description": "Number of responses and acceptances, mean accepted offer and mean rejected offer."
+                }
+              ]
+            },
+            "config_schema": {
+              "type": "object",
+              "properties": {
+                "step": {
+                  "type": "string",
+                  "maxLength": 120,
+                  "title": "Step (empty: whole run)",
+                  "default": "",
+                  "x-hnf-reference": "step"
+                }
+              },
+              "required": [
+                "step"
+              ],
+              "additionalProperties": false
+            }
+          }
+        ],
+        "contract_version": "1.0.0",
+        "digest": "sha256:c9693af46719ec7c420108f9b7ece2e07d44e05ec207cebe470638b9302d9080"
+      }
+    },
+    {
+      "path": "packages/hnf.effort_task-1.0.0.hnf.json",
+      "digest": "sha256:646a8a8873b3eebfd1251def13d669997fff8be1a81e0d78be6d141afdbfdde2",
+      "added_at": "2026-11-18T01:14:36+00:00",
+      "manifest": {
+        "bundle_id": "hnf.effort_task",
+        "version": "1.0.0",
+        "author": "Human Not Found",
+        "description": "An effort task with individual or pooled credit, and a mean effort measure (social loafing).",
+        "permissions": [
+          "read_shared_state",
+          "read_private_actions",
+          "write_state",
+          "emit_event"
+        ],
+        "components": [
+          {
+            "id": "hnf.effort_task.effort",
+            "family": "mechanic",
+            "entrypoint": "effort_task",
+            "description": "Effort task",
+            "about": {
+              "summary": "Each participant privately chooses how much effort to put into a task, from 0 to 10, with effort credited individually or only as a group total.",
+              "how_it_works": "Every participant chooses an effort level at the same time. The instructions say whether each person's effort is recorded and credited to them (individual) or only the group's combined effort is recorded (pooled). After each round a shared result gives the total, and the individual efforts only with individual credit.",
+              "actions": [
+                {
+                  "type": "effort.choose",
+                  "description": "Choose an effort level from 0 to 10."
+                }
+              ],
+              "ends_when": "When everyone has chosen in the last round (unless 'End the step' is off)."
+            },
+            "config_schema": {
+              "type": "object",
+              "properties": {
+                "prompt": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 4000,
+                  "title": "Task description",
+                  "default": "Your task is to shout as loudly as you can when the signal is given."
+                },
+                "credit": {
+                  "type": "string",
+                  "enum": [
+                    "individual",
+                    "pooled"
+                  ],
+                  "title": "How effort is credited",
+                  "default": "individual"
+                },
+                "rounds": {
+                  "type": "integer",
+                  "title": "Rounds",
+                  "default": 1,
+                  "minimum": 1,
+                  "maximum": 50
+                },
+                "finish": {
+                  "type": "boolean",
+                  "title": "End the step when everyone has chosen",
+                  "default": true
+                }
+              },
+              "required": [
+                "prompt",
+                "credit",
+                "rounds",
+                "finish"
+              ],
+              "additionalProperties": false
+            }
+          },
+          {
+            "id": "hnf.effort_task.effort_mean",
+            "family": "evaluator",
+            "entrypoint": "effort",
+            "description": "Effort",
+            "about": {
+              "summary": "Mean effort chosen, overall and separately for individual and pooled credit.",
+              "how_it_works": "Reads every effort choice (including private ones) and the credit type of the step it was made in.",
+              "outputs": [
+                {
+                  "label": "Mean effort",
+                  "unit": "0 to 10",
+                  "description": "Mean of all effort choices."
+                },
+                {
+                  "label": "Details",
+                  "description": "Mean effort with individual and with pooled credit, per participant, and the number of choices."
+                }
+              ]
+            },
+            "config_schema": {
+              "type": "object",
+              "properties": {
+                "step": {
+                  "type": "string",
+                  "maxLength": 120,
+                  "title": "Step (empty: whole run)",
+                  "default": "",
+                  "x-hnf-reference": "step"
+                }
+              },
+              "required": [
+                "step"
+              ],
+              "additionalProperties": false
+            }
+          }
+        ],
+        "contract_version": "1.0.0",
+        "digest": "sha256:08c49290da7843f4cc31835a754c644306180143b88dd616c8c6435657bac049"
+      }
+    },
+    {
+      "path": "packages/hnf.group_decision-1.0.0.hnf.json",
+      "digest": "sha256:b0535a69214de26322b85c0050b79e63b9943a5d5c6109b94070dbc112b3cdc1",
+      "added_at": "2026-11-18T01:14:36+00:00",
+      "manifest": {
+        "bundle_id": "hnf.group_decision",
+        "version": "1.0.0",
+        "author": "Human Not Found",
+        "description": "Group decisions by majority, unanimity or a leader, with measures of decision accuracy and information shared.",
+        "permissions": [
+          "read_shared_state",
+          "read_private_actions",
+          "write_state",
+          "emit_event"
+        ],
+        "components": [
+          {
+            "id": "hnf.group_decision.decision",
+            "family": "mechanic",
+            "entrypoint": "group_decision",
+            "description": "Group decision",
+            "about": {
+              "summary": "The group chooses one of several options by majority, unanimity or a leader's choice; or participants vote individually.",
+              "how_it_works": "Each voter chooses one option. Majority: the option with the most votes wins; a tie means another vote. Unanimity: an option wins only if everyone chose it; otherwise everyone votes again. Leader: only the leader (the first enabled participant if none is set) chooses. Individual: everyone votes once on their own and no group decision is made, for recording private choices before a discussion. Votes are seen by everyone or only by the voter. If no decision is reached after the last allowed vote, the decision is recorded as none. The result is published as decision.result.",
+              "actions": [
+                {
+                  "type": "decision.vote",
+                  "description": "Choose one of the options."
+                }
+              ],
+              "ends_when": "When a decision is reached or the last allowed vote is over (unless 'End the step' is off)."
+            },
+            "config_schema": {
+              "type": "object",
+              "properties": {
+                "prompt": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 4000,
+                  "title": "Instructions",
+                  "default": "Choose the best option."
+                },
+                "options": {
+                  "type": "array",
+                  "title": "Options",
+                  "minItems": 2,
+                  "maxItems": 20,
+                  "items": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 200
+                  },
+                  "default": [
+                    "Option A",
+                    "Option B",
+                    "Option C"
+                  ],
+                  "uniqueItems": true
+                },
+                "rule": {
+                  "type": "string",
+                  "enum": [
+                    "majority",
+                    "unanimity",
+                    "leader",
+                    "individual"
+                  ],
+                  "title": "Decision rule",
+                  "default": "majority"
+                },
+                "leader": {
+                  "type": "string",
+                  "maxLength": 120,
+                  "title": "Leader (empty: first enabled participant)",
+                  "default": "",
+                  "x-hnf-reference": "participant"
+                },
+                "visible": {
+                  "type": "boolean",
+                  "title": "Everyone sees each vote",
+                  "default": true
+                },
+                "max_ballots": {
+                  "type": "integer",
+                  "title": "Most votes before stopping without a decision",
+                  "default": 3,
+                  "minimum": 1,
+                  "maximum": 20
+                },
+                "finish": {
+                  "type": "boolean",
+                  "title": "End the step when the decision is made",
+                  "default": true
+                }
+              },
+              "required": [
+                "prompt",
+                "options",
+                "rule",
+                "leader",
+                "visible",
+                "max_ballots",
+                "finish"
+              ],
+              "additionalProperties": false
+            }
+          },
+          {
+            "id": "hnf.group_decision.decision_accuracy",
+            "family": "evaluator",
+            "entrypoint": "decision_accuracy",
+            "description": "Decision accuracy",
+            "about": {
+              "summary": "Whether the group's decision matches the answer key.",
+              "how_it_works": "Reads the last group decision in the step (or the whole run) and compares it with the answer key, ignoring capitals. No decision counts as incorrect. A step with only individual votes gives no result.",
+              "outputs": [
+                {
+                  "label": "Correct",
+                  "unit": "1 or 0",
+                  "description": "1 if the decision matches the answer key, otherwise 0."
+                },
+                {
+                  "label": "Details",
+                  "description": "The decision, the answer key, the number of votes it took and the vote counts."
+                }
+              ]
+            },
+            "config_schema": {
+              "type": "object",
+              "properties": {
+                "answer_key": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 200,
+                  "title": "Correct option",
+                  "default": "Option A"
+                },
+                "step": {
+                  "type": "string",
+                  "maxLength": 120,
+                  "title": "Step (empty: whole run)",
+                  "default": "",
+                  "x-hnf-reference": "step"
+                }
+              },
+              "required": [
+                "answer_key",
+                "step"
+              ],
+              "additionalProperties": false
+            }
+          },
+          {
+            "id": "hnf.group_decision.information_shared",
+            "family": "evaluator",
+            "entrypoint": "information_shared",
+            "description": "Information shared",
+            "about": {
+              "summary": "Which of the configured clues participants mentioned in their discussion messages.",
+              "how_it_works": "A clue counts as mentioned when any of its keywords appears in a discussion message (ignoring capitals). Mark each clue as shared (everyone had it) or unique (only one participant had it) to compare the two, as in hidden-profile studies. Keyword matching is simple: choose distinctive words.",
+              "outputs": [
+                {
+                  "label": "Clues mentioned",
+                  "unit": "0 to 1",
+                  "description": "Share of the configured clues that someone mentioned."
+                },
+                {
+                  "label": "Details",
+                  "description": "Who mentioned each clue, the clues each participant mentioned, and the rates for shared and unique clues."
+                }
+              ]
+            },
+            "config_schema": {
+              "type": "object",
+              "properties": {
+                "clues": {
+                  "type": "array",
+                  "title": "Clues",
+                  "maxItems": 60,
+                  "default": [],
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 64,
+                        "title": "Clue ID"
+                      },
+                      "keywords": {
+                        "type": "array",
+                        "title": "Keywords",
+                        "minItems": 1,
+                        "maxItems": 10,
+                        "items": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 120
+                        },
+                        "default": []
+                      },
+                      "kind": {
+                        "type": "string",
+                        "enum": [
+                          "shared",
+                          "unique"
+                        ],
+                        "title": "Who had it",
+                        "default": "unique"
+                      }
+                    },
+                    "required": [
+                      "id",
+                      "keywords",
+                      "kind"
+                    ],
+                    "additionalProperties": false
+                  }
+                },
+                "action_type": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 120,
+                  "title": "Message action type",
+                  "default": "discussion.message"
+                },
+                "step": {
+                  "type": "string",
+                  "maxLength": 120,
+                  "title": "Step (empty: whole run)",
+                  "default": "",
+                  "x-hnf-reference": "step"
+                }
+              },
+              "required": [
+                "clues",
+                "action_type",
+                "step"
+              ],
+              "additionalProperties": false
+            }
+          }
+        ],
+        "contract_version": "1.0.0",
+        "digest": "sha256:a0a4916f1a972bd37c42ff23e0eb191b6cf6f9b3eb176e3fcb7354a29d470337"
+      }
+    },
+    {
+      "path": "packages/hnf.group_discussion-1.0.0.hnf.json",
+      "digest": "sha256:f3cd33211e8895e277c120af855df2f004c813c04b4b0562a2c638def24dd925",
+      "added_at": "2026-11-18T01:14:36+00:00",
+      "manifest": {
+        "bundle_id": "hnf.group_discussion",
+        "version": "1.0.0",
+        "author": "Human Not Found",
+        "description": "Group discussion with built-in turn-taking, a turn-order procedure, and a participation balance measure.",
+        "permissions": [
+          "read_shared_state",
+          "write_state",
+          "emit_event"
+        ],
+        "components": [
+          {
+            "id": "hnf.group_discussion.discussion",
+            "family": "mechanic",
+            "entrypoint": "discussion",
+            "description": "Discussion",
+            "about": {
+              "summary": "Participants discuss by posting shared messages, with built-in turn-taking.",
+              "how_it_works": "Every message is seen by all participants. Turns: round robin gives the floor to one participant at a time in listed order; free offers everyone a message at once each round, answered in the order the offers were made; procedure waits for a turn-order procedure in the same step to invite each speaker (discussion.invite). With round robin and free, each participant speaks once per round for the configured number of rounds. With procedure, the procedure decides when the step ends. The sample message is what the free test model posts.",
+              "actions": [
+                {
+                  "type": "discussion.message",
+                  "description": "Post a message to the group."
+                }
+              ],
+              "ends_when": "When every participant has spoken in every round (round robin and free, unless 'End the step' is off); with procedure turns, when the procedure ends it."
+            },
+            "config_schema": {
+              "type": "object",
+              "properties": {
+                "prompt": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 4000,
+                  "title": "Discussion instructions",
+                  "default": "Discuss the task with your group."
+                },
+                "turns": {
+                  "type": "string",
+                  "enum": [
+                    "round_robin",
+                    "free",
+                    "procedure"
+                  ],
+                  "title": "Turn-taking",
+                  "default": "round_robin"
+                },
+                "rounds": {
+                  "type": "integer",
+                  "title": "Rounds (each participant speaks once per round)",
+                  "default": 2,
+                  "minimum": 1,
+                  "maximum": 50
+                },
+                "sample": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 4000,
+                  "title": "Sample message (used by the free test model)",
+                  "default": "I think we should compare what each of us knows before deciding."
+                },
+                "finish": {
+                  "type": "boolean",
+                  "title": "End the step when every round is over",
+                  "default": true
+                }
+              },
+              "required": [
+                "prompt",
+                "turns",
+                "rounds",
+                "sample",
+                "finish"
+              ],
+              "additionalProperties": false
+            }
+          },
+          {
+            "id": "hnf.group_discussion.turn_order",
+            "family": "procedure",
+            "entrypoint": "turn_order",
+            "description": "Turn order",
+            "about": {
+              "summary": "Invites one speaker at a time, in listed or random order, for steps that combine a discussion with other activities.",
+              "how_it_works": "At the start of the step the procedure fixes the order (listed, or shuffled with the run's seed so it is reproducible) and sends discussion.invite naming the first speaker. Each time a message of the configured action type is accepted, it invites the next speaker. Use it with a Discussion whose turns are set to procedure.",
+              "actions": [
+                {
+                  "type": "discussion.message",
+                  "description": "The invited speaker posts a message (offered by the Discussion activity)."
+                }
+              ],
+              "ends_when": "When every participant has spoken in every round (unless 'End the step' is off)."
+            },
+            "config_schema": {
+              "type": "object",
+              "properties": {
+                "rounds": {
+                  "type": "integer",
+                  "title": "Rounds",
+                  "default": 2,
+                  "minimum": 1,
+                  "maximum": 50
+                },
+                "order": {
+                  "type": "string",
+                  "enum": [
+                    "listed",
+                    "random"
+                  ],
+                  "title": "Speaking order",
+                  "default": "listed"
+                },
+                "action_type": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 120,
+                  "title": "Action that ends a turn",
+                  "default": "discussion.message"
+                },
+                "finish": {
+                  "type": "boolean",
+                  "title": "End the step when every round is over",
+                  "default": true
+                }
+              },
+              "required": [
+                "rounds",
+                "order",
+                "action_type",
+                "finish"
+              ],
+              "additionalProperties": false
+            }
+          },
+          {
+            "id": "hnf.group_discussion.participation_balance",
+            "family": "evaluator",
+            "entrypoint": "participation_balance",
+            "description": "Participation balance",
+            "about": {
+              "summary": "How evenly participants contributed to the discussion: messages and words per participant, and an evenness score.",
+              "how_it_works": "Counts the discussion messages and their words for every participant, including those who said nothing. Evenness is the normalized entropy of the participants' shares of words: 1 when everyone wrote the same amount, 0 when one person wrote everything.",
+              "outputs": [
+                {
+                  "label": "Evenness",
+                  "unit": "0 to 1",
+                  "description": "Normalized entropy of the participants' shares of words."
+                },
+                {
+                  "label": "Details",
+                  "description": "Messages and words per participant, and the evenness of message counts."
+                }
+              ]
+            },
+            "config_schema": {
+              "type": "object",
+              "properties": {
+                "action_type": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 120,
+                  "title": "Message action type",
+                  "default": "discussion.message"
+                },
+                "step": {
+                  "type": "string",
+                  "maxLength": 120,
+                  "title": "Step (empty: whole run)",
+                  "default": "",
+                  "x-hnf-reference": "step"
+                }
+              },
+              "required": [
+                "action_type",
+                "step"
+              ],
+              "additionalProperties": false
+            }
+          }
+        ],
+        "contract_version": "1.0.0",
+        "digest": "sha256:6630be61852c98c089bd052566f32e69ef590c7aab6975060d8d92b6132738e5"
+      }
+    },
+    {
+      "path": "packages/hnf.idea_generation-1.0.0.hnf.json",
+      "digest": "sha256:e67660fe0e5fb1ebf6e73d2a6aba35977abb45f73a5037f2f65e9b958a819fcd",
+      "added_at": "2026-11-18T01:14:36+00:00",
+      "manifest": {
+        "bundle_id": "hnf.idea_generation",
+        "version": "1.0.0",
+        "author": "Human Not Found",
+        "description": "Idea generation (brainstorming) alone or in groups, and a count of unique ideas.",
+        "permissions": [
+          "read_shared_state",
+          "read_private_actions",
+          "write_state",
+          "emit_event"
+        ],
+        "components": [
+          {
+            "id": "hnf.idea_generation.ideas",
+            "family": "mechanic",
+            "entrypoint": "idea_generation",
+            "description": "Idea generation",
+            "about": {
+              "summary": "Participants list ideas in response to a prompt over several rounds, seeing each other's ideas or working alone.",
+              "how_it_works": "Each round every participant submits a list of new ideas at the same time. With ideas visible, everyone sees what the others submitted (an interacting group); without, each participant works alone and the ideas are only pooled for analysis (a nominal group). Rounds stand in for the time of a brainstorming session.",
+              "actions": [
+                {
+                  "type": "ideas.submit",
+                  "description": "Submit a list of new ideas."
+                }
+              ],
+              "ends_when": "When everyone has submitted ideas in the last round (unless 'End the step' is off)."
+            },
+            "config_schema": {
+              "type": "object",
+              "properties": {
+                "prompt": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 4000,
+                  "title": "Brainstorming prompt",
+                  "default": "Think of as many ways as you can to make your town greener."
+                },
+                "rounds": {
+                  "type": "integer",
+                  "title": "Rounds",
+                  "default": 3,
+                  "minimum": 1,
+                  "maximum": 50
+                },
+                "max_ideas": {
+                  "type": "integer",
+                  "title": "Most ideas per submission",
+                  "default": 5,
+                  "minimum": 1,
+                  "maximum": 20
+                },
+                "visible": {
+                  "type": "boolean",
+                  "title": "Participants see each other's ideas",
+                  "default": true
+                },
+                "sample_ideas": {
+                  "type": "array",
+                  "title": "Sample ideas (used by the free test model)",
+                  "minItems": 1,
+                  "maxItems": 20,
+                  "items": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 500
+                  },
+                  "default": [
+                    "Plant trees along main streets",
+                    "Add protected bike lanes",
+                    "Start a community composting program"
+                  ]
+                },
+                "finish": {
+                  "type": "boolean",
+                  "title": "End the step when every round is over",
+                  "default": true
+                }
+              },
+              "required": [
+                "prompt",
+                "rounds",
+                "max_ideas",
+                "visible",
+                "sample_ideas",
+                "finish"
+              ],
+              "additionalProperties": false
+            }
+          },
+          {
+            "id": "hnf.idea_generation.ideas_count",
+            "family": "evaluator",
+            "entrypoint": "ideas",
+            "description": "Ideas",
+            "about": {
+              "summary": "The number of unique ideas produced by the group, and per participant.",
+              "how_it_works": "Reads every idea submitted (including private ones). Ideas are compared after lowering capitals, removing punctuation and extra spaces, so exact repeats count once. The group value is the number of unique ideas across all participants, which for a nominal group is the pooled count of non-redundant ideas. Ideas that say the same thing in different words are counted separately.",
+              "outputs": [
+                {
+                  "label": "Unique ideas",
+                  "unit": "ideas",
+                  "description": "Unique ideas across the group."
+                },
+                {
+                  "label": "Details",
+                  "description": "Unique and submitted ideas per participant, total submitted, and mean unique ideas per participant."
+                }
+              ]
+            },
+            "config_schema": {
+              "type": "object",
+              "properties": {
+                "step": {
+                  "type": "string",
+                  "maxLength": 120,
+                  "title": "Step (empty: whole run)",
+                  "default": "",
+                  "x-hnf-reference": "step"
+                }
+              },
+              "required": [
+                "step"
+              ],
+              "additionalProperties": false
+            }
+          }
+        ],
+        "contract_version": "1.0.0",
+        "digest": "sha256:e136841a504e67a99dd070acab157873c8c0412583c50092bd51185b965da270"
+      }
+    },
+    {
+      "path": "packages/hnf.participants-1.0.0.hnf.json",
+      "digest": "sha256:1235faa09087c15252b8d91ff39c985e47a24638e7adae31cee016ae2b7caf49",
+      "added_at": "2026-11-18T01:14:36+00:00",
+      "manifest": {
+        "bundle_id": "hnf.participants",
+        "version": "1.0.0",
+        "author": "Human Not Found",
+        "description": "Participant behaviours: a model participant with a persona, and a scripted participant for confederates and controls.",
+        "permissions": [
+          "read_shared_state",
+          "model_call"
+        ],
+        "components": [
+          {
+            "id": "hnf.participants.model",
+            "family": "agent",
+            "entrypoint": "model_participant",
+            "description": "Model participant",
+            "about": {
+              "summary": "A simulated participant that hands every choice to a language model, with an optional persona and instructions.",
+              "how_it_works": "Whenever an activity offers this participant an action, the model receives what the participant may see: the offered actions and their instructions, the participant's private information, and a window of recent shared events and its own private ones. The persona and instructions are added to the system prompt. The model chooses an action and its value; the app checks the reply against the action's format and asks again if it does not fit. With the free test model, the participant always takes the first offered action with its sample value."
+            },
+            "config_schema": {
+              "type": "object",
+              "properties": {
+                "model_ref": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 4000,
+                  "title": "Model",
+                  "default": "default",
+                  "x-hnf-reference": "model"
+                },
+                "persona": {
+                  "type": "string",
+                  "maxLength": 4000,
+                  "title": "Persona (who this participant is)",
+                  "default": ""
+                },
+                "instructions": {
+                  "type": "string",
+                  "maxLength": 4000,
+                  "title": "Instructions",
+                  "default": ""
+                }
+              },
+              "required": [
+                "model_ref",
+                "persona",
+                "instructions"
+              ],
+              "additionalProperties": false
+            }
+          },
+          {
+            "id": "hnf.participants.scripted",
+            "family": "agent",
+            "entrypoint": "scripted_participant",
+            "description": "Scripted participant",
+            "about": {
+              "summary": "A participant that follows a fixed rule for each kind of action, for confederates and control conditions; it never calls a model.",
+              "how_it_works": "For each offer, the participant takes the first offered action that has a rule (or the first offered action) and builds a value that fits it. Rules: first option (the first choice in a list, the lowest allowed number, yes for a yes/no question), fixed number (the configured number, kept within the allowed range), accept all (a choice containing the word 'accept', or yes), and reject all (a choice containing 'reject', or no). Text answers are 'OK.'. Actions without a rule use the default rule."
+            },
+            "config_schema": {
+              "type": "object",
+              "properties": {
+                "rules": {
+                  "type": "array",
+                  "title": "Rules by action type",
+                  "maxItems": 20,
+                  "default": [],
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "action_type": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 120,
+                        "title": "Action type"
+                      },
+                      "rule": {
+                        "type": "string",
+                        "enum": [
+                          "first_option",
+                          "fixed_number",
+                          "accept",
+                          "reject"
+                        ],
+                        "title": "Rule",
+                        "default": "first_option"
+                      },
+                      "number": {
+                        "type": "number",
+                        "title": "Number (for fixed number)",
+                        "default": 0
+                      }
+                    },
+                    "required": [
+                      "action_type",
+                      "rule",
+                      "number"
+                    ],
+                    "additionalProperties": false
+                  }
+                },
+                "default_rule": {
+                  "type": "string",
+                  "enum": [
+                    "first_option",
+                    "fixed_number",
+                    "accept",
+                    "reject"
+                  ],
+                  "title": "Rule for other actions",
+                  "default": "first_option"
+                },
+                "default_number": {
+                  "type": "number",
+                  "title": "Number for other actions (fixed number)",
+                  "default": 0
+                }
+              },
+              "required": [
+                "rules",
+                "default_rule",
+                "default_number"
+              ],
+              "additionalProperties": false
+            }
+          }
+        ],
+        "contract_version": "1.0.0",
+        "digest": "sha256:f4165d8bdb159011b3bf0ceaa1e446eb868b4a07523fdb157f2365e2c56e9e1e"
+      }
+    },
+    {
+      "path": "packages/hnf.questionnaire-1.0.0.hnf.json",
+      "digest": "sha256:5c281f1e33aeb7a688259c623ff284e0e69751942638398e21dc5f3aa31cb801",
+      "added_at": "2026-11-18T01:14:36+00:00",
+      "manifest": {
+        "bundle_id": "hnf.questionnaire",
+        "version": "1.0.0",
+        "author": "Human Not Found",
+        "description": "A questionnaire with scale, choice and text items, and a summary measure.",
+        "permissions": [
+          "read_shared_state",
+          "read_private_actions",
+          "write_state",
+          "emit_event"
+        ],
+        "components": [
+          {
+            "id": "hnf.questionnaire.questionnaire",
+            "family": "mechanic",
+            "entrypoint": "questionnaire",
+            "description": "Questionnaire",
+            "about": {
+              "summary": "Every participant answers the same questionnaire of scale, choice and text items.",
+              "how_it_works": "All participants get the questionnaire at once and answer every item in one submission: a whole number within the scale's range, one of the listed choices, or free text. Answers are seen by everyone or only by the participant. The free test model answers the middle of each scale, the first choice and 'No further comments.'.",
+              "actions": [
+                {
+                  "type": "questionnaire.answers",
+                  "description": "Answer every item."
+                }
+              ],
+              "ends_when": "When everyone has answered (unless 'End the step' is off)."
+            },
+            "config_schema": {
+              "type": "object",
+              "properties": {
+                "prompt": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 4000,
+                  "title": "Instructions",
+                  "default": "Please answer every question."
+                },
+                "items": {
+                  "type": "array",
+                  "title": "Items",
+                  "minItems": 1,
+                  "maxItems": 30,
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 64,
+                        "title": "Item ID"
+                      },
+                      "prompt": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 1000,
+                        "title": "Question"
+                      },
+                      "type": {
+                        "type": "string",
+                        "enum": [
+                          "scale",
+                          "choice",
+                          "text"
+                        ],
+                        "title": "Answer type",
+                        "default": "scale"
+                      },
+                      "min": {
+                        "type": "integer",
+                        "title": "Scale minimum",
+                        "default": 1
+                      },
+                      "max": {
+                        "type": "integer",
+                        "title": "Scale maximum",
+                        "default": 7
+                      },
+                      "options": {
+                        "type": "array",
+                        "title": "Choices",
+                        "minItems": 0,
+                        "maxItems": 20,
+                        "items": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 200
+                        },
+                        "default": [],
+                        "uniqueItems": true
+                      }
+                    },
+                    "required": [
+                      "id",
+                      "prompt",
+                      "type",
+                      "min",
+                      "max",
+                      "options"
+                    ],
+                    "additionalProperties": false
+                  },
+                  "default": [
+                    {
+                      "id": "satisfaction",
+                      "prompt": "How satisfied are you with the outcome?",
+                      "type": "scale",
+                      "min": 1,
+                      "max": 7,
+                      "options": []
+                    }
+                  ]
+                },
+                "visibility": {
+                  "type": "string",
+                  "enum": [
+                    "shared",
+                    "private"
+                  ],
+                  "title": "Who sees the answers",
+                  "default": "private"
+                },
+                "finish": {
+                  "type": "boolean",
+                  "title": "End the step when everyone has answered",
+                  "default": true
+                }
+              },
+              "required": [
+                "prompt",
+                "items",
+                "visibility",
+                "finish"
+              ],
+              "additionalProperties": false
+            }
+          },
+          {
+            "id": "hnf.questionnaire.summary",
+            "family": "evaluator",
+            "entrypoint": "questionnaire_summary",
+            "description": "Questionnaire summary",
+            "about": {
+              "summary": "The number of respondents and a summary of every item.",
+              "how_it_works": "Uses each participant's latest answers (including private ones). Scale items get their mean, choice items the count of each choice, text items the number of answers.",
+              "outputs": [
+                {
+                  "label": "Respondents",
+                  "unit": "participants",
+                  "description": "Participants who answered."
+                },
+                {
+                  "label": "Details",
+                  "description": "Per item: mean (scale), counts (choice) or number of answers (text)."
+                }
+              ]
+            },
+            "config_schema": {
+              "type": "object",
+              "properties": {
+                "step": {
+                  "type": "string",
+                  "maxLength": 120,
+                  "title": "Step (empty: whole run)",
+                  "default": "",
+                  "x-hnf-reference": "step"
+                }
+              },
+              "required": [
+                "step"
+              ],
+              "additionalProperties": false
+            }
+          }
+        ],
+        "contract_version": "1.0.0",
+        "digest": "sha256:96e9c625806f0f64c781e5e6a250c107ad5ecd129d3e264e54c7f15064db437c"
+      }
+    },
+    {
+      "path": "packages/hnf.ranking_tasks-1.0.0.hnf.json",
+      "digest": "sha256:4a70c577a0178c13231e54b1d2b15e05bbd1174e0a4fca3399ebbfc593fe166d",
+      "added_at": "2026-11-18T01:14:36+00:00",
+      "manifest": {
+        "bundle_id": "hnf.ranking_tasks",
+        "version": "1.0.0",
+        "author": "Human Not Found",
+        "description": "Ranking tasks alone or as a group, with error score, group synergy and ranking change measures.",
+        "permissions": [
+          "read_shared_state",
+          "read_private_actions",
+          "write_state",
+          "emit_event"
+        ],
+        "components": [
+          {
+            "id": "hnf.ranking_tasks.ranking",
+            "family": "mechanic",
+            "entrypoint": "ranking_task",
+            "description": "Ranking task",
+            "about": {
+              "summary": "Participants put a list of items in order of importance, each on their own or as a group.",
+              "how_it_works": "Individual mode: every participant ranks all items at the same time. Group mode: the group's ranking is submitted once, by a reporter (the first enabled participant unless one is chosen), who submits the order the group agreed on; put a Discussion step before it so the group can reach that order. Every ranking must contain every item exactly once. Rankings are seen by everyone or only by the participant who submitted them.",
+              "actions": [
+                {
+                  "type": "ranking.submit",
+                  "description": "Individual mode: submit your own ranking of all items."
+                },
+                {
+                  "type": "ranking.group_submit",
+                  "description": "Group mode (reporter only): submit the group's ranking."
+                }
+              ],
+              "ends_when": "When every participant (individual mode) or the reporter (group mode) has submitted (unless 'End the step' is off)."
+            },
+            "config_schema": {
+              "type": "object",
+              "properties": {
+                "prompt": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 4000,
+                  "title": "Instructions",
+                  "default": "Rank the items by how important they are."
+                },
+                "items": {
+                  "type": "array",
+                  "title": "Items",
+                  "minItems": 2,
+                  "maxItems": 30,
+                  "items": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 200
+                  },
+                  "default": [
+                    "Water",
+                    "Map",
+                    "Flashlight"
+                  ],
+                  "uniqueItems": true
+                },
+                "mode": {
+                  "type": "string",
+                  "enum": [
+                    "individual",
+                    "group"
+                  ],
+                  "title": "Who ranks",
+                  "default": "individual"
+                },
+                "reporter": {
+                  "type": "string",
+                  "maxLength": 120,
+                  "title": "Group reporter (group mode; empty: first enabled participant)",
+                  "default": "",
+                  "x-hnf-reference": "participant"
+                },
+                "visibility": {
+                  "type": "string",
+                  "enum": [
+                    "shared",
+                    "private"
+                  ],
+                  "title": "Who sees the answers",
+                  "default": "private"
+                },
+                "finish": {
+                  "type": "boolean",
+                  "title": "End the step when the rankings are in",
+                  "default": true
+                }
+              },
+              "required": [
+                "prompt",
+                "items",
+                "mode",
+                "reporter",
+                "visibility",
+                "finish"
+              ],
+              "additionalProperties": false
+            }
+          },
+          {
+            "id": "hnf.ranking_tasks.error_score",
+            "family": "evaluator",
+            "entrypoint": "error_score",
+            "description": "Error score",
+            "about": {
+              "summary": "How far rankings are from an answer key: the sum of absolute differences in rank, lower is better.",
+              "how_it_works": "For each ranking, adds up how many places each item is from its place in the answer key. Uses each participant's latest individual ranking and the group ranking in the chosen step. The value is the group's error score if a group ranking was submitted, otherwise the mean individual error score.",
+              "outputs": [
+                {
+                  "label": "Error score",
+                  "unit": "rank places",
+                  "description": "Group error score, or the mean individual error score when there is no group ranking."
+                },
+                {
+                  "label": "Details",
+                  "description": "Group error, error per participant, mean and best individual error."
+                }
+              ]
+            },
+            "config_schema": {
+              "type": "object",
+              "properties": {
+                "answer_key": {
+                  "type": "array",
+                  "title": "Answer key (correct order)",
+                  "minItems": 2,
+                  "maxItems": 30,
+                  "items": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 200
+                  },
+                  "default": [
+                    "Water",
+                    "Map",
+                    "Flashlight"
+                  ],
+                  "uniqueItems": true
+                },
+                "step": {
+                  "type": "string",
+                  "maxLength": 120,
+                  "title": "Step (empty: whole run)",
+                  "default": "",
+                  "x-hnf-reference": "step"
+                }
+              },
+              "required": [
+                "answer_key",
+                "step"
+              ],
+              "additionalProperties": false
+            }
+          },
+          {
+            "id": "hnf.ranking_tasks.synergy",
+            "family": "evaluator",
+            "entrypoint": "group_synergy",
+            "description": "Group synergy",
+            "about": {
+              "summary": "Whether the group ranked better than its average member and its best member.",
+              "how_it_works": "Compares the group ranking's error score with the members' error scores from an earlier individual step. The value is the mean individual error minus the group error: above 0 means the group did better than its average member. The details also compare the group with its best member (better than best is often called strong synergy).",
+              "outputs": [
+                {
+                  "label": "Gain over average member",
+                  "unit": "rank places",
+                  "description": "Mean individual error minus group error."
+                },
+                {
+                  "label": "Details",
+                  "description": "Group error, mean and best individual error, and whether the group beat the average and the best member."
+                }
+              ]
+            },
+            "config_schema": {
+              "type": "object",
+              "properties": {
+                "individual_step": {
+                  "type": "string",
+                  "maxLength": 120,
+                  "title": "Individual ranking step",
+                  "default": "",
+                  "x-hnf-reference": "step"
+                },
+                "group_step": {
+                  "type": "string",
+                  "maxLength": 120,
+                  "title": "Group ranking step",
+                  "default": "",
+                  "x-hnf-reference": "step"
+                },
+                "answer_key": {
+                  "type": "array",
+                  "title": "Answer key (correct order)",
+                  "minItems": 2,
+                  "maxItems": 30,
+                  "items": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 200
+                  },
+                  "default": [
+                    "Water",
+                    "Map",
+                    "Flashlight"
+                  ],
+                  "uniqueItems": true
+                }
+              },
+              "required": [
+                "individual_step",
+                "group_step",
+                "answer_key"
+              ],
+              "additionalProperties": false
+            }
+          },
+          {
+            "id": "hnf.ranking_tasks.change",
+            "family": "evaluator",
+            "entrypoint": "ranking_change",
+            "description": "Ranking change",
+            "about": {
+              "summary": "How far each participant's ranking moved between two steps.",
+              "how_it_works": "For each participant who ranked in both steps, adds up how many places each item moved. If the later step has a group ranking, each member's earlier ranking is compared with the group ranking.",
+              "outputs": [
+                {
+                  "label": "Mean change",
+                  "unit": "rank places",
+                  "description": "Mean total movement per participant."
+                },
+                {
+                  "label": "Details",
+                  "description": "Movement per participant."
+                }
+              ]
+            },
+            "config_schema": {
+              "type": "object",
+              "properties": {
+                "step_before": {
+                  "type": "string",
+                  "maxLength": 120,
+                  "title": "Step before",
+                  "default": "",
+                  "x-hnf-reference": "step"
+                },
+                "step_after": {
+                  "type": "string",
+                  "maxLength": 120,
+                  "title": "Step after",
+                  "default": "",
+                  "x-hnf-reference": "step"
+                }
+              },
+              "required": [
+                "step_before",
+                "step_after"
+              ],
+              "additionalProperties": false
+            }
+          }
+        ],
+        "contract_version": "1.0.0",
+        "digest": "sha256:deb4babde66b07acdbf29fc0302f216877705cd1984f7ba79aeba9dbac4e223a"
+      }
+    }
+  ],
+  "templates": [
+    {
+      "path": "templates/brainstorming-nominal-vs-interacting.template.json",
+      "digest": "sha256:bb82f69f6289085c87ba9c15d43d71034cbfa01e4e07ca4380412fdc6d1d5266",
+      "added_at": "2026-11-18T01:14:36+00:00",
+      "id": "brainstorming-nominal-vs-interacting",
+      "name": "Brainstorming: nominal versus interacting groups",
+      "author": "Human Not Found",
+      "description": "Original study: Diehl, M., & Stroebe, W. (1987). Productivity loss in brainstorming groups: Toward the solution of a riddle. Journal of Personality and Social Psychology, 53(3), 497-509. Participants generated ideas on a problem either in interacting groups of four or alone; the ideas of four people working alone were pooled as a 'nominal group' and their non-redundant ideas counted. The studies examined why interacting groups produce fewer ideas than nominal groups. Idea generation appears in 48 of the 500 studies in our survey. In this template both conditions have four participants who submit lists of ideas over three rounds (standing in for the session time): in the interacting condition everyone sees the others' ideas; in the nominal condition each works alone and only the analysis pools the ideas. Participants do not speak or wait for each other, so this design does not reproduce production blocking. The brainstorming problem is new, not the original. Participants are simulated: each is a Model participant, using the free test model until you choose a model, so the first runs only check the design; with the test model every participant takes the sample answer.",
+      "packages": [
+        {
+          "bundle_id": "hnf.idea_generation",
+          "version": "1.0.0",
+          "digest": "0e7cc7f505c089e607e0604eba1fcc2d70b02fab0a16b65aa2e4a6235cdfe7d6"
+        },
+        {
+          "bundle_id": "hnf.participants",
+          "version": "1.0.0",
+          "digest": "3eba369193895ce162da928faffcb34ce74512a9c74d86bf2acc252f11fbcaee"
+        }
+      ]
+    },
+    {
+      "path": "templates/dictator-game.template.json",
+      "digest": "sha256:74bf575f5e3237f9c538553773c1d468028a7562f0aa16cfe8455ce2f5e837d5",
+      "added_at": "2026-11-18T01:14:36+00:00",
+      "id": "dictator-game",
+      "name": "Dictator game",
+      "author": "Human Not Found",
+      "description": "Original study: Forsythe, R., Horowitz, J. L., Savin, N. E., & Sefton, M. (1994). Fairness in simple bargaining experiments. Games and Economic Behavior, 6(3), 347-369. Anonymous pairs: one person decided how to split a sum of money ($5 or $10) with the other, who had no say. Comparing these dictator games with ultimatum games separated fairness from fear of rejection. Dictator games appear in 58 of the 500 studies in our survey. This template has one sender and one receiver, and the two pie sizes as two conditions; the sender may send any amount from 0 to the pie. Participants are simulated: each is a Model participant, using the free test model until you choose a model, so the first runs only check the design; with the test model every participant takes the sample answer.",
+      "packages": [
+        {
+          "bundle_id": "hnf.economic_games",
+          "version": "1.0.0",
+          "digest": "008657757b690dbe46899ffe376576d8598f30ddf8194702e2f4ddb48e054e6b"
+        },
+        {
+          "bundle_id": "hnf.participants",
+          "version": "1.0.0",
+          "digest": "3eba369193895ce162da928faffcb34ce74512a9c74d86bf2acc252f11fbcaee"
+        }
+      ]
+    },
+    {
+      "path": "templates/group-decision-discussion.template.json",
+      "digest": "sha256:1cb2c0a122d59eda0a095f3e297b107018a7a77bedda35a79f1c2a55f72e06a3",
+      "added_at": "2026-11-18T01:14:36+00:00",
+      "id": "group-decision-discussion",
+      "name": "Group decision after discussion (choice dilemma)",
+      "author": "Human Not Found",
+      "description": "Original study: Siegel, J., Dubrovsky, V., Kiesler, S., & McGuire, T. W. (1986). Group processes in computer-mediated communication. Organizational Behavior and Human Decision Processes, 37(2), 157-187. Groups of three made individual choices on choice-dilemma problems, then discussed each problem face to face or through a computer and reached a group decision; the studies compared participation, choice shift and behavior across these media. Group decision tasks appear in 19 of the 500 studies in our survey. This template keeps the computer-mediated sequence for one group of three: each member answers a choice dilemma privately, the group discusses it in text over three rounds, and the group then votes until it agrees (up to three votes). The choice dilemma is new, not one of the original items, and there is no face-to-face condition. Participants are simulated: each is a Model participant, using the free test model until you choose a model, so the first runs only check the design; with the test model every participant takes the sample answer.",
+      "packages": [
+        {
+          "bundle_id": "hnf.group_decision",
+          "version": "1.0.0",
+          "digest": "4ea5ecc2adecf0084876e377efe07a28ad6c6b23d21f3dfd8d6a192bcf31918c"
+        },
+        {
+          "bundle_id": "hnf.group_discussion",
+          "version": "1.0.0",
+          "digest": "8635dc4a94885045a34cc5d9d3027f32f9e802a32ec07f49041ed2e47bc7403a"
+        },
+        {
+          "bundle_id": "hnf.participants",
+          "version": "1.0.0",
+          "digest": "3eba369193895ce162da928faffcb34ce74512a9c74d86bf2acc252f11fbcaee"
+        },
+        {
+          "bundle_id": "hnf.questionnaire",
+          "version": "1.0.0",
+          "digest": "9d1c1b477a6ed605f1fcaf202dd43d997491b305e660ab9812218505c65f9c7b"
+        }
+      ]
+    },
+    {
+      "path": "templates/hidden-profile.template.json",
+      "digest": "sha256:9f3e7420fac632f25fae46e27dc68a5d6c588c5cac62bdb60f8d467c4c8355be",
+      "added_at": "2026-11-18T01:14:36+00:00",
+      "id": "hidden-profile",
+      "name": "Hidden profile: solving a problem versus making a judgment",
+      "author": "Human Not Found",
+      "description": "Original study: Stasser, G., & Stewart, D. (1992). Discovery of hidden profiles by decision-making groups: Solving a problem versus making a judgment. Journal of Personality and Social Psychology, 63(3), 426-434. Groups of three read a murder mystery with three suspects. Clues everyone shared pointed to the wrong suspect; the clues that identified the culprit were split among the members, so the group could only find the answer by pooling them. Groups were told either that the case had a correct solution (solve) or to make their best judgment (judge). Hidden-profile tasks appear in 17 of the 500 studies in our survey. This template keeps the two instructions as two conditions: each member gets the shared clues and two of their own in their private information, the group discusses over three rounds, then decides by consensus (up to three votes). The case is new, written for this template, and follows the paradigm; it is not the original booklet. Participants are simulated: each is a Model participant, using the free test model until you choose a model, so the first runs only check the design; with the test model every participant takes the sample answer.",
+      "packages": [
+        {
+          "bundle_id": "hnf.group_decision",
+          "version": "1.0.0",
+          "digest": "4ea5ecc2adecf0084876e377efe07a28ad6c6b23d21f3dfd8d6a192bcf31918c"
+        },
+        {
+          "bundle_id": "hnf.group_discussion",
+          "version": "1.0.0",
+          "digest": "8635dc4a94885045a34cc5d9d3027f32f9e802a32ec07f49041ed2e47bc7403a"
+        },
+        {
+          "bundle_id": "hnf.participants",
+          "version": "1.0.0",
+          "digest": "3eba369193895ce162da928faffcb34ce74512a9c74d86bf2acc252f11fbcaee"
+        }
+      ]
+    },
+    {
+      "path": "templates/moon-survival.template.json",
+      "digest": "sha256:303964c10c41bbce8eaadeda63f66cd367ac5ab8b6e6caf3bcba840e33971d65",
+      "added_at": "2026-11-18T01:14:36+00:00",
+      "id": "moon-survival",
+      "name": "NASA Moon Survival Task",
+      "author": "Human Not Found",
+      "description": "Original study: Hall, J., & Watson, W. H. (1970). The effects of a normative intervention on group decision-making performance. Human Relations, 23(4), 299-317. Members of five-person groups first ranked 15 items salvaged from a crash landing on the moon by their importance for survival, then reached a group ranking by consensus; rankings were scored against the order given by NASA experts, and groups were compared with their own members. Hall and Watson tested whether brief instructions on how to reach consensus improved group performance. The task is a classic group-decision exercise used in team research and training; ranking tasks are rare in our survey of 500 multi-participant experiments. In this template five participants rank the items alone and privately, discuss over two rounds, and then one member (the reporter) submits the ranking the group agreed on. There is no normative-intervention condition. Error scores add up how many places each item is from the expert ranking (lower is better); synergy compares the group with its average and best member. Participants are simulated: each is a Model participant, using the free test model until you choose a model, so the first runs only check the design; with the test model every participant takes the sample answer.",
+      "packages": [
+        {
+          "bundle_id": "hnf.group_discussion",
+          "version": "1.0.0",
+          "digest": "8635dc4a94885045a34cc5d9d3027f32f9e802a32ec07f49041ed2e47bc7403a"
+        },
+        {
+          "bundle_id": "hnf.participants",
+          "version": "1.0.0",
+          "digest": "3eba369193895ce162da928faffcb34ce74512a9c74d86bf2acc252f11fbcaee"
+        },
+        {
+          "bundle_id": "hnf.ranking_tasks",
+          "version": "1.0.0",
+          "digest": "a27394217e2609b1a640db1e3e1a5d2afa619ff56220bc40a88cd0ad3583f45a"
+        }
+      ]
+    },
+    {
+      "path": "templates/murder-mystery.template.json",
+      "digest": "sha256:ec20eb6a50f6512284ef24fc3145dd9a7205c4d447a20c420dc1bf927cc8c698",
+      "added_at": "2026-11-18T01:14:36+00:00",
+      "id": "murder-mystery",
+      "name": "Murder mystery: individual vote, discussion, group decision",
+      "author": "Human Not Found",
+      "description": "After Stasser, G., & Stewart, D. (1992). Discovery of hidden profiles by decision-making groups: Solving a problem versus making a judgment. Journal of Personality and Social Psychology, 63(3), 426-434. In this hidden-profile paradigm, groups of three solve a murder mystery with three suspects: the clues everyone shares point to the wrong suspect, and the clues that reveal the culprit are split among the members. Hidden-profile tasks appear in 17 of the 500 studies in our survey. Here each member reads the shared clues and two clues of their own (in their private information) and votes alone and privately, the group discusses over three rounds, then decides by majority vote. Comparing the private votes with the group decision shows whether discussion surfaced the unshared clues. The case is new, written for this template, and follows the paradigm; the original booklets are not used. Participants are simulated: each is a Model participant, using the free test model until you choose a model, so the first runs only check the design; with the test model every participant takes the sample answer.",
+      "packages": [
+        {
+          "bundle_id": "hnf.group_decision",
+          "version": "1.0.0",
+          "digest": "4ea5ecc2adecf0084876e377efe07a28ad6c6b23d21f3dfd8d6a192bcf31918c"
+        },
+        {
+          "bundle_id": "hnf.group_discussion",
+          "version": "1.0.0",
+          "digest": "8635dc4a94885045a34cc5d9d3027f32f9e802a32ec07f49041ed2e47bc7403a"
+        },
+        {
+          "bundle_id": "hnf.participants",
+          "version": "1.0.0",
+          "digest": "3eba369193895ce162da928faffcb34ce74512a9c74d86bf2acc252f11fbcaee"
+        }
+      ]
+    },
+    {
+      "path": "templates/public-goods-conditional-cooperation.template.json",
+      "digest": "sha256:2d131483e647acb73ae182aea9ed9d2f5b0a78d59f0889e3f82d3bfff3eb3996",
+      "added_at": "2026-11-18T01:14:36+00:00",
+      "id": "public-goods-conditional-cooperation",
+      "name": "Conditional cooperation in a public goods game",
+      "author": "Human Not Found",
+      "description": "Original study: Fischbacher, U., G\u00e4chter, S., & Fehr, E. (2001). Are people conditionally cooperative? Evidence from a public goods experiment. Economics Letters, 71(3), 397-404. Groups of four each received 20 tokens and chose how many to put in a group project; the project was multiplied so that each token contributed returned 0.4 tokens to every member. The original measured conditional cooperation with a one-shot strategy method: each person gave an unconditional contribution and a table of contributions for every possible average contribution of the others. Public goods games are the most common paradigm in our survey of 500 multi-participant experiments (65 studies). This template runs the same group size, endowment and return over 10 repeated rounds instead of the strategy method: after each round everyone sees every member's contribution and their own earnings, so conditional cooperation shows as contributions that follow the others' previous contributions. Participants are simulated: each is a Model participant, using the free test model until you choose a model, so the first runs only check the design; with the test model every participant takes the sample answer.",
+      "packages": [
+        {
+          "bundle_id": "hnf.economic_games",
+          "version": "1.0.0",
+          "digest": "008657757b690dbe46899ffe376576d8598f30ddf8194702e2f4ddb48e054e6b"
+        },
+        {
+          "bundle_id": "hnf.participants",
+          "version": "1.0.0",
+          "digest": "3eba369193895ce162da928faffcb34ce74512a9c74d86bf2acc252f11fbcaee"
+        }
+      ]
+    },
+    {
+      "path": "templates/public-goods-punishment.template.json",
+      "digest": "sha256:47bb91815a81f136461b648c6b1019353e06028b15c66752a0b97e263504d8b7",
+      "added_at": "2026-11-18T01:14:36+00:00",
+      "id": "public-goods-punishment",
+      "name": "Public goods game with and without punishment",
+      "author": "Human Not Found",
+      "description": "Original study: Fehr, E., & G\u00e4chter, S. (2000). Cooperation and punishment in public goods experiments. American Economic Review, 90(4), 980-994. Groups of four received 20 tokens per period and chose how much to contribute to a group project returning 0.4 tokens per token to every member, for 10 periods without and 10 periods with a punishment opportunity: after seeing the others' contributions, members could assign costly punishment points that reduced the punished member's earnings. Public goods games appear in 65 of the 500 studies in our survey. This template runs the two treatments as two conditions (between runs, not within the same group). Punishment is linear here: each point costs the punisher 1 token and removes 3 from the punished member (the original used an increasing cost schedule and a percentage reduction), with up to 10 points per member per period. Participants are simulated: each is a Model participant, using the free test model until you choose a model, so the first runs only check the design; with the test model every participant takes the sample answer.",
+      "packages": [
+        {
+          "bundle_id": "hnf.economic_games",
+          "version": "1.0.0",
+          "digest": "008657757b690dbe46899ffe376576d8598f30ddf8194702e2f4ddb48e054e6b"
+        },
+        {
+          "bundle_id": "hnf.participants",
+          "version": "1.0.0",
+          "digest": "3eba369193895ce162da928faffcb34ce74512a9c74d86bf2acc252f11fbcaee"
+        }
+      ]
+    },
+    {
+      "path": "templates/repeated-prisoners-dilemma.template.json",
+      "digest": "sha256:5efbee04e16eba3994a99afbc584906036a99eb7ed8383e9e3aa2f360a8176df",
+      "added_at": "2026-11-18T01:14:36+00:00",
+      "id": "repeated-prisoners-dilemma",
+      "name": "Finitely repeated prisoner's dilemma",
+      "author": "Human Not Found",
+      "description": "Original study: Andreoni, J., & Miller, J. H. (1993). Rational cooperation in the finitely repeated prisoner's dilemma: Experimental evidence. The Economic Journal, 103(418), 570-585. Pairs played a prisoner's dilemma for a known, fixed number of rounds; the study compared fixed partners with re-matched strangers to test whether people cooperate early in a finitely repeated game to build a reputation. Prisoner's dilemma games appear in 43 of the 500 studies in our survey. This template runs one ten-round game with a fixed partner (the partners design), with payoffs of 7 each for mutual cooperation, 4 each for mutual defection, and 12 and 0 when one defects; the original repeated such games many times. Participants are simulated: each is a Model participant, using the free test model until you choose a model, so the first runs only check the design; with the test model every participant takes the sample answer.",
+      "packages": [
+        {
+          "bundle_id": "hnf.economic_games",
+          "version": "1.0.0",
+          "digest": "008657757b690dbe46899ffe376576d8598f30ddf8194702e2f4ddb48e054e6b"
+        },
+        {
+          "bundle_id": "hnf.participants",
+          "version": "1.0.0",
+          "digest": "3eba369193895ce162da928faffcb34ce74512a9c74d86bf2acc252f11fbcaee"
+        }
+      ]
+    },
+    {
+      "path": "templates/social-loafing-effort.template.json",
+      "digest": "sha256:c51442ef14ad4a1021e283b7d1a8de659948690c66e72a3acabf583b31640cd9",
+      "added_at": "2026-11-18T01:14:36+00:00",
+      "id": "social-loafing-effort",
+      "name": "Social loafing: effort alone and in a group",
+      "author": "Human Not Found",
+      "description": "Original study: Latan\u00e9, B., Williams, K., & Harkins, S. (1979). Many hands make light the work: The causes and consequences of social loafing. Journal of Personality and Social Psychology, 37(6), 822-832. Participants clapped and shouted as loudly as they could, alone or in groups of up to six; sound output per person fell as group size grew, even when participants only believed others were shouting with them. Effort tasks appear in 22 of the 500 studies in our survey. In this template six participants each choose an effort level from 0 to 10 for the shouting task: in the alone condition each person's effort is recorded and credited to them; in the group condition only the group's combined effort is recorded. Chosen effort stands in for measured sound. Participants are simulated: each is a Model participant, using the free test model until you choose a model, so the first runs only check the design; with the test model every participant takes the sample answer.",
+      "packages": [
+        {
+          "bundle_id": "hnf.effort_task",
+          "version": "1.0.0",
+          "digest": "084583fc1c540709506f91da964d39ea2ea3c29bf7ff8d85280d60703d21ad89"
+        },
+        {
+          "bundle_id": "hnf.participants",
+          "version": "1.0.0",
+          "digest": "3eba369193895ce162da928faffcb34ce74512a9c74d86bf2acc252f11fbcaee"
+        }
+      ]
+    },
+    {
+      "path": "templates/trust-game.template.json",
+      "digest": "sha256:327dabe0b802116029fc19630e3a9ae5d84450980d07c94c69974902cde352f6",
+      "added_at": "2026-11-18T01:14:36+00:00",
+      "id": "trust-game",
+      "name": "Trust game",
+      "author": "Human Not Found",
+      "description": "Original study: Berg, J., Dickhaut, J., & McCabe, K. (1995). Trust, reciprocity, and social history. Games and Economic Behavior, 10(1), 122-142. Both people in an anonymous pair received $10. The sender could send any part of it to the receiver; the amount sent was tripled, and the receiver decided how much to send back. Trust games appear in 47 of the 500 studies in our survey. This template follows the no-history condition: one sender, one receiver, $10 each, amount sent tripled, one round. Participants are simulated: each is a Model participant, using the free test model until you choose a model, so the first runs only check the design; with the test model every participant takes the sample answer.",
+      "packages": [
+        {
+          "bundle_id": "hnf.economic_games",
+          "version": "1.0.0",
+          "digest": "008657757b690dbe46899ffe376576d8598f30ddf8194702e2f4ddb48e054e6b"
+        },
+        {
+          "bundle_id": "hnf.participants",
+          "version": "1.0.0",
+          "digest": "3eba369193895ce162da928faffcb34ce74512a9c74d86bf2acc252f11fbcaee"
+        }
+      ]
+    },
+    {
+      "path": "templates/ultimatum-game.template.json",
+      "digest": "sha256:dbcd0b89dcdad313fa100cda97a1c0f1a6b2a9bd566e54a1332f27bc9aa6f6fa",
+      "added_at": "2026-11-18T01:14:36+00:00",
+      "id": "ultimatum-game",
+      "name": "Ultimatum game",
+      "author": "Human Not Found",
+      "description": "Original study: Forsythe, R., Horowitz, J. L., Savin, N. E., & Sefton, M. (1994). Fairness in simple bargaining experiments. Games and Economic Behavior, 6(3), 347-369. In the ultimatum condition a proposer offered a split of $5 and the responder accepted it, or rejected it so that both got nothing; offers were compared with dictator games. Ultimatum games appear in 47 of the 500 studies in our survey. This template has one proposer and one responder splitting $5, with no counter-offers. Participants are simulated: each is a Model participant, using the free test model until you choose a model, so the first runs only check the design; with the test model every participant takes the sample answer.",
+      "packages": [
+        {
+          "bundle_id": "hnf.economic_games",
+          "version": "1.0.0",
+          "digest": "008657757b690dbe46899ffe376576d8598f30ddf8194702e2f4ddb48e054e6b"
+        },
+        {
+          "bundle_id": "hnf.participants",
+          "version": "1.0.0",
+          "digest": "3eba369193895ce162da928faffcb34ce74512a9c74d86bf2acc252f11fbcaee"
+        }
+      ]
+    }
+  ]
 }

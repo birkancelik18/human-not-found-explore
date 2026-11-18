@@ -1,0 +1,181 @@
+{
+  "bundle_id": "hnf.group_discussion",
+  "version": "1.0.0",
+  "author": "Human Not Found",
+  "description": "Group discussion with built-in turn-taking, a turn-order procedure, and a participation balance measure.",
+  "permissions": [
+    "read_shared_state",
+    "write_state",
+    "emit_event"
+  ],
+  "components": [
+    {
+      "id": "hnf.group_discussion.discussion",
+      "family": "mechanic",
+      "entrypoint": "discussion",
+      "description": "Discussion",
+      "about": {
+        "summary": "Participants discuss by posting shared messages, with built-in turn-taking.",
+        "how_it_works": "Every message is seen by all participants. Turns: round robin gives the floor to one participant at a time in listed order; free offers everyone a message at once each round, answered in the order the offers were made; procedure waits for a turn-order procedure in the same step to invite each speaker (discussion.invite). With round robin and free, each participant speaks once per round for the configured number of rounds. With procedure, the procedure decides when the step ends. The sample message is what the free test model posts.",
+        "actions": [
+          {
+            "type": "discussion.message",
+            "description": "Post a message to the group."
+          }
+        ],
+        "ends_when": "When every participant has spoken in every round (round robin and free, unless 'End the step' is off); with procedure turns, when the procedure ends it."
+      },
+      "config_schema": {
+        "type": "object",
+        "properties": {
+          "prompt": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 4000,
+            "title": "Discussion instructions",
+            "default": "Discuss the task with your group."
+          },
+          "turns": {
+            "type": "string",
+            "enum": [
+              "round_robin",
+              "free",
+              "procedure"
+            ],
+            "title": "Turn-taking",
+            "default": "round_robin"
+          },
+          "rounds": {
+            "type": "integer",
+            "title": "Rounds (each participant speaks once per round)",
+            "default": 2,
+            "minimum": 1,
+            "maximum": 50
+          },
+          "sample": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 4000,
+            "title": "Sample message (used by the free test model)",
+            "default": "I think we should compare what each of us knows before deciding."
+          },
+          "finish": {
+            "type": "boolean",
+            "title": "End the step when every round is over",
+            "default": true
+          }
+        },
+        "required": [
+          "prompt",
+          "turns",
+          "rounds",
+          "sample",
+          "finish"
+        ],
+        "additionalProperties": false
+      }
+    },
+    {
+      "id": "hnf.group_discussion.turn_order",
+      "family": "procedure",
+      "entrypoint": "turn_order",
+      "description": "Turn order",
+      "about": {
+        "summary": "Invites one speaker at a time, in listed or random order, for steps that combine a discussion with other activities.",
+        "how_it_works": "At the start of the step the procedure fixes the order (listed, or shuffled with the run's seed so it is reproducible) and sends discussion.invite naming the first speaker. Each time a message of the configured action type is accepted, it invites the next speaker. Use it with a Discussion whose turns are set to procedure.",
+        "actions": [
+          {
+            "type": "discussion.message",
+            "description": "The invited speaker posts a message (offered by the Discussion activity)."
+          }
+        ],
+        "ends_when": "When every participant has spoken in every round (unless 'End the step' is off)."
+      },
+      "config_schema": {
+        "type": "object",
+        "properties": {
+          "rounds": {
+            "type": "integer",
+            "title": "Rounds",
+            "default": 2,
+            "minimum": 1,
+            "maximum": 50
+          },
+          "order": {
+            "type": "string",
+            "enum": [
+              "listed",
+              "random"
+            ],
+            "title": "Speaking order",
+            "default": "listed"
+          },
+          "action_type": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120,
+            "title": "Action that ends a turn",
+            "default": "discussion.message"
+          },
+          "finish": {
+            "type": "boolean",
+            "title": "End the step when every round is over",
+            "default": true
+          }
+        },
+        "required": [
+          "rounds",
+          "order",
+          "action_type",
+          "finish"
+        ],
+        "additionalProperties": false
+      }
+    },
+    {
+      "id": "hnf.group_discussion.participation_balance",
+      "family": "evaluator",
+      "entrypoint": "participation_balance",
+      "description": "Participation balance",
+      "about": {
+        "summary": "How evenly participants contributed to the discussion: messages and words per participant, and an evenness score.",
+        "how_it_works": "Counts the discussion messages and their words for every participant, including those who said nothing. Evenness is the normalized entropy of the participants' shares of words: 1 when everyone wrote the same amount, 0 when one person wrote everything.",
+        "outputs": [
+          {
+            "label": "Evenness",
+            "unit": "0 to 1",
+            "description": "Normalized entropy of the participants' shares of words."
+          },
+          {
+            "label": "Details",
+            "description": "Messages and words per participant, and the evenness of message counts."
+          }
+        ]
+      },
+      "config_schema": {
+        "type": "object",
+        "properties": {
+          "action_type": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120,
+            "title": "Message action type",
+            "default": "discussion.message"
+          },
+          "step": {
+            "type": "string",
+            "maxLength": 120,
+            "title": "Step (empty: whole run)",
+            "default": "",
+            "x-hnf-reference": "step"
+          }
+        },
+        "required": [
+          "action_type",
+          "step"
+        ],
+        "additionalProperties": false
+      }
+    }
+  ]
+}

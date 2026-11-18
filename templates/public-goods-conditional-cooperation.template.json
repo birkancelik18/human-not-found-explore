@@ -1,0 +1,173 @@
+{
+  "format": "hnf.template.v1",
+  "name": "Conditional cooperation in a public goods game",
+  "author": "Human Not Found",
+  "description": "Original study: Fischbacher, U., Gächter, S., & Fehr, E. (2001). Are people conditionally cooperative? Evidence from a public goods experiment. Economics Letters, 71(3), 397-404. Groups of four each received 20 tokens and chose how many to put in a group project; the project was multiplied so that each token contributed returned 0.4 tokens to every member. The original measured conditional cooperation with a one-shot strategy method: each person gave an unconditional contribution and a table of contributions for every possible average contribution of the others. Public goods games are the most common paradigm in our survey of 500 multi-participant experiments (65 studies). This template runs the same group size, endowment and return over 10 repeated rounds instead of the strategy method: after each round everyone sees every member's contribution and their own earnings, so conditional cooperation shows as contributions that follow the others' previous contributions. Participants are simulated: each is a Model participant, using the free test model until you choose a model, so the first runs only check the design; with the test model every participant takes the sample answer.",
+  "created_at": "2026-11-18T01:13:22.296+00:00",
+  "spec": {
+    "components": [
+      {
+        "config": {
+          "endowment": 20,
+          "finish": true,
+          "max_points": 10,
+          "multiplier": 1.6,
+          "prompt": "You are one of four members of a group. Tokens you earn are converted to money at the end of the study.",
+          "punishment": false,
+          "punishment_cost": 1,
+          "punishment_effect": 3,
+          "rounds": 10
+        },
+        "id": "hnf.economic_games.pool",
+        "version": "1.0.0"
+      }
+    ],
+    "conditions": [
+      {
+        "id": "main",
+        "label": "Main",
+        "overrides": []
+      }
+    ],
+    "description": "Four members, 20 tokens each, return of 0.4 per token, 10 rounds with feedback.",
+    "environment": {
+      "initial_state": {
+        "private_by_participant": {},
+        "shared": {}
+      }
+    },
+    "execution": {
+      "max_actions_per_run": 100,
+      "max_estimated_cost_usd_per_run": 2.0,
+      "max_memory_events": 40,
+      "max_model_calls_per_run": 200,
+      "max_wall_seconds_per_run": 3600,
+      "repetitions_per_condition": 10,
+      "seed": 1
+    },
+    "experiment_id": "public-goods-conditional-cooperation",
+    "measurements": [
+      {
+        "evaluator": {
+          "config": {
+            "kind": "contributed",
+            "step": ""
+          },
+          "id": "hnf.economic_games.amounts_given",
+          "version": "1.0.0"
+        },
+        "id": "contributions",
+        "label": "Mean contribution",
+        "scope": "run"
+      },
+      {
+        "evaluator": {
+          "config": {
+            "step": ""
+          },
+          "id": "hnf.economic_games.cooperation_rate",
+          "version": "1.0.0"
+        },
+        "id": "cooperation",
+        "label": "Contribution rate",
+        "scope": "run"
+      },
+      {
+        "evaluator": {
+          "config": {
+            "step": ""
+          },
+          "id": "hnf.economic_games.payoffs",
+          "version": "1.0.0"
+        },
+        "id": "payoffs",
+        "label": "Earnings",
+        "scope": "run"
+      }
+    ],
+    "participants": [
+      {
+        "agent": {
+          "config": {
+            "instructions": "",
+            "model_ref": "default",
+            "persona": ""
+          },
+          "id": "hnf.participants.model",
+          "version": "1.0.0"
+        },
+        "display_name": "Participant 1",
+        "enabled": true,
+        "id": "p1",
+        "private_context": {},
+        "role": "participant"
+      },
+      {
+        "agent": {
+          "config": {
+            "instructions": "",
+            "model_ref": "default",
+            "persona": ""
+          },
+          "id": "hnf.participants.model",
+          "version": "1.0.0"
+        },
+        "display_name": "Participant 2",
+        "enabled": true,
+        "id": "p2",
+        "private_context": {},
+        "role": "participant"
+      },
+      {
+        "agent": {
+          "config": {
+            "instructions": "",
+            "model_ref": "default",
+            "persona": ""
+          },
+          "id": "hnf.participants.model",
+          "version": "1.0.0"
+        },
+        "display_name": "Participant 3",
+        "enabled": true,
+        "id": "p3",
+        "private_context": {},
+        "role": "participant"
+      },
+      {
+        "agent": {
+          "config": {
+            "instructions": "",
+            "model_ref": "default",
+            "persona": ""
+          },
+          "id": "hnf.participants.model",
+          "version": "1.0.0"
+        },
+        "display_name": "Participant 4",
+        "enabled": true,
+        "id": "p4",
+        "private_context": {},
+        "role": "participant"
+      }
+    ],
+    "research": {
+      "hypotheses": [],
+      "question": "Do people contribute more when the others contributed more in the previous round?"
+    },
+    "schema_version": "2.0.0",
+    "title": "Conditional cooperation (public goods)"
+  },
+  "packages": [
+    {
+      "bundle_id": "hnf.economic_games",
+      "version": "1.0.0",
+      "digest": "008657757b690dbe46899ffe376576d8598f30ddf8194702e2f4ddb48e054e6b"
+    },
+    {
+      "bundle_id": "hnf.participants",
+      "version": "1.0.0",
+      "digest": "3eba369193895ce162da928faffcb34ce74512a9c74d86bf2acc252f11fbcaee"
+    }
+  ]
+}

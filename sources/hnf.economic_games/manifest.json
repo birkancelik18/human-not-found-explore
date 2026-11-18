@@ -1,0 +1,562 @@
+{
+  "bundle_id": "hnf.economic_games",
+  "version": "1.0.0",
+  "author": "Human Not Found",
+  "description": "Economic games: dictator, trust, ultimatum, public goods and payoff-matrix games, with measures of amounts, cooperation, payoffs and acceptance.",
+  "permissions": [
+    "read_shared_state",
+    "read_private_actions",
+    "write_state",
+    "emit_event"
+  ],
+  "components": [
+    {
+      "id": "hnf.economic_games.give",
+      "family": "mechanic",
+      "entrypoint": "give",
+      "description": "Give and transfer",
+      "about": {
+        "summary": "A sender decides how much of an endowment to give to a receiver: the dictator game, or the trust game with a multiplier and a return step.",
+        "how_it_works": "Participants are paired: by listed order (1st sends to 2nd, 3rd to 4th, and so on) or, with roles set to participant role, senders are participants whose role is 'sender' and receivers those whose role is 'receiver'. An unpaired participant sits out. Each sender privately chooses an amount from 0 to the endowment; only the pair sees it. The amount is multiplied by the multiplier (1 for the dictator game). With the return step on, the receiver then chooses how much of what arrived to send back. Sender earns endowment minus amount sent plus amount returned; receiver earns their own endowment plus amount received minus amount returned. After each pair finishes, the activity publishes the result (econ.result), and repeats for the configured number of rounds.",
+        "actions": [
+          {
+            "type": "give.send",
+            "description": "Sender: choose an amount from 0 to the endowment to send."
+          },
+          {
+            "type": "give.return",
+            "description": "Receiver (return step only): choose how much of the received amount to send back."
+          }
+        ],
+        "ends_when": "When every pair has finished the last round (unless 'End the step' is off)."
+      },
+      "config_schema": {
+        "type": "object",
+        "properties": {
+          "prompt": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 4000,
+            "title": "Instructions",
+            "default": "You are taking part in a decision study with real stakes."
+          },
+          "endowment": {
+            "type": "number",
+            "title": "Sender's endowment",
+            "default": 10,
+            "minimum": 0
+          },
+          "multiplier": {
+            "type": "number",
+            "title": "Multiplier on the amount sent",
+            "default": 1,
+            "minimum": 0
+          },
+          "return_step": {
+            "type": "boolean",
+            "title": "Receiver can send money back (trust game)",
+            "default": false
+          },
+          "receiver_endowment": {
+            "type": "number",
+            "title": "Receiver's own endowment",
+            "default": 0,
+            "minimum": 0
+          },
+          "rounds": {
+            "type": "integer",
+            "title": "Rounds",
+            "default": 1,
+            "minimum": 1,
+            "maximum": 50
+          },
+          "roles": {
+            "type": "string",
+            "enum": [
+              "order",
+              "participant_role"
+            ],
+            "title": "How roles are assigned",
+            "default": "order"
+          },
+          "finish": {
+            "type": "boolean",
+            "title": "End the step when the game is over",
+            "default": true
+          }
+        },
+        "required": [
+          "prompt",
+          "endowment",
+          "multiplier",
+          "return_step",
+          "receiver_endowment",
+          "rounds",
+          "roles",
+          "finish"
+        ],
+        "additionalProperties": false
+      }
+    },
+    {
+      "id": "hnf.economic_games.ultimatum",
+      "family": "mechanic",
+      "entrypoint": "ultimatum",
+      "description": "Offer and respond",
+      "about": {
+        "summary": "A proposer offers a split of an endowment and a responder accepts or rejects it: the ultimatum game, with optional counter-offers.",
+        "how_it_works": "Participants are paired by listed order or by the roles 'proposer' and 'responder'. The proposer privately offers the responder an amount from 0 to the endowment; only the pair sees it. The responder accepts or rejects. If accepted, the responder gets the offer and the proposer keeps the rest. If rejected, both get nothing, unless counter-offers are allowed: then the responder makes a counter-offer to the proposer, who accepts or rejects it, up to the configured number of counter-offers. The final outcome is published as econ.result.",
+        "actions": [
+          {
+            "type": "ultimatum.offer",
+            "description": "Proposer: offer the other person an amount from 0 to the endowment."
+          },
+          {
+            "type": "ultimatum.respond",
+            "description": "Responder: accept or reject the offer."
+          }
+        ],
+        "ends_when": "When every pair has accepted an offer or rejected the last allowed one (unless 'End the step' is off)."
+      },
+      "config_schema": {
+        "type": "object",
+        "properties": {
+          "prompt": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 4000,
+            "title": "Instructions",
+            "default": "You are taking part in a decision study with real stakes."
+          },
+          "endowment": {
+            "type": "number",
+            "title": "Amount to split",
+            "default": 10,
+            "minimum": 0
+          },
+          "counter_offers": {
+            "type": "integer",
+            "title": "Counter-offers allowed after a rejection",
+            "default": 0,
+            "minimum": 0,
+            "maximum": 10
+          },
+          "roles": {
+            "type": "string",
+            "enum": [
+              "order",
+              "participant_role"
+            ],
+            "title": "How roles are assigned",
+            "default": "order"
+          },
+          "finish": {
+            "type": "boolean",
+            "title": "End the step when the game is over",
+            "default": true
+          }
+        },
+        "required": [
+          "prompt",
+          "endowment",
+          "counter_offers",
+          "roles",
+          "finish"
+        ],
+        "additionalProperties": false
+      }
+    },
+    {
+      "id": "hnf.economic_games.pool",
+      "family": "mechanic",
+      "entrypoint": "pool",
+      "description": "Contribute to a pool",
+      "about": {
+        "summary": "Group members decide how much of an endowment to put in a shared pool that is multiplied and split equally: the public goods game, with an optional punishment stage.",
+        "how_it_works": "All enabled participants form one group. Each round every member privately chooses how many tokens (0 to the endowment) to contribute. The pool is multiplied by the multiplier and shared equally; each member earns what they kept plus their share. Members then see everyone's contributions and their earnings (in the next round's instructions, and as a shared event). With punishment on, after the contributions are shown each member may assign deduction points to each other member: each point costs the giver the punishment cost and reduces the receiver's earnings by the punishment effect. Earnings can go below zero. Each round's result is published as econ.result.",
+        "actions": [
+          {
+            "type": "pool.contribute",
+            "description": "Choose how many tokens to put in the pool."
+          },
+          {
+            "type": "pool.punish",
+            "description": "Punishment stage only: assign deduction points to each other member."
+          }
+        ],
+        "ends_when": "After the last round (unless 'End the step' is off)."
+      },
+      "config_schema": {
+        "type": "object",
+        "properties": {
+          "prompt": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 4000,
+            "title": "Instructions",
+            "default": "You are a member of a group in a decision study."
+          },
+          "endowment": {
+            "type": "integer",
+            "title": "Endowment per round (tokens)",
+            "default": 20,
+            "minimum": 0,
+            "maximum": 1000
+          },
+          "multiplier": {
+            "type": "number",
+            "title": "Multiplier on the pool",
+            "default": 1.6,
+            "minimum": 0
+          },
+          "rounds": {
+            "type": "integer",
+            "title": "Rounds",
+            "default": 10,
+            "minimum": 1,
+            "maximum": 50
+          },
+          "punishment": {
+            "type": "boolean",
+            "title": "Add a punishment stage after each round",
+            "default": false
+          },
+          "punishment_cost": {
+            "type": "number",
+            "title": "Cost of one deduction point to the giver",
+            "default": 1,
+            "minimum": 0
+          },
+          "punishment_effect": {
+            "type": "number",
+            "title": "Earnings removed from the receiver per point",
+            "default": 3,
+            "minimum": 0
+          },
+          "max_points": {
+            "type": "integer",
+            "title": "Most points one member can give another per round",
+            "default": 10,
+            "minimum": 0,
+            "maximum": 100
+          },
+          "finish": {
+            "type": "boolean",
+            "title": "End the step when the game is over",
+            "default": true
+          }
+        },
+        "required": [
+          "prompt",
+          "endowment",
+          "multiplier",
+          "rounds",
+          "punishment",
+          "punishment_cost",
+          "punishment_effect",
+          "max_points",
+          "finish"
+        ],
+        "additionalProperties": false
+      }
+    },
+    {
+      "id": "hnf.economic_games.matrix",
+      "family": "mechanic",
+      "entrypoint": "matrix",
+      "description": "Payoff-matrix game",
+      "about": {
+        "summary": "Two players choose a move at the same time and earn what a payoff table says, over several rounds: the prisoner's dilemma by default.",
+        "how_it_works": "Participants are paired by listed order (1st with 2nd, and so on); the first of a pair is the row player. Each round both choose one of the moves privately. When both have chosen, each earns the amount the payoff table gives for that pair of moves, and both see the outcome in the next round's instructions and as a shared econ.result event. The table must have an entry for every pair of moves. The cooperative move, if set, is what the cooperation rate counts. The default table is a prisoner's dilemma: both cooperate 3 each, both defect 1 each, a defector against a cooperator 5 and 0.",
+        "actions": [
+          {
+            "type": "matrix.choose",
+            "description": "Choose one of the moves."
+          }
+        ],
+        "ends_when": "After the last round (unless 'End the step' is off)."
+      },
+      "config_schema": {
+        "type": "object",
+        "properties": {
+          "prompt": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 4000,
+            "title": "Instructions",
+            "default": "You are playing a game with another participant."
+          },
+          "moves": {
+            "type": "array",
+            "title": "Moves",
+            "minItems": 2,
+            "maxItems": 10,
+            "uniqueItems": true,
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 60
+            },
+            "default": [
+              "Cooperate",
+              "Defect"
+            ]
+          },
+          "payoffs": {
+            "type": "array",
+            "title": "Payoff table",
+            "minItems": 1,
+            "maxItems": 100,
+            "items": {
+              "type": "object",
+              "properties": {
+                "row": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 60,
+                  "title": "Row player's move"
+                },
+                "column": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 60,
+                  "title": "Column player's move"
+                },
+                "row_payoff": {
+                  "type": "number",
+                  "title": "Row player earns"
+                },
+                "column_payoff": {
+                  "type": "number",
+                  "title": "Column player earns"
+                }
+              },
+              "required": [
+                "row",
+                "column",
+                "row_payoff",
+                "column_payoff"
+              ],
+              "additionalProperties": false
+            },
+            "default": [
+              {
+                "row": "Cooperate",
+                "column": "Cooperate",
+                "row_payoff": 3,
+                "column_payoff": 3
+              },
+              {
+                "row": "Cooperate",
+                "column": "Defect",
+                "row_payoff": 0,
+                "column_payoff": 5
+              },
+              {
+                "row": "Defect",
+                "column": "Cooperate",
+                "row_payoff": 5,
+                "column_payoff": 0
+              },
+              {
+                "row": "Defect",
+                "column": "Defect",
+                "row_payoff": 1,
+                "column_payoff": 1
+              }
+            ]
+          },
+          "cooperative_move": {
+            "type": "string",
+            "maxLength": 60,
+            "title": "Cooperative move (counted by the cooperation rate)",
+            "default": "Cooperate"
+          },
+          "rounds": {
+            "type": "integer",
+            "title": "Rounds",
+            "default": 10,
+            "minimum": 1,
+            "maximum": 100
+          },
+          "finish": {
+            "type": "boolean",
+            "title": "End the step when the game is over",
+            "default": true
+          }
+        },
+        "required": [
+          "prompt",
+          "moves",
+          "payoffs",
+          "cooperative_move",
+          "rounds",
+          "finish"
+        ],
+        "additionalProperties": false
+      }
+    },
+    {
+      "id": "hnf.economic_games.amounts_given",
+      "family": "evaluator",
+      "entrypoint": "amounts_given",
+      "description": "Amounts given",
+      "about": {
+        "summary": "The mean amount sent, returned, offered, contributed or assigned as punishment in the economic games, with its distribution.",
+        "how_it_works": "Reads the results the economic games publish and keeps the amounts of the chosen kind: sent (give and transfer), returned (trust return step), offered (offer and respond, every offer including counter-offers), contributed (public goods) or punishment (points assigned in the punishment stage), or all of them.",
+        "outputs": [
+          {
+            "label": "Mean amount",
+            "unit": "amount",
+            "description": "Mean of the selected amounts."
+          },
+          {
+            "label": "Details",
+            "description": "Count, mean share of what was available, means by kind, role and round, and the sorted distribution."
+          }
+        ]
+      },
+      "config_schema": {
+        "type": "object",
+        "properties": {
+          "kind": {
+            "type": "string",
+            "title": "Which amounts",
+            "enum": [
+              "all",
+              "sent",
+              "returned",
+              "offered",
+              "contributed",
+              "punishment"
+            ],
+            "default": "all"
+          },
+          "step": {
+            "type": "string",
+            "maxLength": 120,
+            "title": "Step (empty: whole run)",
+            "default": "",
+            "x-hnf-reference": "step"
+          }
+        },
+        "required": [
+          "kind",
+          "step"
+        ],
+        "additionalProperties": false
+      }
+    },
+    {
+      "id": "hnf.economic_games.cooperation_rate",
+      "family": "evaluator",
+      "entrypoint": "cooperation_rate",
+      "description": "Cooperation rate",
+      "about": {
+        "summary": "How cooperative choices were: the share of cooperative moves in payoff-matrix games, or the mean contribution as a share of the endowment in public goods games.",
+        "how_it_works": "Reads the results the economic games publish. A payoff-matrix choice counts 1 if it is the game's cooperative move and 0 otherwise. A public goods contribution counts its share of the endowment (0 to 1). The value is the mean over all these decisions.",
+        "outputs": [
+          {
+            "label": "Cooperation rate",
+            "unit": "0 to 1",
+            "description": "Mean cooperation over all decisions."
+          },
+          {
+            "label": "Details",
+            "description": "Number of decisions, and the rate per participant and per round."
+          }
+        ]
+      },
+      "config_schema": {
+        "type": "object",
+        "properties": {
+          "step": {
+            "type": "string",
+            "maxLength": 120,
+            "title": "Step (empty: whole run)",
+            "default": "",
+            "x-hnf-reference": "step"
+          }
+        },
+        "required": [
+          "step"
+        ],
+        "additionalProperties": false
+      }
+    },
+    {
+      "id": "hnf.economic_games.payoffs",
+      "family": "evaluator",
+      "entrypoint": "payoffs",
+      "description": "Payoffs",
+      "about": {
+        "summary": "Earnings per participant across the economic games, with group efficiency and inequality.",
+        "how_it_works": "Adds up each participant's earnings over every result the economic games publish. Efficiency is the total earned divided by the most the participants could have earned together. Inequality is the Gini coefficient of the participants' totals (0: equal).",
+        "outputs": [
+          {
+            "label": "Mean earnings",
+            "unit": "per participant",
+            "description": "Mean total earnings per participant."
+          },
+          {
+            "label": "Details",
+            "description": "Earnings per participant, total, efficiency (0 to 1) and Gini inequality."
+          }
+        ]
+      },
+      "config_schema": {
+        "type": "object",
+        "properties": {
+          "step": {
+            "type": "string",
+            "maxLength": 120,
+            "title": "Step (empty: whole run)",
+            "default": "",
+            "x-hnf-reference": "step"
+          }
+        },
+        "required": [
+          "step"
+        ],
+        "additionalProperties": false
+      }
+    },
+    {
+      "id": "hnf.economic_games.acceptance_rate",
+      "family": "evaluator",
+      "entrypoint": "acceptance_rate",
+      "description": "Acceptance rate",
+      "about": {
+        "summary": "The share of offers accepted in the offer-and-respond (ultimatum) game.",
+        "how_it_works": "Counts every response to an offer or counter-offer and the share that were accepted, and reports the mean accepted and rejected offer.",
+        "outputs": [
+          {
+            "label": "Acceptance rate",
+            "unit": "0 to 1",
+            "description": "Accepted responses divided by all responses."
+          },
+          {
+            "label": "Details",
+            "description": "Number of responses and acceptances, mean accepted offer and mean rejected offer."
+          }
+        ]
+      },
+      "config_schema": {
+        "type": "object",
+        "properties": {
+          "step": {
+            "type": "string",
+            "maxLength": 120,
+            "title": "Step (empty: whole run)",
+            "default": "",
+            "x-hnf-reference": "step"
+          }
+        },
+        "required": [
+          "step"
+        ],
+        "additionalProperties": false
+      }
+    }
+  ]
+}

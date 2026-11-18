@@ -1,0 +1,185 @@
+{
+  "manifest": {
+    "bundle_id": "hnf.questionnaire",
+    "version": "1.0.0",
+    "author": "Human Not Found",
+    "description": "A questionnaire with scale, choice and text items, and a summary measure.",
+    "permissions": [
+      "read_shared_state",
+      "read_private_actions",
+      "write_state",
+      "emit_event"
+    ],
+    "components": [
+      {
+        "id": "hnf.questionnaire.questionnaire",
+        "family": "mechanic",
+        "entrypoint": "questionnaire",
+        "description": "Questionnaire",
+        "about": {
+          "summary": "Every participant answers the same questionnaire of scale, choice and text items.",
+          "how_it_works": "All participants get the questionnaire at once and answer every item in one submission: a whole number within the scale's range, one of the listed choices, or free text. Answers are seen by everyone or only by the participant. The free test model answers the middle of each scale, the first choice and 'No further comments.'.",
+          "actions": [
+            {
+              "type": "questionnaire.answers",
+              "description": "Answer every item."
+            }
+          ],
+          "ends_when": "When everyone has answered (unless 'End the step' is off)."
+        },
+        "config_schema": {
+          "type": "object",
+          "properties": {
+            "prompt": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 4000,
+              "title": "Instructions",
+              "default": "Please answer every question."
+            },
+            "items": {
+              "type": "array",
+              "title": "Items",
+              "minItems": 1,
+              "maxItems": 30,
+              "items": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 64,
+                    "title": "Item ID"
+                  },
+                  "prompt": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 1000,
+                    "title": "Question"
+                  },
+                  "type": {
+                    "type": "string",
+                    "enum": [
+                      "scale",
+                      "choice",
+                      "text"
+                    ],
+                    "title": "Answer type",
+                    "default": "scale"
+                  },
+                  "min": {
+                    "type": "integer",
+                    "title": "Scale minimum",
+                    "default": 1
+                  },
+                  "max": {
+                    "type": "integer",
+                    "title": "Scale maximum",
+                    "default": 7
+                  },
+                  "options": {
+                    "type": "array",
+                    "title": "Choices",
+                    "minItems": 0,
+                    "maxItems": 20,
+                    "items": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 200
+                    },
+                    "default": [],
+                    "uniqueItems": true
+                  }
+                },
+                "required": [
+                  "id",
+                  "prompt",
+                  "type",
+                  "min",
+                  "max",
+                  "options"
+                ],
+                "additionalProperties": false
+              },
+              "default": [
+                {
+                  "id": "satisfaction",
+                  "prompt": "How satisfied are you with the outcome?",
+                  "type": "scale",
+                  "min": 1,
+                  "max": 7,
+                  "options": []
+                }
+              ]
+            },
+            "visibility": {
+              "type": "string",
+              "enum": [
+                "shared",
+                "private"
+              ],
+              "title": "Who sees the answers",
+              "default": "private"
+            },
+            "finish": {
+              "type": "boolean",
+              "title": "End the step when everyone has answered",
+              "default": true
+            }
+          },
+          "required": [
+            "prompt",
+            "items",
+            "visibility",
+            "finish"
+          ],
+          "additionalProperties": false
+        }
+      },
+      {
+        "id": "hnf.questionnaire.summary",
+        "family": "evaluator",
+        "entrypoint": "questionnaire_summary",
+        "description": "Questionnaire summary",
+        "about": {
+          "summary": "The number of respondents and a summary of every item.",
+          "how_it_works": "Uses each participant's latest answers (including private ones). Scale items get their mean, choice items the count of each choice, text items the number of answers.",
+          "outputs": [
+            {
+              "label": "Respondents",
+              "unit": "participants",
+              "description": "Participants who answered."
+            },
+            {
+              "label": "Details",
+              "description": "Per item: mean (scale), counts (choice) or number of answers (text)."
+            }
+          ]
+        },
+        "config_schema": {
+          "type": "object",
+          "properties": {
+            "step": {
+              "type": "string",
+              "maxLength": 120,
+              "title": "Step (empty: whole run)",
+              "default": "",
+              "x-hnf-reference": "step"
+            }
+          },
+          "required": [
+            "step"
+          ],
+          "additionalProperties": false
+        }
+      }
+    ],
+    "contract_version": "1.0.0",
+    "digest": "sha256:96e9c625806f0f64c781e5e6a250c107ad5ecd129d3e264e54c7f15064db437c"
+  },
+  "artifact": {
+    "format": "python.source.v1",
+    "source": "\"\"\"Questionnaire: scale, choice and text items, and a summary measure. Adapted from the app's study kit survey.\"\"\"\n\nNOTHING = {\"effects\": []}\n\n\ndef item_schema(item):\n    if item[\"type\"] == \"scale\":\n        return {\"type\": \"integer\", \"minimum\": item[\"min\"], \"maximum\": item[\"max\"]}\n    if item[\"type\"] == \"choice\":\n        return {\"type\": \"string\", \"enum\": item[\"options\"]}\n    return {\"type\": \"string\", \"minLength\": 1, \"maxLength\": 2000}\n\n\ndef item_sample(item):\n    if item[\"type\"] == \"scale\":\n        return (item[\"min\"] + item[\"max\"]) // 2\n    if item[\"type\"] == \"choice\":\n        return item[\"options\"][0]\n    return \"No further comments.\"\n\n\ndef item_line(item):\n    if item[\"type\"] == \"scale\":\n        return f\"- {item['id']}: {item['prompt']} ({item['min']} to {item['max']})\"\n    if item[\"type\"] == \"choice\":\n        return f\"- {item['id']}: {item['prompt']} (one of: {', '.join(item['options'])})\"\n    return f\"- {item['id']}: {item['prompt']} (free text)\"\n\n\ndef questionnaire(request):\n    config, event = request[\"config\"], request[\"event\"]\n    items, people = config[\"items\"], [person[\"id\"] for person in request[\"participants\"]]\n    for item in items:\n        if item[\"type\"] == \"choice\" and not item[\"options\"]:\n            raise ValueError(f\"Choice item '{item['id']}' needs at least one option.\")\n        if item[\"type\"] == \"scale\" and item[\"min\"] > item[\"max\"]:\n            raise ValueError(f\"Scale item '{item['id']}' has a minimum above its maximum.\")\n    if event[\"topic\"] == \"run.started\":\n        action = {\"type\": \"questionnaire.answers\", \"audience\": \"shared\" if config[\"visibility\"] == \"shared\" else [],\n                  \"prompt\": \"\\n\".join([config[\"prompt\"]] + [item_line(item) for item in items]),\n                  \"schema\": {\"type\": \"object\", \"additionalProperties\": False, \"required\": [item[\"id\"] for item in items],\n                             \"properties\": {item[\"id\"]: item_schema(item) for item in items}},\n                  \"sample\": {item[\"id\"]: item_sample(item) for item in items}}\n        return {\"effects\": [{\"type\": \"offer\", \"id\": \"ask.\" + person, \"actor_id\": person, \"actions\": [action]}\n                            for person in people]}\n    if not (event[\"topic\"] == \"action.accepted\" and request[\"own_event\"] and event[\"action_type\"] == \"questionnaire.answers\"):\n        return NOTHING\n    answered = sorted({*request[\"state\"].get(\"answered\", []), event[\"actor_id\"]})\n    effects = [{\"type\": \"update\", \"state\": {\"answered\": answered}}]\n    if set(answered) >= set(people):\n        effects.append({\"type\": \"emit\", \"topic\": \"questionnaire.completed\", \"audience\": \"shared\", \"payload\": {\n            \"items\": [{\"id\": item[\"id\"], \"type\": item[\"type\"]} for item in items], \"respondents\": len(answered)}})\n        if config[\"finish\"]:\n            effects.append({\"type\": \"finish\"})\n    return {\"effects\": effects}\n\n\ndef questionnaire_summary(request):\n    step = request[\"config\"][\"step\"]\n    latest, types = {}, {}\n    for record in request[\"authorized_events\"]:\n        if step and record[\"step_id\"] != step:\n            continue\n        if record[\"event_type\"] == \"action_applied\" and record[\"payload\"][\"action_type\"] == \"questionnaire.answers\":\n            latest[record[\"actor_id\"]] = record[\"payload\"][\"value\"]\n        elif record[\"event_type\"] == \"component_event\" and record[\"payload\"].get(\"topic\") == \"questionnaire.completed\":\n            types.update({item[\"id\"]: item[\"type\"] for item in record[\"payload\"][\"payload\"][\"items\"]})\n    if not latest:\n        return {\"status\": \"missing\", \"value\": None, \"details\": {\"reason\": \"No questionnaire answers were submitted.\"}}\n    summary = {}\n    for key in sorted({key for answer in latest.values() for key in answer}):\n        values = [answer[key] for answer in latest.values() if key in answer]\n        kind = types.get(key) or (\"scale\" if all(type(value) is int for value in values) else \"text\")\n        if kind == \"scale\":\n            summary[key] = {\"type\": kind, \"mean\": round(sum(values) / len(values), 6), \"n\": len(values)}\n        elif kind == \"choice\":\n            summary[key] = {\"type\": kind, \"counts\": {value: values.count(value) for value in sorted(set(values))}, \"n\": len(values)}\n        else:\n            summary[key] = {\"type\": \"text\", \"n\": len(values)}\n    return {\"status\": \"ok\", \"value\": len(latest), \"unit\": \"respondents\", \"details\": {\"items\": summary}}\n\n\ndef self_test():\n    item = {\"id\": \"q\", \"prompt\": \"?\", \"type\": \"scale\", \"min\": 1, \"max\": 7, \"options\": []}\n    return {\"ok\": item_sample(item) == 4 and item_schema(item)[\"maximum\"] == 7}\n",
+    "options": {}
+  }
+}

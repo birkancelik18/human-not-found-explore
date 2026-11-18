@@ -1,0 +1,190 @@
+{
+  "manifest": {
+    "bundle_id": "hnf.group_discussion",
+    "version": "1.0.0",
+    "author": "Human Not Found",
+    "description": "Group discussion with built-in turn-taking, a turn-order procedure, and a participation balance measure.",
+    "permissions": [
+      "read_shared_state",
+      "write_state",
+      "emit_event"
+    ],
+    "components": [
+      {
+        "id": "hnf.group_discussion.discussion",
+        "family": "mechanic",
+        "entrypoint": "discussion",
+        "description": "Discussion",
+        "about": {
+          "summary": "Participants discuss by posting shared messages, with built-in turn-taking.",
+          "how_it_works": "Every message is seen by all participants. Turns: round robin gives the floor to one participant at a time in listed order; free offers everyone a message at once each round, answered in the order the offers were made; procedure waits for a turn-order procedure in the same step to invite each speaker (discussion.invite). With round robin and free, each participant speaks once per round for the configured number of rounds. With procedure, the procedure decides when the step ends. The sample message is what the free test model posts.",
+          "actions": [
+            {
+              "type": "discussion.message",
+              "description": "Post a message to the group."
+            }
+          ],
+          "ends_when": "When every participant has spoken in every round (round robin and free, unless 'End the step' is off); with procedure turns, when the procedure ends it."
+        },
+        "config_schema": {
+          "type": "object",
+          "properties": {
+            "prompt": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 4000,
+              "title": "Discussion instructions",
+              "default": "Discuss the task with your group."
+            },
+            "turns": {
+              "type": "string",
+              "enum": [
+                "round_robin",
+                "free",
+                "procedure"
+              ],
+              "title": "Turn-taking",
+              "default": "round_robin"
+            },
+            "rounds": {
+              "type": "integer",
+              "title": "Rounds (each participant speaks once per round)",
+              "default": 2,
+              "minimum": 1,
+              "maximum": 50
+            },
+            "sample": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 4000,
+              "title": "Sample message (used by the free test model)",
+              "default": "I think we should compare what each of us knows before deciding."
+            },
+            "finish": {
+              "type": "boolean",
+              "title": "End the step when every round is over",
+              "default": true
+            }
+          },
+          "required": [
+            "prompt",
+            "turns",
+            "rounds",
+            "sample",
+            "finish"
+          ],
+          "additionalProperties": false
+        }
+      },
+      {
+        "id": "hnf.group_discussion.turn_order",
+        "family": "procedure",
+        "entrypoint": "turn_order",
+        "description": "Turn order",
+        "about": {
+          "summary": "Invites one speaker at a time, in listed or random order, for steps that combine a discussion with other activities.",
+          "how_it_works": "At the start of the step the procedure fixes the order (listed, or shuffled with the run's seed so it is reproducible) and sends discussion.invite naming the first speaker. Each time a message of the configured action type is accepted, it invites the next speaker. Use it with a Discussion whose turns are set to procedure.",
+          "actions": [
+            {
+              "type": "discussion.message",
+              "description": "The invited speaker posts a message (offered by the Discussion activity)."
+            }
+          ],
+          "ends_when": "When every participant has spoken in every round (unless 'End the step' is off)."
+        },
+        "config_schema": {
+          "type": "object",
+          "properties": {
+            "rounds": {
+              "type": "integer",
+              "title": "Rounds",
+              "default": 2,
+              "minimum": 1,
+              "maximum": 50
+            },
+            "order": {
+              "type": "string",
+              "enum": [
+                "listed",
+                "random"
+              ],
+              "title": "Speaking order",
+              "default": "listed"
+            },
+            "action_type": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 120,
+              "title": "Action that ends a turn",
+              "default": "discussion.message"
+            },
+            "finish": {
+              "type": "boolean",
+              "title": "End the step when every round is over",
+              "default": true
+            }
+          },
+          "required": [
+            "rounds",
+            "order",
+            "action_type",
+            "finish"
+          ],
+          "additionalProperties": false
+        }
+      },
+      {
+        "id": "hnf.group_discussion.participation_balance",
+        "family": "evaluator",
+        "entrypoint": "participation_balance",
+        "description": "Participation balance",
+        "about": {
+          "summary": "How evenly participants contributed to the discussion: messages and words per participant, and an evenness score.",
+          "how_it_works": "Counts the discussion messages and their words for every participant, including those who said nothing. Evenness is the normalized entropy of the participants' shares of words: 1 when everyone wrote the same amount, 0 when one person wrote everything.",
+          "outputs": [
+            {
+              "label": "Evenness",
+              "unit": "0 to 1",
+              "description": "Normalized entropy of the participants' shares of words."
+            },
+            {
+              "label": "Details",
+              "description": "Messages and words per participant, and the evenness of message counts."
+            }
+          ]
+        },
+        "config_schema": {
+          "type": "object",
+          "properties": {
+            "action_type": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 120,
+              "title": "Message action type",
+              "default": "discussion.message"
+            },
+            "step": {
+              "type": "string",
+              "maxLength": 120,
+              "title": "Step (empty: whole run)",
+              "default": "",
+              "x-hnf-reference": "step"
+            }
+          },
+          "required": [
+            "action_type",
+            "step"
+          ],
+          "additionalProperties": false
+        }
+      }
+    ],
+    "contract_version": "1.0.0",
+    "digest": "sha256:6630be61852c98c089bd052566f32e69ef590c7aab6975060d8d92b6132738e5"
+  },
+  "artifact": {
+    "format": "python.source.v1",
+    "source": "\"\"\"Group discussion: a discussion activity with built-in turn-taking, a turn-order procedure, and participation balance.\"\"\"\n\nimport math\nfrom random import Random\n\nNOTHING = {\"effects\": []}\n\n\ndef message_offer(config, offer_id, actor, heading):\n    return {\"type\": \"offer\", \"id\": offer_id, \"actor_id\": actor, \"actions\": [{\n        \"type\": \"discussion.message\", \"prompt\": f\"{config['prompt']}\\n{heading}\", \"audience\": \"shared\",\n        \"schema\": {\"type\": \"string\", \"minLength\": 1, \"maxLength\": 4000}, \"sample\": config[\"sample\"]}]}\n\n\ndef discussion(request):\n    \"\"\"Shared messages. Turns: round robin (one speaker at a time, in listed order), free (everyone may speak\n    each round), or procedure (speak when a turn-order procedure sends discussion.invite).\"\"\"\n    config, event = request[\"config\"], request[\"event\"]\n    people = [person[\"id\"] for person in request[\"participants\"]]\n    turns, rounds = config[\"turns\"], config[\"rounds\"]\n    state = dict(request[\"state\"])\n    if turns == \"procedure\":\n        if event[\"topic\"] == \"discussion.invite\" and event.get(\"payload\", {}).get(\"actor_id\") in people:\n            count = state.get(\"invites\", 0) + 1\n            return {\"effects\": [{\"type\": \"update\", \"state\": {\"invites\": count}},\n                                message_offer(config, f\"speak{count}\", event[\"payload\"][\"actor_id\"], \"It is your turn to speak.\")]}\n        return NOTHING\n    if event[\"topic\"] == \"run.started\":\n        state = {\"spoken\": 0}\n        if turns == \"round_robin\":\n            return {\"effects\": [{\"type\": \"update\", \"state\": state},\n                                message_offer(config, \"speak\", people[0], f\"Round 1 of {rounds}. It is your turn to speak.\")]}\n        return {\"effects\": [{\"type\": \"update\", \"state\": state}] + [\n            message_offer(config, \"speak.\" + person, person, f\"Round 1 of {rounds}. Add your message.\") for person in people]}\n    if not (event[\"topic\"] == \"action.accepted\" and request[\"own_event\"] and event[\"action_type\"] == \"discussion.message\"):\n        return NOTHING\n    state[\"spoken\"] += 1\n    effects = [{\"type\": \"update\", \"state\": state}]\n    if state[\"spoken\"] >= rounds * len(people):\n        return {\"effects\": effects + ([{\"type\": \"finish\"}] if config[\"finish\"] else [])}\n    round_number = state[\"spoken\"] // len(people) + 1\n    if turns == \"round_robin\":\n        effects.append(message_offer(config, \"speak\", people[state[\"spoken\"] % len(people)],\n                                     f\"Round {round_number} of {rounds}. It is your turn to speak.\"))\n    elif state[\"spoken\"] % len(people) == 0:\n        effects += [message_offer(config, \"speak.\" + person, person, f\"Round {round_number} of {rounds}. Add your message.\")\n                    for person in people]\n    return {\"effects\": effects}\n\n\ndef turn_order(request):\n    \"\"\"Invite one speaker at a time with discussion.invite, for the configured number of rounds.\"\"\"\n    config, event = request[\"config\"], request[\"event\"]\n    state = dict(request[\"state\"])\n    if event[\"topic\"] == \"run.started\":\n        order = [person[\"id\"] for person in request[\"participants\"]]\n        if config[\"order\"] == \"random\":\n            Random(request[\"seed\"]).shuffle(order)\n        state = {\"order\": order, \"turns\": 0}\n    elif event[\"topic\"] == \"action.accepted\" and event.get(\"action_type\") == config[\"action_type\"]:\n        state[\"turns\"] += 1\n    else:\n        return NOTHING\n    order = state[\"order\"]\n    if state[\"turns\"] >= config[\"rounds\"] * len(order):\n        return {\"effects\": [{\"type\": \"update\", \"state\": state}] + ([{\"type\": \"finish\"}] if config[\"finish\"] else [])}\n    return {\"effects\": [{\"type\": \"update\", \"state\": state},\n                        {\"type\": \"emit\", \"topic\": \"discussion.invite\", \"audience\": \"shared\",\n                         \"payload\": {\"actor_id\": order[state[\"turns\"] % len(order)]}}]}\n\n\ndef evenness(counts):\n    \"\"\"Normalized Shannon entropy of the shares: 1 when everyone contributes equally, 0 when one person does everything.\"\"\"\n    total = sum(counts)\n    if len(counts) < 2:\n        return 1.0\n    if total == 0:\n        return None\n    entropy = sum(-count / total * math.log(count / total) for count in counts if count)\n    return round(entropy / math.log(len(counts)), 6)\n\n\ndef participation_balance(request):\n    config = request[\"config\"]\n    people = [person[\"id\"] for person in request[\"experiment\"].get(\"participants\", [])]\n    messages, words = {person: 0 for person in people}, {person: 0 for person in people}\n    for record in request[\"authorized_events\"]:\n        if (record[\"event_type\"] == \"action_applied\" and record[\"payload\"][\"action_type\"] == config[\"action_type\"]\n                and (not config[\"step\"] or record[\"step_id\"] == config[\"step\"])):\n            actor, value = record[\"actor_id\"], record[\"payload\"][\"value\"]\n            messages[actor] = messages.get(actor, 0) + 1\n            words[actor] = words.get(actor, 0) + len(str(value).split())\n    if not sum(messages.values()):\n        return missing(\"No discussion messages were recorded.\")\n    return {\"status\": \"ok\", \"value\": evenness(list(words.values())), \"unit\": \"evenness (0-1)\", \"details\": {\n        \"messages\": messages, \"words\": words, \"message_evenness\": evenness(list(messages.values()))}}\n\n\ndef missing(reason):\n    return {\"status\": \"missing\", \"value\": None, \"details\": {\"reason\": reason}}\n\n\ndef self_test():\n    return {\"ok\": evenness([3, 3, 3]) == 1 and evenness([5, 0]) == 0 and evenness([1]) == 1}\n",
+    "options": {}
+  }
+}

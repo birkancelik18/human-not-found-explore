@@ -1,0 +1,240 @@
+{
+  "bundle_id": "hnf.group_decision",
+  "version": "1.0.0",
+  "author": "Human Not Found",
+  "description": "Group decisions by majority, unanimity or a leader, with measures of decision accuracy and information shared.",
+  "permissions": [
+    "read_shared_state",
+    "read_private_actions",
+    "write_state",
+    "emit_event"
+  ],
+  "components": [
+    {
+      "id": "hnf.group_decision.decision",
+      "family": "mechanic",
+      "entrypoint": "group_decision",
+      "description": "Group decision",
+      "about": {
+        "summary": "The group chooses one of several options by majority, unanimity or a leader's choice; or participants vote individually.",
+        "how_it_works": "Each voter chooses one option. Majority: the option with the most votes wins; a tie means another vote. Unanimity: an option wins only if everyone chose it; otherwise everyone votes again. Leader: only the leader (the first enabled participant if none is set) chooses. Individual: everyone votes once on their own and no group decision is made, for recording private choices before a discussion. Votes are seen by everyone or only by the voter. If no decision is reached after the last allowed vote, the decision is recorded as none. The result is published as decision.result.",
+        "actions": [
+          {
+            "type": "decision.vote",
+            "description": "Choose one of the options."
+          }
+        ],
+        "ends_when": "When a decision is reached or the last allowed vote is over (unless 'End the step' is off)."
+      },
+      "config_schema": {
+        "type": "object",
+        "properties": {
+          "prompt": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 4000,
+            "title": "Instructions",
+            "default": "Choose the best option."
+          },
+          "options": {
+            "type": "array",
+            "title": "Options",
+            "minItems": 2,
+            "maxItems": 20,
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 200
+            },
+            "default": [
+              "Option A",
+              "Option B",
+              "Option C"
+            ],
+            "uniqueItems": true
+          },
+          "rule": {
+            "type": "string",
+            "enum": [
+              "majority",
+              "unanimity",
+              "leader",
+              "individual"
+            ],
+            "title": "Decision rule",
+            "default": "majority"
+          },
+          "leader": {
+            "type": "string",
+            "maxLength": 120,
+            "title": "Leader (empty: first enabled participant)",
+            "default": "",
+            "x-hnf-reference": "participant"
+          },
+          "visible": {
+            "type": "boolean",
+            "title": "Everyone sees each vote",
+            "default": true
+          },
+          "max_ballots": {
+            "type": "integer",
+            "title": "Most votes before stopping without a decision",
+            "default": 3,
+            "minimum": 1,
+            "maximum": 20
+          },
+          "finish": {
+            "type": "boolean",
+            "title": "End the step when the decision is made",
+            "default": true
+          }
+        },
+        "required": [
+          "prompt",
+          "options",
+          "rule",
+          "leader",
+          "visible",
+          "max_ballots",
+          "finish"
+        ],
+        "additionalProperties": false
+      }
+    },
+    {
+      "id": "hnf.group_decision.decision_accuracy",
+      "family": "evaluator",
+      "entrypoint": "decision_accuracy",
+      "description": "Decision accuracy",
+      "about": {
+        "summary": "Whether the group's decision matches the answer key.",
+        "how_it_works": "Reads the last group decision in the step (or the whole run) and compares it with the answer key, ignoring capitals. No decision counts as incorrect. A step with only individual votes gives no result.",
+        "outputs": [
+          {
+            "label": "Correct",
+            "unit": "1 or 0",
+            "description": "1 if the decision matches the answer key, otherwise 0."
+          },
+          {
+            "label": "Details",
+            "description": "The decision, the answer key, the number of votes it took and the vote counts."
+          }
+        ]
+      },
+      "config_schema": {
+        "type": "object",
+        "properties": {
+          "answer_key": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200,
+            "title": "Correct option",
+            "default": "Option A"
+          },
+          "step": {
+            "type": "string",
+            "maxLength": 120,
+            "title": "Step (empty: whole run)",
+            "default": "",
+            "x-hnf-reference": "step"
+          }
+        },
+        "required": [
+          "answer_key",
+          "step"
+        ],
+        "additionalProperties": false
+      }
+    },
+    {
+      "id": "hnf.group_decision.information_shared",
+      "family": "evaluator",
+      "entrypoint": "information_shared",
+      "description": "Information shared",
+      "about": {
+        "summary": "Which of the configured clues participants mentioned in their discussion messages.",
+        "how_it_works": "A clue counts as mentioned when any of its keywords appears in a discussion message (ignoring capitals). Mark each clue as shared (everyone had it) or unique (only one participant had it) to compare the two, as in hidden-profile studies. Keyword matching is simple: choose distinctive words.",
+        "outputs": [
+          {
+            "label": "Clues mentioned",
+            "unit": "0 to 1",
+            "description": "Share of the configured clues that someone mentioned."
+          },
+          {
+            "label": "Details",
+            "description": "Who mentioned each clue, the clues each participant mentioned, and the rates for shared and unique clues."
+          }
+        ]
+      },
+      "config_schema": {
+        "type": "object",
+        "properties": {
+          "clues": {
+            "type": "array",
+            "title": "Clues",
+            "maxItems": 60,
+            "default": [],
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 64,
+                  "title": "Clue ID"
+                },
+                "keywords": {
+                  "type": "array",
+                  "title": "Keywords",
+                  "minItems": 1,
+                  "maxItems": 10,
+                  "items": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 120
+                  },
+                  "default": []
+                },
+                "kind": {
+                  "type": "string",
+                  "enum": [
+                    "shared",
+                    "unique"
+                  ],
+                  "title": "Who had it",
+                  "default": "unique"
+                }
+              },
+              "required": [
+                "id",
+                "keywords",
+                "kind"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "action_type": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120,
+            "title": "Message action type",
+            "default": "discussion.message"
+          },
+          "step": {
+            "type": "string",
+            "maxLength": 120,
+            "title": "Step (empty: whole run)",
+            "default": "",
+            "x-hnf-reference": "step"
+          }
+        },
+        "required": [
+          "clues",
+          "action_type",
+          "step"
+        ],
+        "additionalProperties": false
+      }
+    }
+  ]
+}
