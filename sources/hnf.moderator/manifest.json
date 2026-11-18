@@ -1,0 +1,98 @@
+{
+  "bundle_id": "hnf.moderator",
+  "version": "1.0.0",
+  "author": "Human Not Found",
+  "description": "An AI moderator for group discussions that follows conversational strategies: balance participation, keep the discussion respectful, ask the right expert.",
+  "permissions": [
+    "read_shared_state",
+    "model_call"
+  ],
+  "options": {
+    "hnf.moderator.moderator": {
+      "model": true
+    }
+  },
+  "components": [
+    {
+      "id": "hnf.moderator.moderator",
+      "family": "agent",
+      "entrypoint": "moderator",
+      "description": "AI moderator",
+      "about": {
+        "summary": "A moderator participant that knows when and what to say: it steps in when participation is uneven or a message is disrespectful, and can ask the member best placed to answer.",
+        "how_it_works": "Give this behaviour to a participant with the role 'moderator'. Each goal is a conversational strategy (goal, trigger, behaviour). Balance: when the Gini index of the members' words is above the threshold, it asks for the floor without a model call and invites the quietest member by name. Respect: it asks the model whether the last message was disrespectful and, if so, steps in to remind the group to stay considerate. Expertise: when it picks the next speaker, the model names the member whose public details fit the last message. When it gets the floor with nothing to fix, it briefly sums up or moves the group on. With the hnf.turn_taking rules it is outside the group: never in the rotation, left out of the counts, and asked first after each member's message whether it wants to step in; it reads their turn.status counts. With a Discussion's own round robin or free turns it simply takes its turn and counts the messages in its memory window. Activities offer their actions to every participant, so in a task step (for example a ranking) the moderator answers too; leave it out of such steps' measures, or disable it in those steps. With the free test model every choice takes the action's sample answer.",
+        "actions": [
+          {
+            "type": "turn.request",
+            "description": "Ask for the floor when a goal's trigger fires."
+          },
+          {
+            "type": "turn.pass",
+            "description": "Name the quietest member, or the best-placed one."
+          },
+          {
+            "type": "discussion.message",
+            "description": "A short moderator message: invite someone, restate respect, or sum up."
+          }
+        ]
+      },
+      "config_schema": {
+        "type": "object",
+        "properties": {
+          "model_ref": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 4000,
+            "title": "Model",
+            "default": "default",
+            "x-hnf-reference": "model"
+          },
+          "balance": {
+            "type": "boolean",
+            "title": "Goal: balance participation (invite the quietest member)",
+            "default": true
+          },
+          "civility": {
+            "type": "boolean",
+            "title": "Goal: keep the discussion respectful",
+            "default": true
+          },
+          "expertise": {
+            "type": "boolean",
+            "title": "Goal: ask the member whose details fit the point",
+            "default": false
+          },
+          "balance_threshold": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1,
+            "title": "Unevenness that triggers an invitation (Gini of words, 0 to 1)",
+            "default": 0.3
+          },
+          "persona": {
+            "type": "string",
+            "maxLength": 4000,
+            "title": "Persona (how the moderator comes across)",
+            "default": ""
+          },
+          "instructions": {
+            "type": "string",
+            "maxLength": 4000,
+            "title": "Instructions",
+            "default": ""
+          }
+        },
+        "required": [
+          "model_ref",
+          "balance",
+          "civility",
+          "expertise",
+          "balance_threshold",
+          "persona",
+          "instructions"
+        ],
+        "additionalProperties": false
+      }
+    }
+  ]
+}
