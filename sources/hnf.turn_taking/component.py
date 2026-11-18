@@ -155,7 +155,11 @@ def react(request, kind):
     del state["pending"][event["offer_id"]]
     if action_type == "turn.pass":
         if event["payload"] == "anyone":
-            return done(state, ask(state, [person["id"] for person in people if person["id"] != actor], "bids"))
+            # Offers are answered in the order they are made, so shuffle it: the first to say yes is not always
+            # whoever is listed first.
+            others = [person["id"] for person in people if person["id"] != actor]
+            Random(request["seed"]).shuffle(others)
+            return done(state, ask(state, others, "bids"))
         state["quiet"] = 0
         return done(state, invite(state, event["payload"]))
     if event.get("payload") is True:

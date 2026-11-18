@@ -218,3 +218,10 @@ def test_moderator_can_be_named():
     speakers, *_ = simulate(rules.speaker_selects, [MOD] + GROUP, {**PICK, "max_turns": 3},
                             pass_to=lambda actor, n: "m" if actor == "p1" else "p3")
     assert speakers == ["p1", "m", "p3"]
+
+
+def test_open_floor_order_is_shuffled_with_the_seed():
+    def first_taker(seed):
+        return simulate(rules.speaker_selects, GROUP, {**PICK, "max_turns": 2}, bid=lambda actor, n: True, seed=seed)[0][1]
+    assert first_taker(3) == first_taker(3)
+    assert {first_taker(seed) for seed in range(20)} == {"p2", "p3"}
