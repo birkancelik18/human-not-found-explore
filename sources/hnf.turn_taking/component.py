@@ -23,7 +23,7 @@ def moderators(people):
 
 def fresh(people):
     members = group(people)
-    return {"turn": 0, "messages": {key: 0 for key in members}, "words": {key: 0 for key in members},
+    return {"turn": 0, "member_turns": 0, "messages": {key: 0 for key in members}, "words": {key: 0 for key in members},
             "last": None, "last_member": None, "phase": "speaking", "pending": {}, "yes": [], "quiet": 0,
             "competitors": [], "round": 0}
 
@@ -47,7 +47,9 @@ def invite(state, actor):
 
 
 def ask(state, actors, phase):
-    """Ask each actor privately whether they want to speak next."""
+    """Ask each actor privately whether they want to speak next. With nobody to ask, the last member goes on."""
+    if not actors:
+        return invite(state, state["last_member"])
     state["round"] += 1
     state.update(phase=phase, yes=[], pending={f"{phase}.{state['round']}.{actor}": actor for actor in actors})
     return [{"type": "offer", "id": offer_id, "actor_id": actor, "actions": [{
@@ -86,7 +88,7 @@ def opening(kind, request, state):
     if kind == "least_active":
         return invite(state, quietest(state, group(people), request["seed"]))
     if kind == "raise_hands":
-        return ask(state, [person["id"] for person in people], "bids")
+        return ask(state, group(people), "bids")  # moderators never open the discussion
     return invite(state, group(people)[0])
 
 
@@ -118,8 +120,8 @@ def nobody(kind, request, state):
     if state["quiet"] >= config["quiet_rounds"]:
         state.update(phase="ended", pending={}, yes=[])
         return [{"type": "finish"}] if config["finish"] else []
-    if kind == "raise_hands":
-        return after_turn(kind, request, state)
+    if kind == "raise_hands":  # ask again, this time letting the last speaker go on too
+        return ask(state, [person["id"] for person in request["participants"]], "bids")
     return invite(state, state["last_member"] or group(request["participants"])[0])  # the speaker continues
 
 
@@ -127,6 +129,9 @@ def react(request, kind):
     event, config, people = request["event"], request["config"], request["participants"]
     if event["topic"] == "run.started":
         state = fresh(people)
+        if not group(people):  # only moderators: there is no discussion to run
+            state["phase"] = "ended"
+            return done(state, [{"type": "finish"}] if config["finish"] else [])
         return done(state, opening(kind, request, state))
     if event["topic"] != "action.accepted":
         return NOTHING
@@ -141,9 +146,11 @@ def react(request, kind):
         member = actor in state["messages"]
         if member:
             state["last_member"] = actor
+            state["member_turns"] += 1
         effects = [status(state, actor, event.get("payload", ""))]
         state["competitors"] = []
-        if state["turn"] >= config["max_turns"]:
+        # Only members' messages use up turns, so a moderator does not shorten the group's discussion.
+        if state["member_turns"] >= config["max_turns"]:
             state.update(phase="ended", pending={}, yes=[])
             return done(state, effects + ([{"type": "finish"}] if config["finish"] else []))
         mods = moderators(people)

@@ -48,7 +48,7 @@
             "type": "integer",
             "minimum": 1,
             "maximum": 200,
-            "title": "Turns before the step ends",
+            "title": "Group members' turns before the step ends (moderator messages do not count)",
             "default": 12
           },
           "finish": {
@@ -107,7 +107,7 @@
             "type": "integer",
             "minimum": 1,
             "maximum": 200,
-            "title": "Turns before the step ends",
+            "title": "Group members' turns before the step ends (moderator messages do not count)",
             "default": 12
           },
           "finish": {
@@ -131,7 +131,7 @@
       "description": "Raise hands",
       "about": {
         "summary": "Self-selection: before each turn everyone may privately raise a hand, and one of those who did gets the floor.",
-        "how_it_works": "Before each turn the rule asks every participant except the last speaker, privately, whether they want to speak next (turn.request), so nobody sees the others' answers. Several raised hands is floor competition, recorded in turn.status as competitors: the member with the fewest words so far wins (or one at random with the run's seed). A moderator's raised hand always wins. If nobody raises a hand, the rule asks again; after the configured number of quiet rounds in a row the step ends. After each turn the rule publishes turn.status with every group member's messages and words in this step, which the AI moderator reads; moderators (role 'moderator') are left out of those counts. Every turn adds several actions, so allow enough actions per run and set the memory window (max_memory_events) to at least 40. Use it with a Discussion whose turns are set to procedure.",
+        "how_it_works": "The first round asks every group member; moderators never open the discussion. Before each later turn the rule asks every participant except the last speaker, privately, whether they want to speak next (turn.request), so nobody sees the others' answers. Several raised hands is floor competition, recorded in turn.status as competitors: the member with the fewest words so far wins (or one at random with the run's seed). A moderator's raised hand always wins. If nobody raises a hand, the rule asks again, this time including the last speaker, who may go on; after the configured number of quiet rounds in a row the step ends. After each turn the rule publishes turn.status with every group member's messages and words in this step, which the AI moderator reads; moderators (role 'moderator') are left out of those counts. Every turn adds several actions, so allow enough actions per run and set the memory window (max_memory_events) to at least 40. Use it with a Discussion whose turns are set to procedure.",
         "actions": [
           {
             "type": "turn.request",
@@ -158,7 +158,7 @@
             "type": "integer",
             "minimum": 1,
             "maximum": 200,
-            "title": "Turns before the step ends",
+            "title": "Group members' turns before the step ends (moderator messages do not count)",
             "default": 12
           },
           "finish": {
