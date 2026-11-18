@@ -4,7 +4,7 @@
     {
       "path": "packages/hnf.economic_games-1.0.0.hnf.json",
       "digest": "sha256:386e03f1a3025b93efb1c8c8de3a5f077616163797b25ba2ce3489fa9f47ac3d",
-      "added_at": "2026-11-18T01:14:36+00:00",
+      "added_at": "2026-11-18T02:14:42+01:00",
       "manifest": {
         "bundle_id": "hnf.economic_games",
         "version": "1.0.0",
@@ -573,7 +573,7 @@
     {
       "path": "packages/hnf.effort_task-1.0.0.hnf.json",
       "digest": "sha256:646a8a8873b3eebfd1251def13d669997fff8be1a81e0d78be6d141afdbfdde2",
-      "added_at": "2026-11-18T01:14:36+00:00",
+      "added_at": "2026-11-18T02:14:42+01:00",
       "manifest": {
         "bundle_id": "hnf.effort_task",
         "version": "1.0.0",
@@ -688,7 +688,7 @@
     {
       "path": "packages/hnf.group_decision-1.0.0.hnf.json",
       "digest": "sha256:b0535a69214de26322b85c0050b79e63b9943a5d5c6109b94070dbc112b3cdc1",
-      "added_at": "2026-11-18T01:14:36+00:00",
+      "added_at": "2026-11-18T02:14:42+01:00",
       "manifest": {
         "bundle_id": "hnf.group_decision",
         "version": "1.0.0",
@@ -935,7 +935,7 @@
     {
       "path": "packages/hnf.group_discussion-1.0.0.hnf.json",
       "digest": "sha256:f3cd33211e8895e277c120af855df2f004c813c04b4b0562a2c638def24dd925",
-      "added_at": "2026-11-18T01:14:36+00:00",
+      "added_at": "2026-11-18T02:14:42+01:00",
       "manifest": {
         "bundle_id": "hnf.group_discussion",
         "version": "1.0.0",
@@ -1123,7 +1123,7 @@
     {
       "path": "packages/hnf.idea_generation-1.0.0.hnf.json",
       "digest": "sha256:e67660fe0e5fb1ebf6e73d2a6aba35977abb45f73a5037f2f65e9b958a819fcd",
-      "added_at": "2026-11-18T01:14:36+00:00",
+      "added_at": "2026-11-18T02:14:42+01:00",
       "manifest": {
         "bundle_id": "hnf.idea_generation",
         "version": "1.0.0",
@@ -1259,7 +1259,7 @@
     {
       "path": "packages/hnf.participants-1.0.0.hnf.json",
       "digest": "sha256:1235faa09087c15252b8d91ff39c985e47a24638e7adae31cee016ae2b7caf49",
-      "added_at": "2026-11-18T01:14:36+00:00",
+      "added_at": "2026-11-18T02:14:42+01:00",
       "manifest": {
         "bundle_id": "hnf.participants",
         "version": "1.0.0",
@@ -1395,7 +1395,7 @@
     {
       "path": "packages/hnf.questionnaire-1.0.0.hnf.json",
       "digest": "sha256:5c281f1e33aeb7a688259c623ff284e0e69751942638398e21dc5f3aa31cb801",
-      "added_at": "2026-11-18T01:14:36+00:00",
+      "added_at": "2026-11-18T02:14:42+01:00",
       "manifest": {
         "bundle_id": "hnf.questionnaire",
         "version": "1.0.0",
@@ -1578,7 +1578,7 @@
     {
       "path": "packages/hnf.ranking_tasks-1.0.0.hnf.json",
       "digest": "sha256:4a70c577a0178c13231e54b1d2b15e05bbd1174e0a4fca3399ebbfc593fe166d",
-      "added_at": "2026-11-18T01:14:36+00:00",
+      "added_at": "2026-11-18T02:14:42+01:00",
       "manifest": {
         "bundle_id": "hnf.ranking_tasks",
         "version": "1.0.0",
@@ -1853,7 +1853,7 @@
     {
       "path": "templates/brainstorming-nominal-vs-interacting.template.json",
       "digest": "sha256:bb82f69f6289085c87ba9c15d43d71034cbfa01e4e07ca4380412fdc6d1d5266",
-      "added_at": "2026-11-18T01:14:36+00:00",
+      "added_at": "2026-11-18T02:14:42+01:00",
       "id": "brainstorming-nominal-vs-interacting",
       "name": "Brainstorming: nominal versus interacting groups",
       "author": "Human Not Found",
@@ -1874,7 +1874,7 @@
     {
       "path": "templates/dictator-game.template.json",
       "digest": "sha256:74bf575f5e3237f9c538553773c1d468028a7562f0aa16cfe8455ce2f5e837d5",
-      "added_at": "2026-11-18T01:14:36+00:00",
+      "added_at": "2026-11-18T02:14:42+01:00",
       "id": "dictator-game",
       "name": "Dictator game",
       "author": "Human Not Found",
@@ -1895,7 +1895,7 @@
     {
       "path": "templates/group-decision-discussion.template.json",
       "digest": "sha256:1cb2c0a122d59eda0a095f3e297b107018a7a77bedda35a79f1c2a55f72e06a3",
-      "added_at": "2026-11-18T01:14:36+00:00",
+      "added_at": "2026-11-18T02:14:42+01:00",
       "id": "group-decision-discussion",
       "name": "Group decision after discussion (choice dilemma)",
       "author": "Human Not Found",
@@ -1926,7 +1926,7 @@
     {
       "path": "templates/hidden-profile.template.json",
       "digest": "sha256:9f3e7420fac632f25fae46e27dc68a5d6c588c5cac62bdb60f8d467c4c8355be",
-      "added_at": "2026-11-18T01:14:36+00:00",
+      "added_at": "2026-11-18T02:14:42+01:00",
       "id": "hidden-profile",
       "name": "Hidden profile: solving a problem versus making a judgment",
       "author": "Human Not Found",
@@ -1952,7 +1952,7 @@
     {
       "path": "templates/moon-survival.template.json",
       "digest": "sha256:303964c10c41bbce8eaadeda63f66cd367ac5ab8b6e6caf3bcba840e33971d65",
-      "added_at": "2026-11-18T01:14:36+00:00",
+      "added_at": "2026-11-18T02:14:42+01:00",
       "id": "moon-survival",
       "name": "NASA Moon Survival Task",
       "author": "Human Not Found",
@@ -1978,7 +1978,7 @@
     {
       "path": "templates/murder-mystery.template.json",
       "digest": "sha256:ec20eb6a50f6512284ef24fc3145dd9a7205c4d447a20c420dc1bf927cc8c698",
-      "added_at": "2026-11-18T01:14:36+00:00",
+      "added_at": "2026-11-18T02:14:42+01:00",
       "id": "murder-mystery",
       "name": "Murder mystery: individual vote, discussion, group decision",
       "author": "Human Not Found",
@@ -2004,7 +2004,7 @@
     {
       "path": "templates/public-goods-conditional-cooperation.template.json",
       "digest": "sha256:2d131483e647acb73ae182aea9ed9d2f5b0a78d59f0889e3f82d3bfff3eb3996",
-      "added_at": "2026-11-18T01:14:36+00:00",
+      "added_at": "2026-11-18T02:14:42+01:00",
       "id": "public-goods-conditional-cooperation",
       "name": "Conditional cooperation in a public goods game",
       "author": "Human Not Found",
@@ -2025,7 +2025,7 @@
     {
       "path": "templates/public-goods-punishment.template.json",
       "digest": "sha256:47bb91815a81f136461b648c6b1019353e06028b15c66752a0b97e263504d8b7",
-      "added_at": "2026-11-18T01:14:36+00:00",
+      "added_at": "2026-11-18T02:14:42+01:00",
       "id": "public-goods-punishment",
       "name": "Public goods game with and without punishment",
       "author": "Human Not Found",
@@ -2046,7 +2046,7 @@
     {
       "path": "templates/repeated-prisoners-dilemma.template.json",
       "digest": "sha256:5efbee04e16eba3994a99afbc584906036a99eb7ed8383e9e3aa2f360a8176df",
-      "added_at": "2026-11-18T01:14:36+00:00",
+      "added_at": "2026-11-18T02:14:42+01:00",
       "id": "repeated-prisoners-dilemma",
       "name": "Finitely repeated prisoner's dilemma",
       "author": "Human Not Found",
@@ -2067,7 +2067,7 @@
     {
       "path": "templates/social-loafing-effort.template.json",
       "digest": "sha256:c51442ef14ad4a1021e283b7d1a8de659948690c66e72a3acabf583b31640cd9",
-      "added_at": "2026-11-18T01:14:36+00:00",
+      "added_at": "2026-11-18T02:14:42+01:00",
       "id": "social-loafing-effort",
       "name": "Social loafing: effort alone and in a group",
       "author": "Human Not Found",
@@ -2088,7 +2088,7 @@
     {
       "path": "templates/trust-game.template.json",
       "digest": "sha256:327dabe0b802116029fc19630e3a9ae5d84450980d07c94c69974902cde352f6",
-      "added_at": "2026-11-18T01:14:36+00:00",
+      "added_at": "2026-11-18T02:14:42+01:00",
       "id": "trust-game",
       "name": "Trust game",
       "author": "Human Not Found",
@@ -2109,7 +2109,7 @@
     {
       "path": "templates/ultimatum-game.template.json",
       "digest": "sha256:dbcd0b89dcdad313fa100cda97a1c0f1a6b2a9bd566e54a1332f27bc9aa6f6fa",
-      "added_at": "2026-11-18T01:14:36+00:00",
+      "added_at": "2026-11-18T02:14:42+01:00",
       "id": "ultimatum-game",
       "name": "Ultimatum game",
       "author": "Human Not Found",
