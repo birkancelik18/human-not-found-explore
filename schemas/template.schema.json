@@ -1,0 +1,30 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://human-not-found.example/schemas/template.schema.json",
+  "title": "Human Not Found study template",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["format", "name", "author", "description", "created_at", "spec", "packages"],
+  "properties": {
+    "format": {"const": "hnf.template.v1"},
+    "name": {"type": "string", "minLength": 1, "maxLength": 120},
+    "author": {"type": "string", "minLength": 1, "maxLength": 120},
+    "description": {"type": "string", "maxLength": 4000},
+    "created_at": {"type": "string", "minLength": 1},
+    "spec": {"type": "object"},
+    "packages": {
+      "type": "array",
+      "maxItems": 32,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["bundle_id", "version", "digest"],
+        "properties": {
+          "bundle_id": {"type": "string", "pattern": "^[a-zA-Z][a-zA-Z0-9_.-]*$"},
+          "version": {"type": "string", "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+(?:[-+][0-9A-Za-z.-]+)?$"},
+          "digest": {"type": "string", "pattern": "^sha256:[a-fA-F0-9]{64}$"}
+        }
+      }
+    }
+  }
+}
