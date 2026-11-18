@@ -213,3 +213,8 @@ def self_test():
 def raise_hands(request):
     """Before each turn, ask everyone but the last speaker whether they want the floor; pick among the raised hands."""
     return react(request, "raise_hands")
+
+
+def speaker_selects(request):
+    """The speaker picks who goes next; 'anyone' opens the floor to raised hands; if nobody wants it, the speaker goes on."""
+    return react(request, "speaker_selects")

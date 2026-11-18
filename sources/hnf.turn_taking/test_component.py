@@ -174,3 +174,47 @@ def test_raise_hands_lone_member_with_moderator_progresses():
     lone = [MOD, GROUP[0]]
     speakers, _, finished, _ = simulate(rules.raise_hands, lone, {**HANDS, "max_turns": 3}, bid=lambda actor, n: True)
     assert finished and speakers == ["m", "p1", "m"]
+
+
+# Speaker picks next ------------------------------------------------------------
+
+PICK = {"quiet_rounds": 2}
+
+
+def test_speaker_selects_starts_with_first_member_not_moderator():
+    speakers, *_ = simulate(rules.speaker_selects, [MOD] + GROUP, {**PICK, "max_turns": 1})
+    assert speakers == ["p1"]
+
+
+def test_named_participant_is_invited():
+    names = {"p1": "p3", "p3": "p2", "p2": "p1"}
+    speakers, *_ = simulate(rules.speaker_selects, GROUP, {**PICK, "max_turns": 4},
+                            pass_to=lambda actor, n: names[actor])
+    assert speakers == ["p1", "p3", "p2", "p1"]
+
+
+def test_pass_offer_lists_others_and_anyone_after_moderators_decline():
+    *_, every = simulate(rules.speaker_selects, [MOD] + GROUP, {**PICK, "max_turns": 2},
+                         pass_to=lambda actor, n: "p2")
+    offers = [effect for effect in every if effect["type"] == "offer"]
+    assert offers[0]["actions"][0]["type"] == "turn.request" and offers[0]["actor_id"] == "m"
+    passed = offers[1]["actions"][0]
+    assert offers[1]["actor_id"] == "p1" and passed["type"] == "turn.pass"
+    assert passed["schema"]["enum"] == ["m", "p2", "p3", "anyone"]
+
+
+def test_anyone_opens_the_floor_and_first_yes_wins():
+    speakers, *_ = simulate(rules.speaker_selects, GROUP, {**PICK, "max_turns": 2},
+                            bid=lambda actor, n: actor in ("p2", "p3"))
+    assert speakers == ["p1", "p2"]
+
+
+def test_nobody_wants_the_floor_speaker_continues_then_step_ends():
+    speakers, _, finished, _ = simulate(rules.speaker_selects, GROUP, PICK)
+    assert finished and speakers == ["p1", "p1"]  # one continuation, then the second quiet round ends it
+
+
+def test_moderator_can_be_named():
+    speakers, *_ = simulate(rules.speaker_selects, [MOD] + GROUP, {**PICK, "max_turns": 3},
+                            pass_to=lambda actor, n: "m" if actor == "p1" else "p3")
+    assert speakers == ["p1", "m", "p3"]

@@ -11,6 +11,69 @@
   ],
   "components": [
     {
+      "id": "hnf.turn_taking.speaker_selects",
+      "family": "procedure",
+      "entrypoint": "speaker_selects",
+      "description": "Speaker picks next",
+      "about": {
+        "summary": "The turn-taking rules of everyday conversation: the speaker picks who goes next; otherwise anyone may take the floor; otherwise the speaker goes on.",
+        "how_it_works": "Follows Sacks, Schegloff and Jefferson (1974). The first group member in the list speaks first. After each message the speaker names the next speaker (turn.pass), who is invited. If the speaker answers 'anyone', every other participant is asked privately whether they want to speak (turn.request) and the first to say yes gets the floor. If nobody wants it, the previous speaker continues; after the configured number of such quiet rounds in a row the step ends. Moderators (role 'moderator') are never the first speaker and are left out of the counts; after each group member's message they are asked first whether they want to step in, and a speaker may also name them. After each turn the rule publishes turn.status with every group member's messages and words in this step, which the AI moderator reads. Set the memory window (max_memory_events) to at least 40. Use it with a Discussion whose turns are set to procedure.",
+        "actions": [
+          {
+            "type": "turn.pass",
+            "description": "Name who speaks next, or 'anyone' to leave the floor open."
+          },
+          {
+            "type": "turn.request",
+            "description": "When the floor is open: say privately whether you want to speak next."
+          },
+          {
+            "type": "discussion.message",
+            "description": "The chosen participant posts a message (offered by the Discussion activity)."
+          }
+        ],
+        "ends_when": "When the configured number of turns has been taken, or nobody takes the open floor for the configured number of rounds in a row (unless 'End the step' is off)."
+      },
+      "config_schema": {
+        "type": "object",
+        "properties": {
+          "action_type": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120,
+            "title": "Action that ends a turn",
+            "default": "discussion.message"
+          },
+          "max_turns": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 200,
+            "title": "Turns before the step ends",
+            "default": 12
+          },
+          "finish": {
+            "type": "boolean",
+            "title": "End the step when the discussion is over",
+            "default": true
+          },
+          "quiet_rounds": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 10,
+            "title": "Quiet rounds before the step ends (nobody wants to speak)",
+            "default": 2
+          }
+        },
+        "required": [
+          "action_type",
+          "max_turns",
+          "finish",
+          "quiet_rounds"
+        ],
+        "additionalProperties": false
+      }
+    },
+    {
       "id": "hnf.turn_taking.least_active",
       "family": "procedure",
       "entrypoint": "least_active",
