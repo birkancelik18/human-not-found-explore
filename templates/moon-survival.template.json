@@ -1,0 +1,316 @@
+{
+  "format": "hnf.template.v1",
+  "name": "NASA Moon Survival Task",
+  "author": "Human Not Found",
+  "description": "Original study: Hall, J., & Watson, W. H. (1970). The effects of a normative intervention on group decision-making performance. Human Relations, 23(4), 299-317. Members of five-person groups first ranked 15 items salvaged from a crash landing on the moon by their importance for survival, then reached a group ranking by consensus; rankings were scored against the order given by NASA experts, and groups were compared with their own members. Hall and Watson tested whether brief instructions on how to reach consensus improved group performance. The task is a classic group-decision exercise used in team research and training; ranking tasks are rare in our survey of 500 multi-participant experiments. In this template five participants rank the items alone and privately, discuss over two rounds, and then one member (the reporter) submits the ranking the group agreed on. There is no normative-intervention condition. Error scores add up how many places each item is from the expert ranking (lower is better); synergy compares the group with its average and best member. Participants are simulated: each is a Model participant, using the free test model until you choose a model, so the first runs only check the design; with the test model every participant takes the sample answer.",
+  "created_at": "2026-11-18T01:13:22.408+00:00",
+  "spec": {
+    "components": [],
+    "conditions": [
+      {
+        "id": "main",
+        "label": "Main",
+        "overrides": []
+      }
+    ],
+    "description": "Rank 15 items alone, discuss, then rank as a group; scored against the NASA expert ranking.",
+    "environment": {
+      "initial_state": {
+        "private_by_participant": {},
+        "shared": {}
+      }
+    },
+    "execution": {
+      "max_actions_per_run": 30,
+      "max_estimated_cost_usd_per_run": 2.0,
+      "max_memory_events": 40,
+      "max_model_calls_per_run": 60,
+      "max_wall_seconds_per_run": 3600,
+      "repetitions_per_condition": 10,
+      "seed": 1
+    },
+    "experiment_id": "moon-survival",
+    "measurements": [
+      {
+        "evaluator": {
+          "config": {
+            "answer_key": [
+              "Two 100-lb tanks of oxygen",
+              "5 gallons of water",
+              "Stellar map",
+              "Food concentrate",
+              "Solar-powered FM receiver-transmitter",
+              "50 feet of nylon rope",
+              "First aid kit including injection needles",
+              "Parachute silk",
+              "Self-inflating life raft",
+              "Signal flares",
+              "Two .45 calibre pistols",
+              "One case of dehydrated milk",
+              "Portable heating unit",
+              "Magnetic compass",
+              "Box of matches"
+            ],
+            "step": "alone"
+          },
+          "id": "hnf.ranking_tasks.error_score",
+          "version": "1.0.0"
+        },
+        "id": "individual",
+        "label": "Individual error score",
+        "scope": "run"
+      },
+      {
+        "evaluator": {
+          "config": {
+            "answer_key": [
+              "Two 100-lb tanks of oxygen",
+              "5 gallons of water",
+              "Stellar map",
+              "Food concentrate",
+              "Solar-powered FM receiver-transmitter",
+              "50 feet of nylon rope",
+              "First aid kit including injection needles",
+              "Parachute silk",
+              "Self-inflating life raft",
+              "Signal flares",
+              "Two .45 calibre pistols",
+              "One case of dehydrated milk",
+              "Portable heating unit",
+              "Magnetic compass",
+              "Box of matches"
+            ],
+            "step": "group"
+          },
+          "id": "hnf.ranking_tasks.error_score",
+          "version": "1.0.0"
+        },
+        "id": "group",
+        "label": "Group error score",
+        "scope": "run"
+      },
+      {
+        "evaluator": {
+          "config": {
+            "answer_key": [
+              "Two 100-lb tanks of oxygen",
+              "5 gallons of water",
+              "Stellar map",
+              "Food concentrate",
+              "Solar-powered FM receiver-transmitter",
+              "50 feet of nylon rope",
+              "First aid kit including injection needles",
+              "Parachute silk",
+              "Self-inflating life raft",
+              "Signal flares",
+              "Two .45 calibre pistols",
+              "One case of dehydrated milk",
+              "Portable heating unit",
+              "Magnetic compass",
+              "Box of matches"
+            ],
+            "group_step": "group",
+            "individual_step": "alone"
+          },
+          "id": "hnf.ranking_tasks.synergy",
+          "version": "1.0.0"
+        },
+        "id": "synergy",
+        "label": "Group synergy",
+        "scope": "run"
+      }
+    ],
+    "participants": [
+      {
+        "agent": {
+          "config": {
+            "instructions": "",
+            "model_ref": "default",
+            "persona": ""
+          },
+          "id": "hnf.participants.model",
+          "version": "1.0.0"
+        },
+        "display_name": "Participant 1",
+        "enabled": true,
+        "id": "p1",
+        "private_context": {},
+        "role": "participant"
+      },
+      {
+        "agent": {
+          "config": {
+            "instructions": "",
+            "model_ref": "default",
+            "persona": ""
+          },
+          "id": "hnf.participants.model",
+          "version": "1.0.0"
+        },
+        "display_name": "Participant 2",
+        "enabled": true,
+        "id": "p2",
+        "private_context": {},
+        "role": "participant"
+      },
+      {
+        "agent": {
+          "config": {
+            "instructions": "",
+            "model_ref": "default",
+            "persona": ""
+          },
+          "id": "hnf.participants.model",
+          "version": "1.0.0"
+        },
+        "display_name": "Participant 3",
+        "enabled": true,
+        "id": "p3",
+        "private_context": {},
+        "role": "participant"
+      },
+      {
+        "agent": {
+          "config": {
+            "instructions": "",
+            "model_ref": "default",
+            "persona": ""
+          },
+          "id": "hnf.participants.model",
+          "version": "1.0.0"
+        },
+        "display_name": "Participant 4",
+        "enabled": true,
+        "id": "p4",
+        "private_context": {},
+        "role": "participant"
+      },
+      {
+        "agent": {
+          "config": {
+            "instructions": "",
+            "model_ref": "default",
+            "persona": ""
+          },
+          "id": "hnf.participants.model",
+          "version": "1.0.0"
+        },
+        "display_name": "Participant 5",
+        "enabled": true,
+        "id": "p5",
+        "private_context": {},
+        "role": "participant"
+      }
+    ],
+    "research": {
+      "hypotheses": [],
+      "question": "Does the group's ranking beat its average and its best member?"
+    },
+    "schema_version": "2.0.0",
+    "steps": [
+      {
+        "components": [
+          {
+            "config": {
+              "finish": true,
+              "items": [
+                "Box of matches",
+                "Food concentrate",
+                "50 feet of nylon rope",
+                "Parachute silk",
+                "Portable heating unit",
+                "Two .45 calibre pistols",
+                "One case of dehydrated milk",
+                "Two 100-lb tanks of oxygen",
+                "Stellar map",
+                "Self-inflating life raft",
+                "Magnetic compass",
+                "5 gallons of water",
+                "Signal flares",
+                "First aid kit including injection needles",
+                "Solar-powered FM receiver-transmitter"
+              ],
+              "mode": "individual",
+              "prompt": "You are a member of a space crew that was to meet the mother ship on the lighted surface of the moon. Mechanical trouble forced your ship to crash-land 200 miles from the meeting point. Only 15 items were left intact. Rank them by how important they are for reaching the mother ship: 1 is the most important.",
+              "reporter": "",
+              "visibility": "private"
+            },
+            "id": "hnf.ranking_tasks.ranking",
+            "version": "1.0.0"
+          }
+        ],
+        "id": "alone",
+        "title": "Rank alone"
+      },
+      {
+        "components": [
+          {
+            "config": {
+              "finish": true,
+              "prompt": "You are a member of a space crew that was to meet the mother ship on the lighted surface of the moon. Mechanical trouble forced your ship to crash-land 200 miles from the meeting point. Only 15 items were left intact. Rank them by how important they are for reaching the mother ship: 1 is the most important. Discuss the ranking with your group and try to reach a consensus.",
+              "rounds": 2,
+              "sample": "I would put the oxygen and the water first; what do the rest of you think?",
+              "turns": "round_robin"
+            },
+            "id": "hnf.group_discussion.discussion",
+            "version": "1.0.0"
+          }
+        ],
+        "id": "discuss",
+        "title": "Discuss"
+      },
+      {
+        "components": [
+          {
+            "config": {
+              "finish": true,
+              "items": [
+                "Box of matches",
+                "Food concentrate",
+                "50 feet of nylon rope",
+                "Parachute silk",
+                "Portable heating unit",
+                "Two .45 calibre pistols",
+                "One case of dehydrated milk",
+                "Two 100-lb tanks of oxygen",
+                "Stellar map",
+                "Self-inflating life raft",
+                "Magnetic compass",
+                "5 gallons of water",
+                "Signal flares",
+                "First aid kit including injection needles",
+                "Solar-powered FM receiver-transmitter"
+              ],
+              "mode": "group",
+              "prompt": "You are a member of a space crew that was to meet the mother ship on the lighted surface of the moon. Mechanical trouble forced your ship to crash-land 200 miles from the meeting point. Only 15 items were left intact. Rank them by how important they are for reaching the mother ship: 1 is the most important.",
+              "reporter": "",
+              "visibility": "shared"
+            },
+            "id": "hnf.ranking_tasks.ranking",
+            "version": "1.0.0"
+          }
+        ],
+        "id": "group",
+        "title": "Rank as a group"
+      }
+    ],
+    "title": "NASA Moon Survival Task"
+  },
+  "packages": [
+    {
+      "bundle_id": "hnf.group_discussion",
+      "version": "1.0.0",
+      "digest": "8635dc4a94885045a34cc5d9d3027f32f9e802a32ec07f49041ed2e47bc7403a"
+    },
+    {
+      "bundle_id": "hnf.participants",
+      "version": "1.0.0",
+      "digest": "3eba369193895ce162da928faffcb34ce74512a9c74d86bf2acc252f11fbcaee"
+    },
+    {
+      "bundle_id": "hnf.ranking_tasks",
+      "version": "1.0.0",
+      "digest": "a27394217e2609b1a640db1e3e1a5d2afa619ff56220bc40a88cd0ad3583f45a"
+    }
+  ]
+}

@@ -1,0 +1,176 @@
+{
+  "bundle_id": "hnf.questionnaire",
+  "version": "1.0.0",
+  "author": "Human Not Found",
+  "description": "A questionnaire with scale, choice and text items, and a summary measure.",
+  "permissions": [
+    "read_shared_state",
+    "read_private_actions",
+    "write_state",
+    "emit_event"
+  ],
+  "components": [
+    {
+      "id": "hnf.questionnaire.questionnaire",
+      "family": "mechanic",
+      "entrypoint": "questionnaire",
+      "description": "Questionnaire",
+      "about": {
+        "summary": "Every participant answers the same questionnaire of scale, choice and text items.",
+        "how_it_works": "All participants get the questionnaire at once and answer every item in one submission: a whole number within the scale's range, one of the listed choices, or free text. Answers are seen by everyone or only by the participant. The free test model answers the middle of each scale, the first choice and 'No further comments.'.",
+        "actions": [
+          {
+            "type": "questionnaire.answers",
+            "description": "Answer every item."
+          }
+        ],
+        "ends_when": "When everyone has answered (unless 'End the step' is off)."
+      },
+      "config_schema": {
+        "type": "object",
+        "properties": {
+          "prompt": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 4000,
+            "title": "Instructions",
+            "default": "Please answer every question."
+          },
+          "items": {
+            "type": "array",
+            "title": "Items",
+            "minItems": 1,
+            "maxItems": 30,
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 64,
+                  "title": "Item ID"
+                },
+                "prompt": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 1000,
+                  "title": "Question"
+                },
+                "type": {
+                  "type": "string",
+                  "enum": [
+                    "scale",
+                    "choice",
+                    "text"
+                  ],
+                  "title": "Answer type",
+                  "default": "scale"
+                },
+                "min": {
+                  "type": "integer",
+                  "title": "Scale minimum",
+                  "default": 1
+                },
+                "max": {
+                  "type": "integer",
+                  "title": "Scale maximum",
+                  "default": 7
+                },
+                "options": {
+                  "type": "array",
+                  "title": "Choices",
+                  "minItems": 0,
+                  "maxItems": 20,
+                  "items": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 200
+                  },
+                  "default": [],
+                  "uniqueItems": true
+                }
+              },
+              "required": [
+                "id",
+                "prompt",
+                "type",
+                "min",
+                "max",
+                "options"
+              ],
+              "additionalProperties": false
+            },
+            "default": [
+              {
+                "id": "satisfaction",
+                "prompt": "How satisfied are you with the outcome?",
+                "type": "scale",
+                "min": 1,
+                "max": 7,
+                "options": []
+              }
+            ]
+          },
+          "visibility": {
+            "type": "string",
+            "enum": [
+              "shared",
+              "private"
+            ],
+            "title": "Who sees the answers",
+            "default": "private"
+          },
+          "finish": {
+            "type": "boolean",
+            "title": "End the step when everyone has answered",
+            "default": true
+          }
+        },
+        "required": [
+          "prompt",
+          "items",
+          "visibility",
+          "finish"
+        ],
+        "additionalProperties": false
+      }
+    },
+    {
+      "id": "hnf.questionnaire.summary",
+      "family": "evaluator",
+      "entrypoint": "questionnaire_summary",
+      "description": "Questionnaire summary",
+      "about": {
+        "summary": "The number of respondents and a summary of every item.",
+        "how_it_works": "Uses each participant's latest answers (including private ones). Scale items get their mean, choice items the count of each choice, text items the number of answers.",
+        "outputs": [
+          {
+            "label": "Respondents",
+            "unit": "participants",
+            "description": "Participants who answered."
+          },
+          {
+            "label": "Details",
+            "description": "Per item: mean (scale), counts (choice) or number of answers (text)."
+          }
+        ]
+      },
+      "config_schema": {
+        "type": "object",
+        "properties": {
+          "step": {
+            "type": "string",
+            "maxLength": 120,
+            "title": "Step (empty: whole run)",
+            "default": "",
+            "x-hnf-reference": "step"
+          }
+        },
+        "required": [
+          "step"
+        ],
+        "additionalProperties": false
+      }
+    }
+  ]
+}

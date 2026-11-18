@@ -1,0 +1,249 @@
+{
+  "manifest": {
+    "bundle_id": "hnf.group_decision",
+    "version": "1.0.0",
+    "author": "Human Not Found",
+    "description": "Group decisions by majority, unanimity or a leader, with measures of decision accuracy and information shared.",
+    "permissions": [
+      "read_shared_state",
+      "read_private_actions",
+      "write_state",
+      "emit_event"
+    ],
+    "components": [
+      {
+        "id": "hnf.group_decision.decision",
+        "family": "mechanic",
+        "entrypoint": "group_decision",
+        "description": "Group decision",
+        "about": {
+          "summary": "The group chooses one of several options by majority, unanimity or a leader's choice; or participants vote individually.",
+          "how_it_works": "Each voter chooses one option. Majority: the option with the most votes wins; a tie means another vote. Unanimity: an option wins only if everyone chose it; otherwise everyone votes again. Leader: only the leader (the first enabled participant if none is set) chooses. Individual: everyone votes once on their own and no group decision is made, for recording private choices before a discussion. Votes are seen by everyone or only by the voter. If no decision is reached after the last allowed vote, the decision is recorded as none. The result is published as decision.result.",
+          "actions": [
+            {
+              "type": "decision.vote",
+              "description": "Choose one of the options."
+            }
+          ],
+          "ends_when": "When a decision is reached or the last allowed vote is over (unless 'End the step' is off)."
+        },
+        "config_schema": {
+          "type": "object",
+          "properties": {
+            "prompt": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 4000,
+              "title": "Instructions",
+              "default": "Choose the best option."
+            },
+            "options": {
+              "type": "array",
+              "title": "Options",
+              "minItems": 2,
+              "maxItems": 20,
+              "items": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 200
+              },
+              "default": [
+                "Option A",
+                "Option B",
+                "Option C"
+              ],
+              "uniqueItems": true
+            },
+            "rule": {
+              "type": "string",
+              "enum": [
+                "majority",
+                "unanimity",
+                "leader",
+                "individual"
+              ],
+              "title": "Decision rule",
+              "default": "majority"
+            },
+            "leader": {
+              "type": "string",
+              "maxLength": 120,
+              "title": "Leader (empty: first enabled participant)",
+              "default": "",
+              "x-hnf-reference": "participant"
+            },
+            "visible": {
+              "type": "boolean",
+              "title": "Everyone sees each vote",
+              "default": true
+            },
+            "max_ballots": {
+              "type": "integer",
+              "title": "Most votes before stopping without a decision",
+              "default": 3,
+              "minimum": 1,
+              "maximum": 20
+            },
+            "finish": {
+              "type": "boolean",
+              "title": "End the step when the decision is made",
+              "default": true
+            }
+          },
+          "required": [
+            "prompt",
+            "options",
+            "rule",
+            "leader",
+            "visible",
+            "max_ballots",
+            "finish"
+          ],
+          "additionalProperties": false
+        }
+      },
+      {
+        "id": "hnf.group_decision.decision_accuracy",
+        "family": "evaluator",
+        "entrypoint": "decision_accuracy",
+        "description": "Decision accuracy",
+        "about": {
+          "summary": "Whether the group's decision matches the answer key.",
+          "how_it_works": "Reads the last group decision in the step (or the whole run) and compares it with the answer key, ignoring capitals. No decision counts as incorrect. A step with only individual votes gives no result.",
+          "outputs": [
+            {
+              "label": "Correct",
+              "unit": "1 or 0",
+              "description": "1 if the decision matches the answer key, otherwise 0."
+            },
+            {
+              "label": "Details",
+              "description": "The decision, the answer key, the number of votes it took and the vote counts."
+            }
+          ]
+        },
+        "config_schema": {
+          "type": "object",
+          "properties": {
+            "answer_key": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 200,
+              "title": "Correct option",
+              "default": "Option A"
+            },
+            "step": {
+              "type": "string",
+              "maxLength": 120,
+              "title": "Step (empty: whole run)",
+              "default": "",
+              "x-hnf-reference": "step"
+            }
+          },
+          "required": [
+            "answer_key",
+            "step"
+          ],
+          "additionalProperties": false
+        }
+      },
+      {
+        "id": "hnf.group_decision.information_shared",
+        "family": "evaluator",
+        "entrypoint": "information_shared",
+        "description": "Information shared",
+        "about": {
+          "summary": "Which of the configured clues participants mentioned in their discussion messages.",
+          "how_it_works": "A clue counts as mentioned when any of its keywords appears in a discussion message (ignoring capitals). Mark each clue as shared (everyone had it) or unique (only one participant had it) to compare the two, as in hidden-profile studies. Keyword matching is simple: choose distinctive words.",
+          "outputs": [
+            {
+              "label": "Clues mentioned",
+              "unit": "0 to 1",
+              "description": "Share of the configured clues that someone mentioned."
+            },
+            {
+              "label": "Details",
+              "description": "Who mentioned each clue, the clues each participant mentioned, and the rates for shared and unique clues."
+            }
+          ]
+        },
+        "config_schema": {
+          "type": "object",
+          "properties": {
+            "clues": {
+              "type": "array",
+              "title": "Clues",
+              "maxItems": 60,
+              "default": [],
+              "items": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 64,
+                    "title": "Clue ID"
+                  },
+                  "keywords": {
+                    "type": "array",
+                    "title": "Keywords",
+                    "minItems": 1,
+                    "maxItems": 10,
+                    "items": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 120
+                    },
+                    "default": []
+                  },
+                  "kind": {
+                    "type": "string",
+                    "enum": [
+                      "shared",
+                      "unique"
+                    ],
+                    "title": "Who had it",
+                    "default": "unique"
+                  }
+                },
+                "required": [
+                  "id",
+                  "keywords",
+                  "kind"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "action_type": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 120,
+              "title": "Message action type",
+              "default": "discussion.message"
+            },
+            "step": {
+              "type": "string",
+              "maxLength": 120,
+              "title": "Step (empty: whole run)",
+              "default": "",
+              "x-hnf-reference": "step"
+            }
+          },
+          "required": [
+            "clues",
+            "action_type",
+            "step"
+          ],
+          "additionalProperties": false
+        }
+      }
+    ],
+    "contract_version": "1.0.0",
+    "digest": "sha256:a0a4916f1a972bd37c42ff23e0eb191b6cf6f9b3eb176e3fcb7354a29d470337"
+  },
+  "artifact": {
+    "format": "python.source.v1",
+    "source": "\"\"\"Group decision: choose one option by majority, unanimity or a leader; measure accuracy and the information shared.\"\"\"\n\nNOTHING = {\"effects\": []}\n\n\ndef group_decision(request):\n    config, event = request[\"config\"], request[\"event\"]\n    people = [person[\"id\"] for person in request[\"participants\"]]\n    options, rule = config[\"options\"], config[\"rule\"]\n    leader = config[\"leader\"] or people[0]\n    if rule == \"leader\" and leader not in people:\n        raise ValueError(\"The leader must be an enabled participant.\")\n    voters = [leader] if rule == \"leader\" else people\n    audience = \"shared\" if config[\"visible\"] else []\n    rules = {\"majority\": \"The option with the most votes is chosen; a tie means another vote.\",\n             \"unanimity\": \"An option is chosen only if everyone votes for it; otherwise you vote again.\",\n             \"leader\": \"You are the leader: your choice is the group's decision.\",\n             \"individual\": \"Vote on your own; this is your personal choice, not a group decision.\"}\n\n    def ballot(state, note=\"\"):\n        return [{\"type\": \"offer\", \"id\": f\"vote{state['ballot']}.{person}\", \"actor_id\": person, \"actions\": [{\n            \"type\": \"decision.vote\", \"audience\": audience, \"schema\": {\"type\": \"string\", \"enum\": options},\n            \"sample\": options[0],\n            \"prompt\": f\"{config['prompt']}\\nVote {state['ballot']} of {config['max_ballots']}. {rules[rule]}{note}\\n\"\n                      f\"Choose one of: {', '.join(options)}\"}]} for person in voters]\n\n    if event[\"topic\"] == \"run.started\":\n        state = {\"ballot\": 1, \"votes\": {}}\n        return {\"effects\": [{\"type\": \"update\", \"state\": state}] + ballot(state)}\n    if not (event[\"topic\"] == \"action.accepted\" and request[\"own_event\"] and event[\"action_type\"] == \"decision.vote\"\n            and \"payload\" in event):\n        return NOTHING\n    state = dict(request[\"state\"])\n    state[\"votes\"] = {**state[\"votes\"], event[\"actor_id\"]: event[\"payload\"]}\n    if len(state[\"votes\"]) < len(voters):\n        return {\"effects\": [{\"type\": \"update\", \"state\": state}]}\n    counts = {option: list(state[\"votes\"].values()).count(option) for option in options}\n    top = max(counts.values())\n    leaders = [option for option, count in counts.items() if count == top]\n    if rule == \"individual\":\n        decision = None\n    elif rule == \"unanimity\":\n        decision = leaders[0] if top == len(voters) else None\n    else:\n        decision = leaders[0] if len(leaders) == 1 else None\n    if decision is None and rule != \"individual\" and state[\"ballot\"] < config[\"max_ballots\"]:\n        state = {\"ballot\": state[\"ballot\"] + 1, \"votes\": {}}\n        shown = f\" Last vote: {', '.join(f'{option} {count}' for option, count in counts.items() if count)}.\" if config[\"visible\"] else \"\"\n        return {\"effects\": [{\"type\": \"update\", \"state\": state},\n                            {\"type\": \"emit\", \"topic\": \"decision.revote\", \"audience\": \"shared\",\n                             \"payload\": {\"ballot\": state[\"ballot\"] - 1, \"counts\": counts if config[\"visible\"] else None}}]\n                + ballot(state, \" No decision was reached in the last vote.\" + shown)}\n    effects = [{\"type\": \"update\", \"state\": {**state, \"over\": True}},\n               {\"type\": \"emit\", \"topic\": \"decision.result\", \"audience\": \"shared\",\n                \"payload\": {\"decision\": decision, \"rule\": rule, \"ballots\": state[\"ballot\"], \"counts\": counts}}]\n    return {\"effects\": effects + ([{\"type\": \"finish\"}] if config[\"finish\"] else [])}\n\n\n# Measures -------------------------------------------------------------------\n\ndef missing(reason):\n    return {\"status\": \"missing\", \"value\": None, \"details\": {\"reason\": reason}}\n\n\ndef decision_accuracy(request):\n    config = request[\"config\"]\n    results = [record[\"payload\"][\"payload\"] for record in request[\"authorized_events\"]\n               if record[\"event_type\"] == \"component_event\" and record[\"payload\"].get(\"topic\") == \"decision.result\"\n               and (not config[\"step\"] or record[\"step_id\"] == config[\"step\"])]\n    if not results:\n        return missing(\"No group decision was recorded.\")\n    outcome = results[-1]\n    if outcome[\"rule\"] == \"individual\":\n        return missing(\"This step collected individual votes, not a group decision; choose the group decision step.\")\n    correct = outcome[\"decision\"] is not None and outcome[\"decision\"].strip().lower() == config[\"answer_key\"].strip().lower()\n    return {\"status\": \"ok\", \"value\": int(correct), \"unit\": \"correct (1) or not (0)\", \"details\": {\n        \"decision\": outcome[\"decision\"], \"answer_key\": config[\"answer_key\"], \"ballots\": outcome[\"ballots\"],\n        \"counts\": outcome[\"counts\"]}}\n\n\ndef mentioned(text, clue):\n    text = text.lower()\n    return any(keyword.strip().lower() in text for keyword in clue[\"keywords\"] if keyword.strip())\n\n\ndef information_shared(request):\n    config = request[\"config\"]\n    clues = config[\"clues\"]\n    if not clues:\n        return missing(\"Configure the clues to look for.\")\n    messages = [(record[\"actor_id\"], str(record[\"payload\"][\"value\"])) for record in request[\"authorized_events\"]\n                if record[\"event_type\"] == \"action_applied\" and record[\"payload\"][\"action_type\"] == config[\"action_type\"]\n                and (not config[\"step\"] or record[\"step_id\"] == config[\"step\"])]\n    if not messages:\n        return missing(\"No discussion messages were recorded.\")\n    by_clue = {clue[\"id\"]: sorted({actor for actor, text in messages if mentioned(text, clue)}) for clue in clues}\n    by_participant = {}\n    for clue_id, actors in by_clue.items():\n        for actor in actors:\n            by_participant.setdefault(actor, []).append(clue_id)\n    rate = lambda group: (round(sum(bool(by_clue[clue[\"id\"]]) for clue in group) / len(group), 6) if group else None)\n    return {\"status\": \"ok\", \"value\": rate(clues), \"unit\": \"share of clues mentioned (0-1)\", \"details\": {\n        \"mentioned_by\": by_clue, \"clues_by_participant\": by_participant,\n        \"shared_clues_mentioned\": rate([clue for clue in clues if clue[\"kind\"] == \"shared\"]),\n        \"unique_clues_mentioned\": rate([clue for clue in clues if clue[\"kind\"] == \"unique\"])}}\n\n\ndef self_test():\n    clue = {\"id\": \"a\", \"keywords\": [\"Knife\", \" alibi\"], \"kind\": \"shared\"}\n    return {\"ok\": mentioned(\"He had no ALIBI.\", clue) and not mentioned(\"Nothing here.\", clue)}\n",
+    "options": {}
+  }
+}

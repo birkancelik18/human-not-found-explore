@@ -1,0 +1,108 @@
+{
+  "bundle_id": "hnf.effort_task",
+  "version": "1.0.0",
+  "author": "Human Not Found",
+  "description": "An effort task with individual or pooled credit, and a mean effort measure (social loafing).",
+  "permissions": [
+    "read_shared_state",
+    "read_private_actions",
+    "write_state",
+    "emit_event"
+  ],
+  "components": [
+    {
+      "id": "hnf.effort_task.effort",
+      "family": "mechanic",
+      "entrypoint": "effort_task",
+      "description": "Effort task",
+      "about": {
+        "summary": "Each participant privately chooses how much effort to put into a task, from 0 to 10, with effort credited individually or only as a group total.",
+        "how_it_works": "Every participant chooses an effort level at the same time. The instructions say whether each person's effort is recorded and credited to them (individual) or only the group's combined effort is recorded (pooled). After each round a shared result gives the total, and the individual efforts only with individual credit.",
+        "actions": [
+          {
+            "type": "effort.choose",
+            "description": "Choose an effort level from 0 to 10."
+          }
+        ],
+        "ends_when": "When everyone has chosen in the last round (unless 'End the step' is off)."
+      },
+      "config_schema": {
+        "type": "object",
+        "properties": {
+          "prompt": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 4000,
+            "title": "Task description",
+            "default": "Your task is to shout as loudly as you can when the signal is given."
+          },
+          "credit": {
+            "type": "string",
+            "enum": [
+              "individual",
+              "pooled"
+            ],
+            "title": "How effort is credited",
+            "default": "individual"
+          },
+          "rounds": {
+            "type": "integer",
+            "title": "Rounds",
+            "default": 1,
+            "minimum": 1,
+            "maximum": 50
+          },
+          "finish": {
+            "type": "boolean",
+            "title": "End the step when everyone has chosen",
+            "default": true
+          }
+        },
+        "required": [
+          "prompt",
+          "credit",
+          "rounds",
+          "finish"
+        ],
+        "additionalProperties": false
+      }
+    },
+    {
+      "id": "hnf.effort_task.effort_mean",
+      "family": "evaluator",
+      "entrypoint": "effort",
+      "description": "Effort",
+      "about": {
+        "summary": "Mean effort chosen, overall and separately for individual and pooled credit.",
+        "how_it_works": "Reads every effort choice (including private ones) and the credit type of the step it was made in.",
+        "outputs": [
+          {
+            "label": "Mean effort",
+            "unit": "0 to 10",
+            "description": "Mean of all effort choices."
+          },
+          {
+            "label": "Details",
+            "description": "Mean effort with individual and with pooled credit, per participant, and the number of choices."
+          }
+        ]
+      },
+      "config_schema": {
+        "type": "object",
+        "properties": {
+          "step": {
+            "type": "string",
+            "maxLength": 120,
+            "title": "Step (empty: whole run)",
+            "default": "",
+            "x-hnf-reference": "step"
+          }
+        },
+        "required": [
+          "step"
+        ],
+        "additionalProperties": false
+      }
+    }
+  ]
+}

@@ -33,6 +33,27 @@ appears in Explore until it is merged. Reviews look at:
 - the `about` text: it should say plainly what each component does;
 - for templates, that the design matches the study it claims to replicate.
 
+## Sources and rebuilding
+
+The first-party packages and templates are built from `sources/`:
+
+- `sources/<bundle_id>/component.py` and `manifest.json`: the Python source and manifest of each package;
+- `sources/templates.py`: the study design of each template.
+
+`scripts/build.py` packs every source into `packages/` with the app's SDK and regenerates `templates/` through the
+app's own **Export as template** endpoint (in a temporary workspace), so template checksums match the packages.
+`scripts/verify.py` installs everything in a fresh temporary workspace, uses each template and runs a pilot of every
+condition with the free test model, checking that each run completes with every measure ok. Both need a local
+checkout of the Human Not Found app; run them with its Python environment, and set `HNF_APP` to its folder if it is
+not at `../AUI-Team-Simulator/implementation/human-not-found-v2`.
+
+```sh
+$HNF_APP/.venv/bin/python scripts/build.py
+$HNF_APP/.venv/bin/python scripts/verify.py
+```
+
+Change a package's version when you change its source or manifest.
+
 ## Check locally
 
 ```sh

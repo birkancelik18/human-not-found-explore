@@ -1,0 +1,292 @@
+{
+  "format": "hnf.template.v1",
+  "name": "Murder mystery: individual vote, discussion, group decision",
+  "author": "Human Not Found",
+  "description": "After Stasser, G., & Stewart, D. (1992). Discovery of hidden profiles by decision-making groups: Solving a problem versus making a judgment. Journal of Personality and Social Psychology, 63(3), 426-434. In this hidden-profile paradigm, groups of three solve a murder mystery with three suspects: the clues everyone shares point to the wrong suspect, and the clues that reveal the culprit are split among the members. Hidden-profile tasks appear in 17 of the 500 studies in our survey. Here each member reads the shared clues and two clues of their own (in their private information) and votes alone and privately, the group discusses over three rounds, then decides by majority vote. Comparing the private votes with the group decision shows whether discussion surfaced the unshared clues. The case is new, written for this template, and follows the paradigm; the original booklets are not used. Participants are simulated: each is a Model participant, using the free test model until you choose a model, so the first runs only check the design; with the test model every participant takes the sample answer.",
+  "created_at": "2026-11-18T01:13:22.398+00:00",
+  "spec": {
+    "components": [],
+    "conditions": [
+      {
+        "id": "main",
+        "label": "Main",
+        "overrides": []
+      }
+    ],
+    "description": "Private clues, a private vote, discussion, then a majority decision on the culprit.",
+    "environment": {
+      "initial_state": {
+        "private_by_participant": {},
+        "shared": {}
+      }
+    },
+    "execution": {
+      "max_actions_per_run": 30,
+      "max_estimated_cost_usd_per_run": 2.0,
+      "max_memory_events": 40,
+      "max_model_calls_per_run": 60,
+      "max_wall_seconds_per_run": 3600,
+      "repetitions_per_condition": 10,
+      "seed": 1
+    },
+    "experiment_id": "murder-mystery",
+    "measurements": [
+      {
+        "evaluator": {
+          "config": {
+            "answer_key": "Dana Whitlow",
+            "step": "decide"
+          },
+          "id": "hnf.group_decision.decision_accuracy",
+          "version": "1.0.0"
+        },
+        "id": "accuracy",
+        "label": "Correct suspect",
+        "scope": "run"
+      },
+      {
+        "evaluator": {
+          "config": {
+            "action_type": "discussion.message",
+            "clues": [
+              {
+                "id": "keycard",
+                "keywords": [
+                  "key card",
+                  "loading dock"
+                ],
+                "kind": "unique"
+              },
+              {
+                "id": "car",
+                "keywords": [
+                  "car park",
+                  "dana's car"
+                ],
+                "kind": "unique"
+              },
+              {
+                "id": "lawyer",
+                "keywords": [
+                  "lawyer",
+                  "partnership"
+                ],
+                "kind": "unique"
+              },
+              {
+                "id": "rounds",
+                "keywords": [
+                  "rounds",
+                  "every evening"
+                ],
+                "kind": "unique"
+              },
+              {
+                "id": "receipt",
+                "keywords": [
+                  "receipt",
+                  "pharmacy"
+                ],
+                "kind": "unique"
+              },
+              {
+                "id": "waiters",
+                "keywords": [
+                  "waiters",
+                  "10:35"
+                ],
+                "kind": "unique"
+              }
+            ],
+            "step": "discuss"
+          },
+          "id": "hnf.group_decision.information_shared",
+          "version": "1.0.0"
+        },
+        "id": "information",
+        "label": "Unshared clues mentioned",
+        "scope": "run"
+      }
+    ],
+    "participants": [
+      {
+        "agent": {
+          "config": {
+            "instructions": "",
+            "model_ref": "default",
+            "persona": ""
+          },
+          "id": "hnf.participants.model",
+          "version": "1.0.0"
+        },
+        "display_name": "Participant 1",
+        "enabled": true,
+        "id": "p1",
+        "private_context": {
+          "case": "Robert Kline, owner of the Harbor Hotel, was found dead in his office at 11 pm, poisoned by a sedative in his tea. The police have three suspects: Dana Whitlow (his business partner), Marcus Hale (the night manager) and Lena Ortiz (the head chef). Exactly one of them did it.",
+          "clues_everyone_has": [
+            "Marcus Hale argued loudly with Robert Kline that afternoon after being told he would be fired.",
+            "Marcus Hale's fingerprints were found on the office door handle.",
+            "Nobody can confirm where Marcus Hale was between 10 and 11 pm.",
+            "Lena Ortiz was seen leaving the kitchen at 10:30 pm.",
+            "Dana Whitlow says she spent the whole evening at home."
+          ],
+          "note": "The other members have their own clues, which may differ from yours.",
+          "your_own_clues": [
+            "The security log shows Marcus Hale's key card opening the loading dock, at the far end of the building, at 10:40 pm.",
+            "A guest saw Dana Whitlow's car in the staff car park at 10:50 pm."
+          ]
+        },
+        "role": "participant"
+      },
+      {
+        "agent": {
+          "config": {
+            "instructions": "",
+            "model_ref": "default",
+            "persona": ""
+          },
+          "id": "hnf.participants.model",
+          "version": "1.0.0"
+        },
+        "display_name": "Participant 2",
+        "enabled": true,
+        "id": "p2",
+        "private_context": {
+          "case": "Robert Kline, owner of the Harbor Hotel, was found dead in his office at 11 pm, poisoned by a sedative in his tea. The police have three suspects: Dana Whitlow (his business partner), Marcus Hale (the night manager) and Lena Ortiz (the head chef). Exactly one of them did it.",
+          "clues_everyone_has": [
+            "Marcus Hale argued loudly with Robert Kline that afternoon after being told he would be fired.",
+            "Marcus Hale's fingerprints were found on the office door handle.",
+            "Nobody can confirm where Marcus Hale was between 10 and 11 pm.",
+            "Lena Ortiz was seen leaving the kitchen at 10:30 pm.",
+            "Dana Whitlow says she spent the whole evening at home."
+          ],
+          "note": "The other members have their own clues, which may differ from yours.",
+          "your_own_clues": [
+            "Robert Kline had told his lawyer he would end his partnership with Dana Whitlow the next morning.",
+            "Marcus Hale opens the office door every evening as part of his rounds."
+          ]
+        },
+        "role": "participant"
+      },
+      {
+        "agent": {
+          "config": {
+            "instructions": "",
+            "model_ref": "default",
+            "persona": ""
+          },
+          "id": "hnf.participants.model",
+          "version": "1.0.0"
+        },
+        "display_name": "Participant 3",
+        "enabled": true,
+        "id": "p3",
+        "private_context": {
+          "case": "Robert Kline, owner of the Harbor Hotel, was found dead in his office at 11 pm, poisoned by a sedative in his tea. The police have three suspects: Dana Whitlow (his business partner), Marcus Hale (the night manager) and Lena Ortiz (the head chef). Exactly one of them did it.",
+          "clues_everyone_has": [
+            "Marcus Hale argued loudly with Robert Kline that afternoon after being told he would be fired.",
+            "Marcus Hale's fingerprints were found on the office door handle.",
+            "Nobody can confirm where Marcus Hale was between 10 and 11 pm.",
+            "Lena Ortiz was seen leaving the kitchen at 10:30 pm.",
+            "Dana Whitlow says she spent the whole evening at home."
+          ],
+          "note": "The other members have their own clues, which may differ from yours.",
+          "your_own_clues": [
+            "A pharmacy receipt for the same sedative, in Dana Whitlow's name, was found in a hotel bin.",
+            "Two waiters say Lena Ortiz was back in the kitchen by 10:35 pm and stayed there."
+          ]
+        },
+        "role": "participant"
+      }
+    ],
+    "research": {
+      "hypotheses": [],
+      "question": "Do groups find the culprit that no member can identify from their own clues?"
+    },
+    "schema_version": "2.0.0",
+    "steps": [
+      {
+        "components": [
+          {
+            "config": {
+              "finish": true,
+              "leader": "",
+              "max_ballots": 1,
+              "options": [
+                "Dana Whitlow",
+                "Marcus Hale",
+                "Lena Ortiz"
+              ],
+              "prompt": "Read the case and your clues. Who do you think committed the murder?",
+              "rule": "individual",
+              "visible": false
+            },
+            "id": "hnf.group_decision.decision",
+            "version": "1.0.0"
+          }
+        ],
+        "id": "alone",
+        "title": "Read your clues and vote alone"
+      },
+      {
+        "components": [
+          {
+            "config": {
+              "finish": true,
+              "prompt": "Discuss the case with your group. Share the clues you have; the others may know things you do not.",
+              "rounds": 3,
+              "sample": "Here is what I know about the case so far.",
+              "turns": "round_robin"
+            },
+            "id": "hnf.group_discussion.discussion",
+            "version": "1.0.0"
+          }
+        ],
+        "id": "discuss",
+        "title": "Discuss the case"
+      },
+      {
+        "components": [
+          {
+            "config": {
+              "finish": true,
+              "leader": "",
+              "max_ballots": 3,
+              "options": [
+                "Dana Whitlow",
+                "Marcus Hale",
+                "Lena Ortiz"
+              ],
+              "prompt": "As a group, decide which suspect committed the murder.",
+              "rule": "majority",
+              "visible": true
+            },
+            "id": "hnf.group_decision.decision",
+            "version": "1.0.0"
+          }
+        ],
+        "id": "decide",
+        "title": "Decide as a group"
+      }
+    ],
+    "title": "Murder mystery (hidden profile)"
+  },
+  "packages": [
+    {
+      "bundle_id": "hnf.group_decision",
+      "version": "1.0.0",
+      "digest": "4ea5ecc2adecf0084876e377efe07a28ad6c6b23d21f3dfd8d6a192bcf31918c"
+    },
+    {
+      "bundle_id": "hnf.group_discussion",
+      "version": "1.0.0",
+      "digest": "8635dc4a94885045a34cc5d9d3027f32f9e802a32ec07f49041ed2e47bc7403a"
+    },
+    {
+      "bundle_id": "hnf.participants",
+      "version": "1.0.0",
+      "digest": "3eba369193895ce162da928faffcb34ce74512a9c74d86bf2acc252f11fbcaee"
+    }
+  ]
+}

@@ -1,0 +1,134 @@
+{
+  "bundle_id": "hnf.participants",
+  "version": "1.0.0",
+  "author": "Human Not Found",
+  "description": "Participant behaviours: a model participant with a persona, and a scripted participant for confederates and controls.",
+  "permissions": [
+    "read_shared_state",
+    "model_call"
+  ],
+  "components": [
+    {
+      "id": "hnf.participants.model",
+      "family": "agent",
+      "entrypoint": "model_participant",
+      "description": "Model participant",
+      "about": {
+        "summary": "A simulated participant that hands every choice to a language model, with an optional persona and instructions.",
+        "how_it_works": "Whenever an activity offers this participant an action, the model receives what the participant may see: the offered actions and their instructions, the participant's private information, and a window of recent shared events and its own private ones. The persona and instructions are added to the system prompt. The model chooses an action and its value; the app checks the reply against the action's format and asks again if it does not fit. With the free test model, the participant always takes the first offered action with its sample value."
+      },
+      "config_schema": {
+        "type": "object",
+        "properties": {
+          "model_ref": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 4000,
+            "title": "Model",
+            "default": "default",
+            "x-hnf-reference": "model"
+          },
+          "persona": {
+            "type": "string",
+            "maxLength": 4000,
+            "title": "Persona (who this participant is)",
+            "default": ""
+          },
+          "instructions": {
+            "type": "string",
+            "maxLength": 4000,
+            "title": "Instructions",
+            "default": ""
+          }
+        },
+        "required": [
+          "model_ref",
+          "persona",
+          "instructions"
+        ],
+        "additionalProperties": false
+      }
+    },
+    {
+      "id": "hnf.participants.scripted",
+      "family": "agent",
+      "entrypoint": "scripted_participant",
+      "description": "Scripted participant",
+      "about": {
+        "summary": "A participant that follows a fixed rule for each kind of action, for confederates and control conditions; it never calls a model.",
+        "how_it_works": "For each offer, the participant takes the first offered action that has a rule (or the first offered action) and builds a value that fits it. Rules: first option (the first choice in a list, the lowest allowed number, yes for a yes/no question), fixed number (the configured number, kept within the allowed range), accept all (a choice containing the word 'accept', or yes), and reject all (a choice containing 'reject', or no). Text answers are 'OK.'. Actions without a rule use the default rule."
+      },
+      "config_schema": {
+        "type": "object",
+        "properties": {
+          "rules": {
+            "type": "array",
+            "title": "Rules by action type",
+            "maxItems": 20,
+            "default": [],
+            "items": {
+              "type": "object",
+              "properties": {
+                "action_type": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 120,
+                  "title": "Action type"
+                },
+                "rule": {
+                  "type": "string",
+                  "enum": [
+                    "first_option",
+                    "fixed_number",
+                    "accept",
+                    "reject"
+                  ],
+                  "title": "Rule",
+                  "default": "first_option"
+                },
+                "number": {
+                  "type": "number",
+                  "title": "Number (for fixed number)",
+                  "default": 0
+                }
+              },
+              "required": [
+                "action_type",
+                "rule",
+                "number"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "default_rule": {
+            "type": "string",
+            "enum": [
+              "first_option",
+              "fixed_number",
+              "accept",
+              "reject"
+            ],
+            "title": "Rule for other actions",
+            "default": "first_option"
+          },
+          "default_number": {
+            "type": "number",
+            "title": "Number for other actions (fixed number)",
+            "default": 0
+          }
+        },
+        "required": [
+          "rules",
+          "default_rule",
+          "default_number"
+        ],
+        "additionalProperties": false
+      }
+    }
+  ],
+  "options": {
+    "hnf.participants.model": {
+      "model": true
+    }
+  }
+}

@@ -1,0 +1,185 @@
+{
+  "format": "hnf.template.v1",
+  "name": "Social loafing: effort alone and in a group",
+  "author": "Human Not Found",
+  "description": "Original study: Latané, B., Williams, K., & Harkins, S. (1979). Many hands make light the work: The causes and consequences of social loafing. Journal of Personality and Social Psychology, 37(6), 822-832. Participants clapped and shouted as loudly as they could, alone or in groups of up to six; sound output per person fell as group size grew, even when participants only believed others were shouting with them. Effort tasks appear in 22 of the 500 studies in our survey. In this template six participants each choose an effort level from 0 to 10 for the shouting task: in the alone condition each person's effort is recorded and credited to them; in the group condition only the group's combined effort is recorded. Chosen effort stands in for measured sound. Participants are simulated: each is a Model participant, using the free test model until you choose a model, so the first runs only check the design; with the test model every participant takes the sample answer.",
+  "created_at": "2026-11-18T01:13:22.364+00:00",
+  "spec": {
+    "components": [
+      {
+        "config": {
+          "credit": "individual",
+          "finish": true,
+          "prompt": "Your task is to shout as loudly as you can when the signal is given.",
+          "rounds": 1
+        },
+        "id": "hnf.effort_task.effort",
+        "version": "1.0.0"
+      }
+    ],
+    "conditions": [
+      {
+        "id": "alone",
+        "label": "Alone (individual credit)",
+        "overrides": []
+      },
+      {
+        "id": "group",
+        "label": "Group of 6 (pooled credit)",
+        "overrides": [
+          {
+            "path": "/components/0/config/credit",
+            "value": "pooled"
+          }
+        ]
+      }
+    ],
+    "description": "Six participants choose effort with individual or pooled credit.",
+    "environment": {
+      "initial_state": {
+        "private_by_participant": {},
+        "shared": {}
+      }
+    },
+    "execution": {
+      "max_actions_per_run": 20,
+      "max_estimated_cost_usd_per_run": 2.0,
+      "max_memory_events": 40,
+      "max_model_calls_per_run": 40,
+      "max_wall_seconds_per_run": 3600,
+      "repetitions_per_condition": 10,
+      "seed": 1
+    },
+    "experiment_id": "social-loafing-effort",
+    "measurements": [
+      {
+        "evaluator": {
+          "config": {
+            "step": ""
+          },
+          "id": "hnf.effort_task.effort_mean",
+          "version": "1.0.0"
+        },
+        "id": "effort",
+        "label": "Mean effort",
+        "scope": "run"
+      }
+    ],
+    "participants": [
+      {
+        "agent": {
+          "config": {
+            "instructions": "",
+            "model_ref": "default",
+            "persona": ""
+          },
+          "id": "hnf.participants.model",
+          "version": "1.0.0"
+        },
+        "display_name": "Participant 1",
+        "enabled": true,
+        "id": "p1",
+        "private_context": {},
+        "role": "participant"
+      },
+      {
+        "agent": {
+          "config": {
+            "instructions": "",
+            "model_ref": "default",
+            "persona": ""
+          },
+          "id": "hnf.participants.model",
+          "version": "1.0.0"
+        },
+        "display_name": "Participant 2",
+        "enabled": true,
+        "id": "p2",
+        "private_context": {},
+        "role": "participant"
+      },
+      {
+        "agent": {
+          "config": {
+            "instructions": "",
+            "model_ref": "default",
+            "persona": ""
+          },
+          "id": "hnf.participants.model",
+          "version": "1.0.0"
+        },
+        "display_name": "Participant 3",
+        "enabled": true,
+        "id": "p3",
+        "private_context": {},
+        "role": "participant"
+      },
+      {
+        "agent": {
+          "config": {
+            "instructions": "",
+            "model_ref": "default",
+            "persona": ""
+          },
+          "id": "hnf.participants.model",
+          "version": "1.0.0"
+        },
+        "display_name": "Participant 4",
+        "enabled": true,
+        "id": "p4",
+        "private_context": {},
+        "role": "participant"
+      },
+      {
+        "agent": {
+          "config": {
+            "instructions": "",
+            "model_ref": "default",
+            "persona": ""
+          },
+          "id": "hnf.participants.model",
+          "version": "1.0.0"
+        },
+        "display_name": "Participant 5",
+        "enabled": true,
+        "id": "p5",
+        "private_context": {},
+        "role": "participant"
+      },
+      {
+        "agent": {
+          "config": {
+            "instructions": "",
+            "model_ref": "default",
+            "persona": ""
+          },
+          "id": "hnf.participants.model",
+          "version": "1.0.0"
+        },
+        "display_name": "Participant 6",
+        "enabled": true,
+        "id": "p6",
+        "private_context": {},
+        "role": "participant"
+      }
+    ],
+    "research": {
+      "hypotheses": [],
+      "question": "Do people put in less effort when only the group's combined output is recorded?"
+    },
+    "schema_version": "2.0.0",
+    "title": "Social loafing"
+  },
+  "packages": [
+    {
+      "bundle_id": "hnf.effort_task",
+      "version": "1.0.0",
+      "digest": "084583fc1c540709506f91da964d39ea2ea3c29bf7ff8d85280d60703d21ad89"
+    },
+    {
+      "bundle_id": "hnf.participants",
+      "version": "1.0.0",
+      "digest": "3eba369193895ce162da928faffcb34ce74512a9c74d86bf2acc252f11fbcaee"
+    }
+  ]
+}

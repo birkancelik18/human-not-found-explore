@@ -1,0 +1,142 @@
+{
+  "manifest": {
+    "bundle_id": "hnf.participants",
+    "version": "1.0.0",
+    "author": "Human Not Found",
+    "description": "Participant behaviours: a model participant with a persona, and a scripted participant for confederates and controls.",
+    "permissions": [
+      "read_shared_state",
+      "model_call"
+    ],
+    "components": [
+      {
+        "id": "hnf.participants.model",
+        "family": "agent",
+        "entrypoint": "model_participant",
+        "description": "Model participant",
+        "about": {
+          "summary": "A simulated participant that hands every choice to a language model, with an optional persona and instructions.",
+          "how_it_works": "Whenever an activity offers this participant an action, the model receives what the participant may see: the offered actions and their instructions, the participant's private information, and a window of recent shared events and its own private ones. The persona and instructions are added to the system prompt. The model chooses an action and its value; the app checks the reply against the action's format and asks again if it does not fit. With the free test model, the participant always takes the first offered action with its sample value."
+        },
+        "config_schema": {
+          "type": "object",
+          "properties": {
+            "model_ref": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 4000,
+              "title": "Model",
+              "default": "default",
+              "x-hnf-reference": "model"
+            },
+            "persona": {
+              "type": "string",
+              "maxLength": 4000,
+              "title": "Persona (who this participant is)",
+              "default": ""
+            },
+            "instructions": {
+              "type": "string",
+              "maxLength": 4000,
+              "title": "Instructions",
+              "default": ""
+            }
+          },
+          "required": [
+            "model_ref",
+            "persona",
+            "instructions"
+          ],
+          "additionalProperties": false
+        }
+      },
+      {
+        "id": "hnf.participants.scripted",
+        "family": "agent",
+        "entrypoint": "scripted_participant",
+        "description": "Scripted participant",
+        "about": {
+          "summary": "A participant that follows a fixed rule for each kind of action, for confederates and control conditions; it never calls a model.",
+          "how_it_works": "For each offer, the participant takes the first offered action that has a rule (or the first offered action) and builds a value that fits it. Rules: first option (the first choice in a list, the lowest allowed number, yes for a yes/no question), fixed number (the configured number, kept within the allowed range), accept all (a choice containing the word 'accept', or yes), and reject all (a choice containing 'reject', or no). Text answers are 'OK.'. Actions without a rule use the default rule."
+        },
+        "config_schema": {
+          "type": "object",
+          "properties": {
+            "rules": {
+              "type": "array",
+              "title": "Rules by action type",
+              "maxItems": 20,
+              "default": [],
+              "items": {
+                "type": "object",
+                "properties": {
+                  "action_type": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 120,
+                    "title": "Action type"
+                  },
+                  "rule": {
+                    "type": "string",
+                    "enum": [
+                      "first_option",
+                      "fixed_number",
+                      "accept",
+                      "reject"
+                    ],
+                    "title": "Rule",
+                    "default": "first_option"
+                  },
+                  "number": {
+                    "type": "number",
+                    "title": "Number (for fixed number)",
+                    "default": 0
+                  }
+                },
+                "required": [
+                  "action_type",
+                  "rule",
+                  "number"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "default_rule": {
+              "type": "string",
+              "enum": [
+                "first_option",
+                "fixed_number",
+                "accept",
+                "reject"
+              ],
+              "title": "Rule for other actions",
+              "default": "first_option"
+            },
+            "default_number": {
+              "type": "number",
+              "title": "Number for other actions (fixed number)",
+              "default": 0
+            }
+          },
+          "required": [
+            "rules",
+            "default_rule",
+            "default_number"
+          ],
+          "additionalProperties": false
+        }
+      }
+    ],
+    "contract_version": "1.0.0",
+    "digest": "sha256:f4165d8bdb159011b3bf0ceaa1e446eb868b4a07523fdb157f2365e2c56e9e1e"
+  },
+  "artifact": {
+    "format": "python.source.v1",
+    "source": "\"\"\"Participant behaviours: a model participant and a scripted participant.\"\"\"\n\nSYSTEM = (\"You are a participant in a research study. Read the situation, the instructions and what you remember, \"\n          \"then choose one of the allowed actions and give its value.\")\n\n\ndef model_participant(request):\n    \"\"\"Hand every choice to the configured model, with the persona and instructions as the system prompt.\"\"\"\n    config = request[\"config\"]\n    system = \" \".join(part for part in (SYSTEM, config[\"persona\"].strip(), config[\"instructions\"].strip()) if part)\n    return {\"invocation_id\": request[\"invocation_id\"], \"request_model\": True, \"system\": system[:8000]}\n\n\n# Scripted participant ----------------------------------------------------\n\ndef pick(options, rule):\n    \"\"\"Choose among enum options: accept/reject look for an option with that word, otherwise the first.\"\"\"\n    if rule in (\"accept\", \"reject\"):\n        for option in options:\n            if isinstance(option, str) and rule in option.lower():\n                return option\n    return options[0]\n\n\ndef value_for(schema, rule, number):\n    \"\"\"A value that fits the action's schema, following the rule.\"\"\"\n    if \"const\" in schema:\n        return schema[\"const\"]\n    if schema.get(\"enum\"):\n        return pick(schema[\"enum\"], rule)\n    for key in (\"oneOf\", \"anyOf\"):\n        if schema.get(key):\n            return value_for(schema[key][0], rule, number)\n    kind = schema.get(\"type\")\n    if isinstance(kind, list):\n        kind = kind[0]\n    if kind == \"boolean\":\n        return rule != \"reject\"\n    if kind in (\"integer\", \"number\"):\n        low = schema.get(\"minimum\", schema.get(\"exclusiveMinimum\", 0))\n        high = schema.get(\"maximum\", schema.get(\"exclusiveMaximum\", max(low, number)))\n        value = min(max(number, low), high) if rule == \"fixed_number\" else low\n        return int(value) if kind == \"integer\" else value\n    if kind == \"array\":\n        items = schema.get(\"items\", {})\n        count = min(schema.get(\"minItems\", 1), schema.get(\"maxItems\", 100))\n        if items.get(\"enum\") and schema.get(\"uniqueItems\"):\n            return items[\"enum\"][:count]\n        return [value_for(items, rule, number) for _ in range(count)]\n    if kind == \"object\":\n        properties = schema.get(\"properties\", {})\n        return {key: value_for(properties.get(key, {}), rule, number) for key in schema.get(\"required\", [])}\n    text = \"OK.\"\n    return (text * (1 + schema.get(\"minLength\", 0) // len(text)))[:max(schema.get(\"maxLength\", 4000), 1)]\n\n\ndef scripted_participant(request):\n    \"\"\"Answer with a fixed rule per action type, for confederates and controls.\"\"\"\n    config = request[\"config\"]\n    rules = {item[\"action_type\"]: item for item in config[\"rules\"]}\n    actions = request[\"observation\"][\"allowed_actions\"]\n    action = next((item for item in actions if item[\"type\"] in rules), actions[0])\n    rule = rules.get(action[\"type\"], {\"rule\": config[\"default_rule\"], \"number\": config[\"default_number\"]})\n    return {\"invocation_id\": request[\"invocation_id\"], \"action_type\": action[\"type\"],\n            \"payload\": value_for(action[\"schema\"], rule[\"rule\"], rule[\"number\"])}\n\n\ndef self_test():\n    number = {\"type\": \"number\", \"minimum\": 0, \"maximum\": 10}\n    choice = {\"type\": \"string\", \"enum\": [\"accept\", \"reject\"]}\n    return {\"ok\": value_for(number, \"fixed_number\", 4) == 4 and value_for(number, \"fixed_number\", 40) == 10\n            and value_for(number, \"first_option\", 4) == 0 and value_for(choice, \"reject\", 0) == \"reject\"\n            and value_for(choice, \"accept\", 0) == \"accept\" and value_for({\"type\": \"boolean\"}, \"reject\", 0) is False\n            and value_for({\"type\": \"string\", \"minLength\": 1}, \"first_option\", 0) == \"OK.\"}\n",
+    "options": {
+      "hnf.participants.model": {
+        "model": true
+      }
+    }
+  }
+}
