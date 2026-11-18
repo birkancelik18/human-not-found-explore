@@ -125,3 +125,52 @@ def test_group_balance_missing_without_messages():
 
 def test_self_test():
     assert rules.self_test() == {"ok": True}
+
+
+# Raise hands -----------------------------------------------------------------
+
+HANDS = {"tie_break": "least_active", "quiet_rounds": 2}
+
+
+def test_raise_hands_asks_everyone_but_last_speaker_privately():
+    *_, every = simulate(rules.raise_hands, [MOD] + GROUP, {**HANDS, "max_turns": 2},
+                         bid=lambda actor, n: actor == "p1" if n == 0 else actor == "p2")
+    offers = [effect for effect in every if effect["type"] == "offer"]
+    first, second = offers[:4], offers[4:]
+    assert {effect["actor_id"] for effect in first} == {"m", "p1", "p2", "p3"}
+    assert {effect["actor_id"] for effect in second} == {"m", "p2", "p3"}  # p1 just spoke
+    assert all(effect["actions"][0]["audience"] == [effect["actor_id"]] for effect in offers)
+
+
+def test_raise_hands_tie_goes_to_least_active():
+    words = {"p1": "w " * 9, "p2": "w", "p3": "w " * 2}
+    turns = [{"p1"}, {"p3"}, {"p2"}, {"p1", "p3"}]  # p2 spoke last, so p1 and p3 compete
+    speakers, statuses, *_ = simulate(rules.raise_hands, GROUP, {**HANDS, "max_turns": 4},
+                                      text=lambda actor, n: words[actor], bid=lambda actor, n: actor in turns[n])
+    assert speakers == ["p1", "p3", "p2", "p3"]
+    assert statuses[-1]["competitors"] == ["p1", "p3"]
+
+
+def test_raise_hands_moderator_wins_tie():
+    speakers, *_ = simulate(rules.raise_hands, [MOD] + GROUP, {**HANDS, "max_turns": 2},
+                            bid=lambda actor, n: n == 1 and actor in ("m", "p2") or (n == 0 and actor == "p1"))
+    assert speakers == ["p1", "m"]
+
+
+def test_raise_hands_ends_after_quiet_rounds():
+    speakers, _, finished, every = simulate(rules.raise_hands, GROUP, HANDS, bid=lambda actor, n: n == 0 and actor == "p2")
+    assert finished and speakers == ["p2"]
+    assert len([effect for effect in every if effect["type"] == "offer"]) == 3 + 2 + 2  # opening round + two quiet rounds
+
+
+def test_raise_hands_random_tie_is_seeded():
+    def run(seed):
+        return simulate(rules.raise_hands, GROUP, {**HANDS, "tie_break": "random", "max_turns": 1},
+                        bid=lambda actor, n: True, seed=seed)[0]
+    assert run(1) == run(1) and {run(seed)[0] for seed in range(20)} == {"p1", "p2", "p3"}
+
+
+def test_raise_hands_lone_member_with_moderator_progresses():
+    lone = [MOD, GROUP[0]]
+    speakers, _, finished, _ = simulate(rules.raise_hands, lone, {**HANDS, "max_turns": 3}, bid=lambda actor, n: True)
+    assert finished and speakers == ["m", "p1", "m"]

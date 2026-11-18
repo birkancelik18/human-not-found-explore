@@ -62,6 +62,75 @@
       }
     },
     {
+      "id": "hnf.turn_taking.raise_hands",
+      "family": "procedure",
+      "entrypoint": "raise_hands",
+      "description": "Raise hands",
+      "about": {
+        "summary": "Self-selection: before each turn everyone may privately raise a hand, and one of those who did gets the floor.",
+        "how_it_works": "Before each turn the rule asks every participant except the last speaker, privately, whether they want to speak next (turn.request), so nobody sees the others' answers. Several raised hands is floor competition, recorded in turn.status as competitors: the member with the fewest words so far wins (or one at random with the run's seed). A moderator's raised hand always wins. If nobody raises a hand, the rule asks again; after the configured number of quiet rounds in a row the step ends. After each turn the rule publishes turn.status with every group member's messages and words in this step, which the AI moderator reads; moderators (role 'moderator') are left out of those counts. Every turn adds several actions, so allow enough actions per run and set the memory window (max_memory_events) to at least 40. Use it with a Discussion whose turns are set to procedure.",
+        "actions": [
+          {
+            "type": "turn.request",
+            "description": "Say privately whether you want to speak next."
+          },
+          {
+            "type": "discussion.message",
+            "description": "The chosen participant posts a message (offered by the Discussion activity)."
+          }
+        ],
+        "ends_when": "When the configured number of turns has been taken, or nobody wants to speak for the configured number of rounds in a row (unless 'End the step' is off)."
+      },
+      "config_schema": {
+        "type": "object",
+        "properties": {
+          "action_type": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120,
+            "title": "Action that ends a turn",
+            "default": "discussion.message"
+          },
+          "max_turns": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 200,
+            "title": "Turns before the step ends",
+            "default": 12
+          },
+          "finish": {
+            "type": "boolean",
+            "title": "End the step when the discussion is over",
+            "default": true
+          },
+          "quiet_rounds": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 10,
+            "title": "Quiet rounds before the step ends (nobody wants to speak)",
+            "default": 2
+          },
+          "tie_break": {
+            "type": "string",
+            "enum": [
+              "least_active",
+              "random"
+            ],
+            "title": "When several raise a hand",
+            "default": "least_active"
+          }
+        },
+        "required": [
+          "action_type",
+          "max_turns",
+          "finish",
+          "quiet_rounds",
+          "tie_break"
+        ],
+        "additionalProperties": false
+      }
+    },
+    {
       "id": "hnf.turn_taking.group_balance",
       "family": "evaluator",
       "entrypoint": "group_balance",

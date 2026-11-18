@@ -208,3 +208,8 @@ def group_balance(request):
 
 def self_test():
     return {"ok": evenness([3, 3, 3]) == 1 and evenness([5, 0]) == 0 and evenness([1]) == 1}
+
+
+def raise_hands(request):
+    """Before each turn, ask everyone but the last speaker whether they want the floor; pick among the raised hands."""
+    return react(request, "raise_hands")
