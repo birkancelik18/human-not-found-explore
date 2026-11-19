@@ -1949,6 +1949,308 @@
       }
     },
     {
+      "path": "packages/hnf.survey_measures-1.0.0.hnf.json",
+      "digest": "sha256:104823a129f0867747c60916bcae9727c08c40eb30cfb33306e1cb89165c8f64",
+      "added_at": "2026-11-19T13:11:30+01:00",
+      "manifest": {
+        "bundle_id": "hnf.survey_measures",
+        "version": "1.0.0",
+        "author": "Human Not Found",
+        "description": "Measures computed from questionnaire answers: item contrast (e.g. truth discernment), answer-key accuracy, weight of advice, and change between steps.",
+        "permissions": [
+          "read_shared_state",
+          "read_private_actions"
+        ],
+        "components": [
+          {
+            "id": "hnf.survey_measures.item_contrast",
+            "family": "evaluator",
+            "entrypoint": "item_contrast",
+            "description": "Item contrast",
+            "about": {
+              "summary": "The mean answer to one group of scale items minus another, such as true minus false headlines (truth discernment).",
+              "how_it_works": "Uses each participant's latest questionnaire answers in the step. An item belongs to a group when its ID starts with one of the group's prefixes (a full item ID also works). For each participant, takes the mean of their group A items minus the mean of their group B items; the value is the mean over participants. Only scale answers count.",
+              "outputs": [
+                {
+                  "label": "Item contrast",
+                  "unit": "scale points",
+                  "description": "Mean over participants of (group A mean - group B mean)."
+                },
+                {
+                  "label": "Details",
+                  "description": "The value for each participant, so results can be split by persona."
+                }
+              ]
+            },
+            "config_schema": {
+              "type": "object",
+              "properties": {
+                "group_a": {
+                  "type": "array",
+                  "title": "Group A item IDs or prefixes",
+                  "minItems": 1,
+                  "maxItems": 30,
+                  "items": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 64
+                  },
+                  "default": [
+                    "true_"
+                  ]
+                },
+                "group_b": {
+                  "type": "array",
+                  "title": "Group B item IDs or prefixes",
+                  "minItems": 1,
+                  "maxItems": 30,
+                  "items": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 64
+                  },
+                  "default": [
+                    "false_"
+                  ]
+                },
+                "step": {
+                  "type": "string",
+                  "maxLength": 120,
+                  "title": "Step (empty: whole run)",
+                  "default": "",
+                  "x-hnf-reference": "step"
+                }
+              },
+              "required": [
+                "group_a",
+                "group_b",
+                "step"
+              ],
+              "additionalProperties": false
+            }
+          },
+          {
+            "id": "hnf.survey_measures.answer_key_accuracy",
+            "family": "evaluator",
+            "entrypoint": "answer_key_accuracy",
+            "description": "Answer-key accuracy",
+            "about": {
+              "summary": "The share of questionnaire items each participant answered correctly, against an answer key.",
+              "how_it_works": "Uses each participant's latest questionnaire answers in the step. An answer is correct when its text equals the key's answer (numbers are compared as text, so write 8 for the scale answer 8). Items a participant did not answer are left out of their share. The value is the mean share over participants; details also give the share correct per item.",
+              "outputs": [
+                {
+                  "label": "Answer-key accuracy",
+                  "unit": "share correct",
+                  "description": "Mean over participants of the share of key items answered correctly."
+                },
+                {
+                  "label": "Details",
+                  "description": "The value for each participant, so results can be split by persona."
+                }
+              ]
+            },
+            "config_schema": {
+              "type": "object",
+              "properties": {
+                "answer_key": {
+                  "type": "array",
+                  "title": "Answer key",
+                  "minItems": 1,
+                  "maxItems": 30,
+                  "default": [
+                    {
+                      "item": "q1",
+                      "answer": "8"
+                    }
+                  ],
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "item": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 64,
+                        "title": "Item ID"
+                      },
+                      "answer": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 200,
+                        "title": "Correct answer"
+                      }
+                    },
+                    "required": [
+                      "item",
+                      "answer"
+                    ],
+                    "additionalProperties": false
+                  }
+                },
+                "step": {
+                  "type": "string",
+                  "maxLength": 120,
+                  "title": "Step (empty: whole run)",
+                  "default": "",
+                  "x-hnf-reference": "step"
+                }
+              },
+              "required": [
+                "answer_key",
+                "step"
+              ],
+              "additionalProperties": false
+            }
+          },
+          {
+            "id": "hnf.survey_measures.weight_of_advice",
+            "family": "evaluator",
+            "entrypoint": "weight_of_advice",
+            "description": "Weight of advice",
+            "about": {
+              "summary": "How far participants moved from their first estimate toward the advice they were given: 0 means they ignored it, 1 that they adopted it.",
+              "how_it_works": "For each participant and each advised item: (final estimate - first estimate) / (advice - first estimate), from their latest numeric answers in the two steps. Items where the advice equals the first estimate are skipped, because the weight is undefined. With 'Limit to 0-1' on, weights below 0 count as 0 and above 1 as 1. The value is the mean over participants of their mean weight.",
+              "outputs": [
+                {
+                  "label": "Weight of advice",
+                  "unit": "weight of advice",
+                  "description": "Mean weight of advice over participants."
+                },
+                {
+                  "label": "Details",
+                  "description": "The value for each participant, so results can be split by persona."
+                }
+              ]
+            },
+            "config_schema": {
+              "type": "object",
+              "properties": {
+                "advice": {
+                  "type": "array",
+                  "title": "Advice given per item",
+                  "minItems": 1,
+                  "maxItems": 30,
+                  "default": [
+                    {
+                      "item": "estimate",
+                      "value": 100
+                    }
+                  ],
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "item": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 64,
+                        "title": "Item ID"
+                      },
+                      "value": {
+                        "type": "number",
+                        "title": "Advice"
+                      }
+                    },
+                    "required": [
+                      "item",
+                      "value"
+                    ],
+                    "additionalProperties": false
+                  }
+                },
+                "first_step": {
+                  "type": "string",
+                  "maxLength": 120,
+                  "title": "Step with the first estimates",
+                  "default": "",
+                  "x-hnf-reference": "step"
+                },
+                "final_step": {
+                  "type": "string",
+                  "maxLength": 120,
+                  "title": "Step with the final estimates",
+                  "default": "",
+                  "x-hnf-reference": "step"
+                },
+                "truncate": {
+                  "type": "boolean",
+                  "title": "Limit to 0-1",
+                  "default": true
+                }
+              },
+              "required": [
+                "advice",
+                "first_step",
+                "final_step",
+                "truncate"
+              ],
+              "additionalProperties": false
+            }
+          },
+          {
+            "id": "hnf.survey_measures.step_change",
+            "family": "evaluator",
+            "entrypoint": "step_change",
+            "description": "Change between steps",
+            "about": {
+              "summary": "How the answers to one questionnaire item changed between two steps, such as vaccination intent before and after a message.",
+              "how_it_works": "Uses the latest answers of participants who answered the item in both steps. With an answer to count, the value is the share giving that answer after minus the share before. Without one, it is the mean answer after minus the mean before (scale items).",
+              "outputs": [
+                {
+                  "label": "Change between steps",
+                  "unit": "change",
+                  "description": "Change in the share giving the chosen answer, or in the mean answer."
+                },
+                {
+                  "label": "Details",
+                  "description": "The value for each participant, so results can be split by persona."
+                }
+              ]
+            },
+            "config_schema": {
+              "type": "object",
+              "properties": {
+                "item": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 64,
+                  "title": "Item ID",
+                  "default": "intent"
+                },
+                "target": {
+                  "type": "string",
+                  "maxLength": 200,
+                  "title": "Answer to count (empty: change in the mean)",
+                  "default": ""
+                },
+                "before_step": {
+                  "type": "string",
+                  "maxLength": 120,
+                  "title": "Step before",
+                  "default": "",
+                  "x-hnf-reference": "step"
+                },
+                "after_step": {
+                  "type": "string",
+                  "maxLength": 120,
+                  "title": "Step after",
+                  "default": "",
+                  "x-hnf-reference": "step"
+                }
+              },
+              "required": [
+                "item",
+                "target",
+                "before_step",
+                "after_step"
+              ],
+              "additionalProperties": false
+            }
+          }
+        ],
+        "contract_version": "1.0.0",
+        "digest": "sha256:aee085fb8469c5ad9e4e0e31e05a19e8136cb42a6d7c94de753ced36a85479d4"
+      }
+    },
+    {
       "path": "packages/hnf.turn_taking-1.0.0.hnf.json",
       "digest": "sha256:8342dea0e4875cf20c184df4cd42a34aa112cf4427286a7f3de27db4fbbf74ba",
       "added_at": "2026-11-19T00:24:03+01:00",
@@ -2200,6 +2502,122 @@
   ],
   "templates": [
     {
+      "path": "templates/accuracy-nudge-sharing.template.json",
+      "digest": "sha256:8fffe537deafdc7fea2bafc7fd02561e714d26e6e7d09ba37e7eb1b951f0f6ed",
+      "added_at": "2026-11-19T12:50:59+01:00",
+      "id": "accuracy-nudge-sharing",
+      "name": "Accuracy nudge: sharing COVID-19 headlines",
+      "author": "Human Not Found",
+      "description": "Original study: Pennycook, G., McPhetres, J., Zhang, Y., Lu, J. G., & Rand, D. G. (2020). Fighting COVID-19 misinformation on social media: Experimental evidence for a scalable accuracy-nudge intervention. Psychological Science, 31(7), 770-780. Across two studies with more than 1,700 US adults, people were worse at telling true from false COVID-19 headlines when deciding what to share than when judging accuracy; in Study 2, asking people to judge the accuracy of a single unrelated headline first nearly tripled truth discernment in their sharing intentions. This template follows Study 2 with ten US participants: in the treatment condition they first rate the accuracy of one non-COVID headline, in the control condition they answer a neutral question instead (the original control had no first task), and both then rate how likely they would be to share each of ten COVID-19 headlines (five true, five false) on a 6-point scale. The headlines are new, written for this template from claims circulating in March 2020. The sharing discernment measure is the mean of true minus false items; compare it between the conditions. Participants are simulated: each is a Model participant, using the free test model until you choose a model, so the first runs only check the design; with the test model every participant takes the sample answer.",
+      "packages": [
+        {
+          "bundle_id": "hnf.participants",
+          "version": "1.0.0",
+          "digest": "3eba369193895ce162da928faffcb34ce74512a9c74d86bf2acc252f11fbcaee"
+        },
+        {
+          "bundle_id": "hnf.questionnaire",
+          "version": "1.0.0",
+          "digest": "9d1c1b477a6ed605f1fcaf202dd43d997491b305e660ab9812218505c65f9c7b"
+        },
+        {
+          "bundle_id": "hnf.survey_measures",
+          "version": "1.0.0",
+          "digest": "746f02b0c0e687ae7ec7947f3e3cd437e1ad0ec63bf33336e4e194138887558d"
+        }
+      ],
+      "components": [
+        "hnf.participants.model",
+        "hnf.questionnaire.questionnaire",
+        "hnf.questionnaire.summary",
+        "hnf.survey_measures.item_contrast"
+      ]
+    },
+    {
+      "path": "templates/algorithm-appreciation.template.json",
+      "digest": "sha256:3392667d22b3be3afa7059c12e6afbc9262be4b0fb8a27cbddb328f1a658b498",
+      "added_at": "2026-11-19T12:50:59+01:00",
+      "id": "algorithm-appreciation",
+      "name": "Algorithm appreciation: advice from an algorithm or from people",
+      "author": "Human Not Found",
+      "description": "Original study: Logg, J. M., Minson, J. A., & Moore, D. A. (2019). Algorithm appreciation: People prefer algorithmic to human judgment. Organizational Behavior and Human Decision Processes, 151, 90-103. In six experiments, people made an estimate, received advice, and made a final estimate. They moved further toward the advice when it was said to come from an algorithm than from people; the effect waned when they chose between the algorithm and their own judgment, and among experienced forecasters. In Experiment 1A people estimated a person's weight from a photograph. In this template ten US participants estimate the weight of three people from written descriptions (the photographs are not used), then see advice labelled as coming from an algorithm or from the average of 275 earlier participants, and give final estimates. The advice is the same in both conditions. The weight-of-advice measure is (final - first) / (advice - first), limited to 0-1; compare it between the conditions. The advice values are weight_1: 186 lb, weight_2: 121 lb, weight_3: 238 lb. Participants are simulated: each is a Model participant, using the free test model until you choose a model, so the first runs only check the design; with the test model every participant takes the sample answer.",
+      "packages": [
+        {
+          "bundle_id": "hnf.participants",
+          "version": "1.0.0",
+          "digest": "3eba369193895ce162da928faffcb34ce74512a9c74d86bf2acc252f11fbcaee"
+        },
+        {
+          "bundle_id": "hnf.questionnaire",
+          "version": "1.0.0",
+          "digest": "9d1c1b477a6ed605f1fcaf202dd43d997491b305e660ab9812218505c65f9c7b"
+        },
+        {
+          "bundle_id": "hnf.survey_measures",
+          "version": "1.0.0",
+          "digest": "746f02b0c0e687ae7ec7947f3e3cd437e1ad0ec63bf33336e4e194138887558d"
+        }
+      ],
+      "components": [
+        "hnf.participants.model",
+        "hnf.questionnaire.questionnaire",
+        "hnf.questionnaire.summary",
+        "hnf.survey_measures.weight_of_advice"
+      ]
+    },
+    {
+      "path": "templates/algorithm-aversion.template.json",
+      "digest": "sha256:812154c87e62931e1cfa656205f93b2d03e583ce908a5ae3696a01bf5dd350a4",
+      "added_at": "2026-11-19T12:50:59+01:00",
+      "id": "algorithm-aversion",
+      "name": "Algorithm aversion after seeing an algorithm err",
+      "author": "Human Not Found",
+      "description": "Original study: Dietvorst, B. J., Simmons, J. P., & Massey, C. (2015). Algorithm aversion: People erroneously avoid algorithms after seeing them err. Journal of Experimental Psychology: General, 144(1), 114-126. Participants forecast MBA students' success from admissions data. Those who had seen a statistical model's forecasts and errors were less likely to bet their bonus on the model, and more likely to choose their own forecasts, than those who had not, even when they saw that the model outperformed them. In this template ten participants read the forecasting task and its incentive, then choose whose forecasts decide their bonus for the next ten cases and rate their confidence in each. Conditions: no practice information (control); a summary of the model's errors in ten practice cases (model); or the model's and their own errors, the model being better (both). The original had participants make the practice forecasts themselves and a fourth condition (own forecasts only); here the practice feedback is a written summary. Compare the share choosing the model between conditions. Participants are simulated: each is a Model participant, using the free test model until you choose a model, so the first runs only check the design; with the test model every participant takes the sample answer.",
+      "packages": [
+        {
+          "bundle_id": "hnf.participants",
+          "version": "1.0.0",
+          "digest": "3eba369193895ce162da928faffcb34ce74512a9c74d86bf2acc252f11fbcaee"
+        },
+        {
+          "bundle_id": "hnf.questionnaire",
+          "version": "1.0.0",
+          "digest": "9d1c1b477a6ed605f1fcaf202dd43d997491b305e660ab9812218505c65f9c7b"
+        }
+      ],
+      "components": [
+        "hnf.participants.model",
+        "hnf.questionnaire.questionnaire",
+        "hnf.questionnaire.summary"
+      ]
+    },
+    {
+      "path": "templates/autonomous-vehicle-dilemma.template.json",
+      "digest": "sha256:d36a0b785242e8e97b2b442ea383065e1395f342a741aa990e497810153042c5",
+      "added_at": "2026-11-19T12:50:59+01:00",
+      "id": "autonomous-vehicle-dilemma",
+      "name": "The social dilemma of autonomous vehicles",
+      "author": "Human Not Found",
+      "description": "Original study: Bonnefon, J.-F., Shariff, A., & Rahwan, I. (2016). The social dilemma of autonomous vehicles. Science, 352(6293), 1573-1576. In six online studies with US Mechanical Turk participants, most people judged it moral for a self-driving car to sacrifice its passenger to save ten pedestrians, but were less willing to buy such a car than a self-protective one, and opposed regulations that would require it, especially when imagining family members in the car. This template asks ten US participants how moral the sacrifice is, how likely they would be to buy a utilitarian or a self-protective car, and whether they support regulation, on the original 0-100 scales, with two conditions: alone in the car, or with a family member. The wording is written for this template and the six studies' other variations are not included. Compare moral approval with willingness to buy the utilitarian car, and both conditions. Participants are simulated: each is a Model participant, using the free test model until you choose a model, so the first runs only check the design; with the test model every participant takes the sample answer.",
+      "packages": [
+        {
+          "bundle_id": "hnf.participants",
+          "version": "1.0.0",
+          "digest": "3eba369193895ce162da928faffcb34ce74512a9c74d86bf2acc252f11fbcaee"
+        },
+        {
+          "bundle_id": "hnf.questionnaire",
+          "version": "1.0.0",
+          "digest": "9d1c1b477a6ed605f1fcaf202dd43d997491b305e660ab9812218505c65f9c7b"
+        }
+      ],
+      "components": [
+        "hnf.participants.model",
+        "hnf.questionnaire.questionnaire",
+        "hnf.questionnaire.summary"
+      ]
+    },
+    {
       "path": "templates/brainstorming-nominal-vs-interacting.template.json",
       "digest": "sha256:bb82f69f6289085c87ba9c15d43d71034cbfa01e4e07ca4380412fdc6d1d5266",
       "added_at": "2026-11-18T02:14:42+01:00",
@@ -2218,6 +2636,11 @@
           "version": "1.0.0",
           "digest": "3eba369193895ce162da928faffcb34ce74512a9c74d86bf2acc252f11fbcaee"
         }
+      ],
+      "components": [
+        "hnf.idea_generation.ideas",
+        "hnf.idea_generation.ideas_count",
+        "hnf.participants.model"
       ]
     },
     {
@@ -2239,6 +2662,71 @@
           "version": "1.0.0",
           "digest": "3eba369193895ce162da928faffcb34ce74512a9c74d86bf2acc252f11fbcaee"
         }
+      ],
+      "components": [
+        "hnf.economic_games.amounts_given",
+        "hnf.economic_games.give",
+        "hnf.economic_games.payoffs",
+        "hnf.participants.model"
+      ]
+    },
+    {
+      "path": "templates/fake-news-cognitive-reflection.template.json",
+      "digest": "sha256:fe343772cd71404d5e65637cab0cd3e0fd8034f9a5c7fafc5d6f43fb0e0f89ab",
+      "added_at": "2026-11-19T12:50:59+01:00",
+      "id": "fake-news-cognitive-reflection",
+      "name": "Lazy, not biased: reasoning and belief in fake news",
+      "author": "Human Not Found",
+      "description": "Original study: Pennycook, G., & Rand, D. G. (2019). Lazy, not biased: Susceptibility to partisan fake news is better explained by lack of reasoning than by motivated reasoning. Cognition, 188, 39-50. In two studies, 3,446 Mechanical Turk workers took the Cognitive Reflection Test (CRT) and rated the accuracy of real and fake political news headlines favouring Democrats or Republicans. Higher CRT scores went with lower belief in fake news and better discernment between real and fake, even for headlines that matched the participant's party. In this template ten US participants (five Democrats, five Republicans) answer four CRT-2 items (Thomson & Oppenheimer, 2016) and then rate twelve headlines on the original 4-point accuracy scale: three true and three false favouring each party. The headlines are new, written for this template, and shown as text rather than as Facebook posts; the CRT items are multiple choice, offering the intuitive and the correct answer. Item ids mark each headline as true or false and pro-Democrat or pro-Republican. Measures: truth discernment (mean rating of true minus false headlines) and CRT score (share correct), each also given per participant so they can be related to each other and to the participant's party. Participants are simulated: each is a Model participant, using the free test model until you choose a model, so the first runs only check the design; with the test model every participant takes the sample answer.",
+      "packages": [
+        {
+          "bundle_id": "hnf.participants",
+          "version": "1.0.0",
+          "digest": "3eba369193895ce162da928faffcb34ce74512a9c74d86bf2acc252f11fbcaee"
+        },
+        {
+          "bundle_id": "hnf.questionnaire",
+          "version": "1.0.0",
+          "digest": "9d1c1b477a6ed605f1fcaf202dd43d997491b305e660ab9812218505c65f9c7b"
+        },
+        {
+          "bundle_id": "hnf.survey_measures",
+          "version": "1.0.0",
+          "digest": "746f02b0c0e687ae7ec7947f3e3cd437e1ad0ec63bf33336e4e194138887558d"
+        }
+      ],
+      "components": [
+        "hnf.participants.model",
+        "hnf.questionnaire.questionnaire",
+        "hnf.questionnaire.summary",
+        "hnf.survey_measures.answer_key_accuracy",
+        "hnf.survey_measures.item_contrast"
+      ]
+    },
+    {
+      "path": "templates/global-preference-survey.template.json",
+      "digest": "sha256:d0090d13cfa9ce3f7ad992e3f4d746fb11e7dfde3e6702b00c40daed7079db62",
+      "added_at": "2026-11-19T12:50:59+01:00",
+      "id": "global-preference-survey",
+      "name": "Global Preference Survey: risk, patience, reciprocity, altruism and trust",
+      "author": "Human Not Found",
+      "description": "Original study: Falk, A., Becker, A., Dohmen, T., Enke, B., Huffman, D., & Sunde, U. (2018). Global evidence on economic preferences. The Quarterly Journal of Economics, 133(4), 1645-1692. The Global Preference Survey measured risk taking, patience, positive and negative reciprocity, altruism and trust among 80,000 people in representative samples of 76 countries, with survey items validated against incentivized experiments. Preferences varied strongly between countries and even more within them, and predicted saving, schooling, health and prosocial behaviour. This template asks ten participants of mixed age, gender and occupation the survey's qualitative items, with six conditions placing them in the United States, Germany, Sweden, Japan, Nigeria or Brazil. The original's quantitative staircase items (lottery and time-delay choices) are left out, so the composite preference indices cannot be rebuilt exactly; compare item means across countries with the country-level data published by the authors. Participants are simulated: each is a Model participant, using the free test model until you choose a model, so the first runs only check the design; with the test model every participant takes the sample answer.",
+      "packages": [
+        {
+          "bundle_id": "hnf.participants",
+          "version": "1.0.0",
+          "digest": "3eba369193895ce162da928faffcb34ce74512a9c74d86bf2acc252f11fbcaee"
+        },
+        {
+          "bundle_id": "hnf.questionnaire",
+          "version": "1.0.0",
+          "digest": "9d1c1b477a6ed605f1fcaf202dd43d997491b305e660ab9812218505c65f9c7b"
+        }
+      ],
+      "components": [
+        "hnf.participants.model",
+        "hnf.questionnaire.questionnaire",
+        "hnf.questionnaire.summary"
       ]
     },
     {
@@ -2270,6 +2758,14 @@
           "version": "1.0.0",
           "digest": "9d1c1b477a6ed605f1fcaf202dd43d997491b305e660ab9812218505c65f9c7b"
         }
+      ],
+      "components": [
+        "hnf.group_decision.decision",
+        "hnf.group_discussion.discussion",
+        "hnf.group_discussion.participation_balance",
+        "hnf.participants.model",
+        "hnf.questionnaire.questionnaire",
+        "hnf.questionnaire.summary"
       ]
     },
     {
@@ -2296,6 +2792,46 @@
           "version": "1.0.0",
           "digest": "3eba369193895ce162da928faffcb34ce74512a9c74d86bf2acc252f11fbcaee"
         }
+      ],
+      "components": [
+        "hnf.group_decision.decision",
+        "hnf.group_decision.decision_accuracy",
+        "hnf.group_decision.information_shared",
+        "hnf.group_discussion.discussion",
+        "hnf.group_discussion.participation_balance",
+        "hnf.participants.model"
+      ]
+    },
+    {
+      "path": "templates/illusory-truth-fake-news.template.json",
+      "digest": "sha256:40456cb05416c17534976de7ccfebc260acf0a897db80bda6618084dcf6edf3f",
+      "added_at": "2026-11-19T12:50:59+01:00",
+      "id": "illusory-truth-fake-news",
+      "name": "Prior exposure and belief in fake news",
+      "author": "Human Not Found",
+      "description": "Original study: Pennycook, G., Cannon, T. D., & Rand, D. G. (2018). Prior exposure increases perceived accuracy of fake news. Journal of Experimental Psychology: General, 147(12), 1865-1880. Mechanical Turk participants first saw a set of real and fake headlines and said whether they would share them; after a distractor task they rated the accuracy of those headlines and new ones. A single prior exposure raised the perceived accuracy of fake news, even when the fake headlines had carried a 'Disputed by 3rd Party Fact-Checkers' warning, and even for headlines against the participant's politics. In this template ten US participants see four headlines (two true, two false) and say whether they would share each, then rate the accuracy of all twelve headlines (the four seen and eight new). The warning condition labels the false headlines as disputed during exposure. There is no distractor task, and the headlines are new, written for this template. The illusory-truth measure is the mean accuracy of the seen false headlines minus the new false ones; above zero means prior exposure raised belief. Participants are simulated: each is a Model participant, using the free test model until you choose a model, so the first runs only check the design; with the test model every participant takes the sample answer.",
+      "packages": [
+        {
+          "bundle_id": "hnf.participants",
+          "version": "1.0.0",
+          "digest": "3eba369193895ce162da928faffcb34ce74512a9c74d86bf2acc252f11fbcaee"
+        },
+        {
+          "bundle_id": "hnf.questionnaire",
+          "version": "1.0.0",
+          "digest": "9d1c1b477a6ed605f1fcaf202dd43d997491b305e660ab9812218505c65f9c7b"
+        },
+        {
+          "bundle_id": "hnf.survey_measures",
+          "version": "1.0.0",
+          "digest": "746f02b0c0e687ae7ec7947f3e3cd437e1ad0ec63bf33336e4e194138887558d"
+        }
+      ],
+      "components": [
+        "hnf.participants.model",
+        "hnf.questionnaire.questionnaire",
+        "hnf.questionnaire.summary",
+        "hnf.survey_measures.item_contrast"
       ]
     },
     {
@@ -2322,6 +2858,39 @@
           "version": "1.0.0",
           "digest": "a27394217e2609b1a640db1e3e1a5d2afa619ff56220bc40a88cd0ad3583f45a"
         }
+      ],
+      "components": [
+        "hnf.group_discussion.discussion",
+        "hnf.participants.model",
+        "hnf.ranking_tasks.error_score",
+        "hnf.ranking_tasks.ranking",
+        "hnf.ranking_tasks.synergy"
+      ]
+    },
+    {
+      "path": "templates/moral-machine.template.json",
+      "digest": "sha256:fc7954321c5acbb8f4f366a12cc20b915707bcd0c1c781fa4a81ba37b4e12b28",
+      "added_at": "2026-11-19T12:50:59+01:00",
+      "id": "moral-machine",
+      "name": "Moral Machine: whom should a self-driving car spare?",
+      "author": "Human Not Found",
+      "description": "Original study: Awad, E., Dsouza, S., Kim, R., Schulz, J., Henrich, J., Shariff, A., Bonnefon, J.-F., & Rahwan, I. (2018). The Moral Machine experiment. Nature, 563(7729), 59-64. An online platform collected about 40 million decisions from millions of people in 233 countries and territories on dilemmas in which a self-driving car must kill one of two groups. Globally, people preferred to spare humans over animals, more lives over fewer and the young over the old; countries formed Western, Eastern and Southern clusters that weighed these preferences differently. This template gives ten participants nine dilemmas, each varying one attribute (species, number, age, gender, social status, fitness, lawfulness, intervention, passengers versus pedestrians), and runs three conditions whose participants live in the United States, Japan or Brazil, one country from each cluster. The original randomised every attribute of each scene and estimated effects with conjoint analysis; here each dilemma isolates one attribute and the option order alternates. Compare the share choosing each side per dilemma with the paper's Figure 2 and across conditions with its Figure 3. Participants are simulated: each is a Model participant, using the free test model until you choose a model, so the first runs only check the design; with the test model every participant takes the sample answer.",
+      "packages": [
+        {
+          "bundle_id": "hnf.participants",
+          "version": "1.0.0",
+          "digest": "3eba369193895ce162da928faffcb34ce74512a9c74d86bf2acc252f11fbcaee"
+        },
+        {
+          "bundle_id": "hnf.questionnaire",
+          "version": "1.0.0",
+          "digest": "9d1c1b477a6ed605f1fcaf202dd43d997491b305e660ab9812218505c65f9c7b"
+        }
+      ],
+      "components": [
+        "hnf.participants.model",
+        "hnf.questionnaire.questionnaire",
+        "hnf.questionnaire.summary"
       ]
     },
     {
@@ -2348,6 +2917,13 @@
           "version": "1.0.0",
           "digest": "3eba369193895ce162da928faffcb34ce74512a9c74d86bf2acc252f11fbcaee"
         }
+      ],
+      "components": [
+        "hnf.group_decision.decision",
+        "hnf.group_decision.decision_accuracy",
+        "hnf.group_decision.information_shared",
+        "hnf.group_discussion.discussion",
+        "hnf.participants.model"
       ]
     },
     {
@@ -2369,6 +2945,13 @@
           "version": "1.0.0",
           "digest": "3eba369193895ce162da928faffcb34ce74512a9c74d86bf2acc252f11fbcaee"
         }
+      ],
+      "components": [
+        "hnf.economic_games.amounts_given",
+        "hnf.economic_games.cooperation_rate",
+        "hnf.economic_games.payoffs",
+        "hnf.economic_games.pool",
+        "hnf.participants.model"
       ]
     },
     {
@@ -2390,6 +2973,13 @@
           "version": "1.0.0",
           "digest": "3eba369193895ce162da928faffcb34ce74512a9c74d86bf2acc252f11fbcaee"
         }
+      ],
+      "components": [
+        "hnf.economic_games.amounts_given",
+        "hnf.economic_games.cooperation_rate",
+        "hnf.economic_games.payoffs",
+        "hnf.economic_games.pool",
+        "hnf.participants.model"
       ]
     },
     {
@@ -2411,6 +3001,12 @@
           "version": "1.0.0",
           "digest": "3eba369193895ce162da928faffcb34ce74512a9c74d86bf2acc252f11fbcaee"
         }
+      ],
+      "components": [
+        "hnf.economic_games.cooperation_rate",
+        "hnf.economic_games.matrix",
+        "hnf.economic_games.payoffs",
+        "hnf.participants.model"
       ]
     },
     {
@@ -2432,6 +3028,11 @@
           "version": "1.0.0",
           "digest": "3eba369193895ce162da928faffcb34ce74512a9c74d86bf2acc252f11fbcaee"
         }
+      ],
+      "components": [
+        "hnf.effort_task.effort",
+        "hnf.effort_task.effort_mean",
+        "hnf.participants.model"
       ]
     },
     {
@@ -2453,6 +3054,12 @@
           "version": "1.0.0",
           "digest": "3eba369193895ce162da928faffcb34ce74512a9c74d86bf2acc252f11fbcaee"
         }
+      ],
+      "components": [
+        "hnf.economic_games.amounts_given",
+        "hnf.economic_games.give",
+        "hnf.economic_games.payoffs",
+        "hnf.participants.model"
       ]
     },
     {
@@ -2474,6 +3081,45 @@
           "version": "1.0.0",
           "digest": "3eba369193895ce162da928faffcb34ce74512a9c74d86bf2acc252f11fbcaee"
         }
+      ],
+      "components": [
+        "hnf.economic_games.acceptance_rate",
+        "hnf.economic_games.amounts_given",
+        "hnf.economic_games.payoffs",
+        "hnf.economic_games.ultimatum",
+        "hnf.participants.model"
+      ]
+    },
+    {
+      "path": "templates/vaccine-misinformation-intent.template.json",
+      "digest": "sha256:d076828d42f5b9bdc60a6430076c79358d11ac629e31aaf357a58ea59ddd68c0",
+      "added_at": "2026-11-19T12:50:59+01:00",
+      "id": "vaccine-misinformation-intent",
+      "name": "COVID-19 vaccine misinformation and vaccination intent",
+      "author": "Human Not Found",
+      "description": "Original study: Loomba, S., de Figueiredo, A., Piatek, S. J., de Graaf, K., & Larson, H. J. (2021). Measuring the impact of COVID-19 vaccine misinformation on vaccination intent in the UK and USA. Nature Human Behaviour, 5(3), 337-348. In a pre-registered randomized controlled trial with 8,001 respondents in the UK and the US in September 2020, people stated whether they would accept a COVID-19 vaccine, were shown five recent social media posts containing vaccine misinformation or five factual posts, and stated their intent again. Misinformation lowered intent relative to the factual posts. This template runs the US arm with ten US participants: intent before (the original 4-point item), five posts with questions about trust and sharing, and intent after. The posts are new, written for this template, paraphrasing claims that circulated in 2020; the original used real posts with images. The intent-change measure is the share answering 'Yes, definitely' after minus before; compare it between the conditions. Participants are simulated: each is a Model participant, using the free test model until you choose a model, so the first runs only check the design; with the test model every participant takes the sample answer.",
+      "packages": [
+        {
+          "bundle_id": "hnf.participants",
+          "version": "1.0.0",
+          "digest": "3eba369193895ce162da928faffcb34ce74512a9c74d86bf2acc252f11fbcaee"
+        },
+        {
+          "bundle_id": "hnf.questionnaire",
+          "version": "1.0.0",
+          "digest": "9d1c1b477a6ed605f1fcaf202dd43d997491b305e660ab9812218505c65f9c7b"
+        },
+        {
+          "bundle_id": "hnf.survey_measures",
+          "version": "1.0.0",
+          "digest": "746f02b0c0e687ae7ec7947f3e3cd437e1ad0ec63bf33336e4e194138887558d"
+        }
+      ],
+      "components": [
+        "hnf.participants.model",
+        "hnf.questionnaire.questionnaire",
+        "hnf.questionnaire.summary",
+        "hnf.survey_measures.step_change"
       ]
     }
   ]
