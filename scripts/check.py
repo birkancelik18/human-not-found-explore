@@ -32,6 +32,14 @@ def added_at(path):
     return result.stdout.strip() or datetime.now(timezone.utc).isoformat(timespec="seconds")
 
 
+def components_used(spec):
+    """The component IDs a template's design uses: participant behaviours, step components and measures."""
+    refs = [person["agent"] for person in spec.get("participants", []) if person.get("enabled", True)]
+    refs += spec.get("components", []) + [ref for step in spec.get("steps", []) for ref in step.get("components", [])]
+    refs += [measure["evaluator"] for measure in spec.get("measurements", []) if "evaluator" in measure]
+    return sorted({ref["id"] for ref in refs})
+
+
 def check_package(path, data):
     problems = []
     if set(data) != {"manifest", "artifact"}:
@@ -88,7 +96,8 @@ def main(write_index):
         if not found:
             templates.append({"path": str(path.relative_to(ROOT)), "digest": "sha256:" + hashlib.sha256(raw).hexdigest(),
                               "added_at": added_at(path), "id": path.name.removesuffix(".template.json"),
-                              **{key: data[key] for key in ("name", "author", "description", "packages")}})
+                              **{key: data[key] for key in ("name", "author", "description", "packages")},
+                              "components": components_used(data["spec"])})
     for problem in problems:
         print(problem, file=sys.stderr)
     if problems:
