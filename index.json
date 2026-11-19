@@ -1257,6 +1257,106 @@
       }
     },
     {
+      "path": "packages/hnf.moderator-1.0.0.hnf.json",
+      "digest": "sha256:d3b1e2ab0a69bfab484292d06297375252c3d11a503a76b8bae8c4602256cd48",
+      "added_at": "2026-11-19T00:24:03+01:00",
+      "manifest": {
+        "bundle_id": "hnf.moderator",
+        "version": "1.0.0",
+        "author": "Human Not Found",
+        "description": "An AI moderator for group discussions that follows conversational strategies: balance participation, keep the discussion respectful, ask the right expert.",
+        "permissions": [
+          "read_shared_state",
+          "model_call"
+        ],
+        "components": [
+          {
+            "id": "hnf.moderator.moderator",
+            "family": "agent",
+            "entrypoint": "moderator",
+            "description": "AI moderator",
+            "about": {
+              "summary": "A moderator participant that knows when and what to say: it steps in when participation is uneven or a message is disrespectful, and can ask the member best placed to answer.",
+              "how_it_works": "Give this behaviour to a participant with the role 'moderator'. Each goal is a conversational strategy (goal, trigger, behaviour). Balance: when the Gini index of the members' words is above the threshold, it asks for the floor without a model call and invites the quietest member by name. Respect: it asks the model whether the last message was disrespectful and, if so, steps in to remind the group to stay considerate. Expertise: when it picks the next speaker, the model names the member whose public details fit the last message. When it gets the floor with nothing to fix, it briefly sums up or moves the group on. With the hnf.turn_taking rules it is outside the group: never in the rotation, left out of the counts, and asked first after each member's message whether it wants to step in; it reads their turn.status counts. With a Discussion's own round robin or free turns it simply takes its turn and counts the messages in its memory window. Activities offer their actions to every participant, so in a task step (for example a ranking) the moderator answers too: leave its answers out of that step's measures, or compare against a condition without the moderator (disable the participant there). With the free test model every choice takes the action's sample answer.",
+              "actions": [
+                {
+                  "type": "turn.request",
+                  "description": "Ask for the floor when a goal's trigger fires."
+                },
+                {
+                  "type": "turn.pass",
+                  "description": "Name the quietest member, or the best-placed one."
+                },
+                {
+                  "type": "discussion.message",
+                  "description": "A short moderator message: invite someone, restate respect, or sum up."
+                }
+              ]
+            },
+            "config_schema": {
+              "type": "object",
+              "properties": {
+                "model_ref": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 4000,
+                  "title": "Model",
+                  "default": "default",
+                  "x-hnf-reference": "model"
+                },
+                "balance": {
+                  "type": "boolean",
+                  "title": "Goal: balance participation (invite the quietest member)",
+                  "default": true
+                },
+                "civility": {
+                  "type": "boolean",
+                  "title": "Goal: keep the discussion respectful",
+                  "default": true
+                },
+                "expertise": {
+                  "type": "boolean",
+                  "title": "Goal: ask the member whose details fit the point",
+                  "default": false
+                },
+                "balance_threshold": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 1,
+                  "title": "Unevenness that triggers an invitation (Gini of words, 0 to 1)",
+                  "default": 0.3
+                },
+                "persona": {
+                  "type": "string",
+                  "maxLength": 4000,
+                  "title": "Persona (how the moderator comes across)",
+                  "default": ""
+                },
+                "instructions": {
+                  "type": "string",
+                  "maxLength": 4000,
+                  "title": "Instructions",
+                  "default": ""
+                }
+              },
+              "required": [
+                "model_ref",
+                "balance",
+                "civility",
+                "expertise",
+                "balance_threshold",
+                "persona",
+                "instructions"
+              ],
+              "additionalProperties": false
+            }
+          }
+        ],
+        "contract_version": "1.0.0",
+        "digest": "sha256:1a2e2ce3183ef3ebbcd1e7ee6d46de226f8498a7d6e7a5bc51d462c306d32e17"
+      }
+    },
+    {
       "path": "packages/hnf.participants-1.0.0.hnf.json",
       "digest": "sha256:1235faa09087c15252b8d91ff39c985e47a24638e7adae31cee016ae2b7caf49",
       "added_at": "2026-11-18T02:14:42+01:00",
@@ -1846,6 +1946,255 @@
         ],
         "contract_version": "1.0.0",
         "digest": "sha256:deb4babde66b07acdbf29fc0302f216877705cd1984f7ba79aeba9dbac4e223a"
+      }
+    },
+    {
+      "path": "packages/hnf.turn_taking-1.0.0.hnf.json",
+      "digest": "sha256:8342dea0e4875cf20c184df4cd42a34aa112cf4427286a7f3de27db4fbbf74ba",
+      "added_at": "2026-11-19T00:24:03+01:00",
+      "manifest": {
+        "bundle_id": "hnf.turn_taking",
+        "version": "1.0.0",
+        "author": "Human Not Found",
+        "description": "Rules for who speaks next in a group discussion (speaker picks next, raise hands, least active next), and a participation measure that leaves moderators out.",
+        "permissions": [
+          "read_shared_state",
+          "read_private_actions",
+          "write_state",
+          "emit_event"
+        ],
+        "components": [
+          {
+            "id": "hnf.turn_taking.speaker_selects",
+            "family": "procedure",
+            "entrypoint": "speaker_selects",
+            "description": "Speaker picks next",
+            "about": {
+              "summary": "The turn-taking rules of everyday conversation: the speaker picks who goes next; otherwise anyone may take the floor; otherwise the speaker goes on.",
+              "how_it_works": "Follows Sacks, Schegloff and Jefferson (1974). The first group member in the list speaks first. After each message the speaker names the next speaker (turn.pass), who is invited. If the speaker answers 'anyone', every other participant is asked privately whether they want to speak (turn.request) and the first to say yes gets the floor. If nobody wants it, the previous speaker continues; after the configured number of such quiet rounds in a row the step ends. Moderators (role 'moderator') are never the first speaker and are left out of the counts; after each group member's message they are asked first whether they want to step in, and a speaker may also name them. After each turn the rule publishes turn.status with every group member's messages and words in this step, which the AI moderator reads. Set the memory window (max_memory_events) to at least 40. Use it with a Discussion whose turns are set to procedure.",
+              "actions": [
+                {
+                  "type": "turn.pass",
+                  "description": "Name who speaks next, or 'anyone' to leave the floor open."
+                },
+                {
+                  "type": "turn.request",
+                  "description": "When the floor is open: say privately whether you want to speak next."
+                },
+                {
+                  "type": "discussion.message",
+                  "description": "The chosen participant posts a message (offered by the Discussion activity)."
+                }
+              ],
+              "ends_when": "When the configured number of turns has been taken, or nobody takes the open floor for the configured number of rounds in a row (unless 'End the step' is off)."
+            },
+            "config_schema": {
+              "type": "object",
+              "properties": {
+                "action_type": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 120,
+                  "title": "Action that ends a turn",
+                  "default": "discussion.message"
+                },
+                "max_turns": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 200,
+                  "title": "Group members' turns before the step ends (moderator messages do not count)",
+                  "default": 12
+                },
+                "finish": {
+                  "type": "boolean",
+                  "title": "End the step when the discussion is over",
+                  "default": true
+                },
+                "quiet_rounds": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 10,
+                  "title": "Quiet rounds before the step ends (nobody wants to speak)",
+                  "default": 2
+                }
+              },
+              "required": [
+                "action_type",
+                "max_turns",
+                "finish",
+                "quiet_rounds"
+              ],
+              "additionalProperties": false
+            }
+          },
+          {
+            "id": "hnf.turn_taking.least_active",
+            "family": "procedure",
+            "entrypoint": "least_active",
+            "description": "Least active next",
+            "about": {
+              "summary": "Always gives the floor to the group member who has said the least so far, a policy that balances participation without asking anyone.",
+              "how_it_works": "At the start and after every turn the rule invites the group member with the fewest words in this step (discussion.invite); ties are broken at random with the run's seed, so it is reproducible. Participants whose role is 'moderator' are outside the group: they are never put in the rotation and are left out of the counts, and after each group member's message every moderator is asked privately whether it wants to speak next (turn.request); a yes gives it the next turn. After each turn the rule publishes turn.status with every group member's messages and words in this step, which the AI moderator reads. Use it with a Discussion whose turns are set to procedure.",
+              "actions": [
+                {
+                  "type": "discussion.message",
+                  "description": "The invited member posts a message (offered by the Discussion activity)."
+                },
+                {
+                  "type": "turn.request",
+                  "description": "Moderators only: say whether to step in before the next member."
+                }
+              ],
+              "ends_when": "When the configured number of turns has been taken (unless 'End the step' is off)."
+            },
+            "config_schema": {
+              "type": "object",
+              "properties": {
+                "action_type": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 120,
+                  "title": "Action that ends a turn",
+                  "default": "discussion.message"
+                },
+                "max_turns": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 200,
+                  "title": "Group members' turns before the step ends (moderator messages do not count)",
+                  "default": 12
+                },
+                "finish": {
+                  "type": "boolean",
+                  "title": "End the step when the discussion is over",
+                  "default": true
+                }
+              },
+              "required": [
+                "action_type",
+                "max_turns",
+                "finish"
+              ],
+              "additionalProperties": false
+            }
+          },
+          {
+            "id": "hnf.turn_taking.raise_hands",
+            "family": "procedure",
+            "entrypoint": "raise_hands",
+            "description": "Raise hands",
+            "about": {
+              "summary": "Self-selection: before each turn everyone may privately raise a hand, and one of those who did gets the floor.",
+              "how_it_works": "The first round asks every group member; moderators never open the discussion. Before each later turn the rule asks every participant except the last speaker, privately, whether they want to speak next (turn.request), so nobody sees the others' answers. Several raised hands is floor competition, recorded in turn.status as competitors: the member with the fewest words so far wins (or one at random with the run's seed). A moderator's raised hand always wins. If nobody raises a hand, the rule asks again, this time including the last speaker, who may go on; after the configured number of quiet rounds in a row the step ends. After each turn the rule publishes turn.status with every group member's messages and words in this step, which the AI moderator reads; moderators (role 'moderator') are left out of those counts. Every turn adds several actions, so allow enough actions per run and set the memory window (max_memory_events) to at least 40. Use it with a Discussion whose turns are set to procedure.",
+              "actions": [
+                {
+                  "type": "turn.request",
+                  "description": "Say privately whether you want to speak next."
+                },
+                {
+                  "type": "discussion.message",
+                  "description": "The chosen participant posts a message (offered by the Discussion activity)."
+                }
+              ],
+              "ends_when": "When the configured number of turns has been taken, or nobody wants to speak for the configured number of rounds in a row (unless 'End the step' is off)."
+            },
+            "config_schema": {
+              "type": "object",
+              "properties": {
+                "action_type": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 120,
+                  "title": "Action that ends a turn",
+                  "default": "discussion.message"
+                },
+                "max_turns": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 200,
+                  "title": "Group members' turns before the step ends (moderator messages do not count)",
+                  "default": 12
+                },
+                "finish": {
+                  "type": "boolean",
+                  "title": "End the step when the discussion is over",
+                  "default": true
+                },
+                "quiet_rounds": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 10,
+                  "title": "Quiet rounds before the step ends (nobody wants to speak)",
+                  "default": 2
+                },
+                "tie_break": {
+                  "type": "string",
+                  "enum": [
+                    "least_active",
+                    "random"
+                  ],
+                  "title": "When several raise a hand",
+                  "default": "least_active"
+                }
+              },
+              "required": [
+                "action_type",
+                "max_turns",
+                "finish",
+                "quiet_rounds",
+                "tie_break"
+              ],
+              "additionalProperties": false
+            }
+          },
+          {
+            "id": "hnf.turn_taking.group_balance",
+            "family": "evaluator",
+            "entrypoint": "group_balance",
+            "description": "Group participation balance",
+            "about": {
+              "summary": "How evenly the group members contributed to the discussion, leaving moderators out, so groups with and without a moderator compare the same people.",
+              "how_it_works": "Counts the discussion messages and their words of every participant whose role is not 'moderator', including members who said nothing. Evenness is the normalized entropy of the members' shares of words: 1 when everyone wrote the same amount, 0 when one person wrote everything.",
+              "outputs": [
+                {
+                  "label": "Evenness",
+                  "unit": "0 to 1",
+                  "description": "Normalized entropy of the group members' shares of words."
+                },
+                {
+                  "label": "Details",
+                  "description": "Messages and words per group member, and the evenness of message counts."
+                }
+              ]
+            },
+            "config_schema": {
+              "type": "object",
+              "properties": {
+                "action_type": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 120,
+                  "title": "Message action type",
+                  "default": "discussion.message"
+                },
+                "step": {
+                  "type": "string",
+                  "maxLength": 120,
+                  "title": "Step (empty: whole run)",
+                  "default": "",
+                  "x-hnf-reference": "step"
+                }
+              },
+              "required": [
+                "action_type",
+                "step"
+              ],
+              "additionalProperties": false
+            }
+          }
+        ],
+        "contract_version": "1.0.0",
+        "digest": "sha256:67b01716053d2186766c32668a12d48753eb82beee51df5bfaaa04f8e16badf5"
       }
     }
   ],
