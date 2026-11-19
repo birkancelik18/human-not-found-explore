@@ -1,0 +1,295 @@
+{
+  "bundle_id": "hnf.survey_measures",
+  "version": "1.0.0",
+  "author": "Human Not Found",
+  "description": "Measures computed from questionnaire answers: item contrast (e.g. truth discernment), answer-key accuracy, weight of advice, and change between steps.",
+  "permissions": [
+    "read_shared_state",
+    "read_private_actions"
+  ],
+  "components": [
+    {
+      "id": "hnf.survey_measures.item_contrast",
+      "family": "evaluator",
+      "entrypoint": "item_contrast",
+      "description": "Item contrast",
+      "about": {
+        "summary": "The mean answer to one group of scale items minus another, such as true minus false headlines (truth discernment).",
+        "how_it_works": "Uses each participant's latest questionnaire answers in the step. An item belongs to a group when its ID starts with one of the group's prefixes (a full item ID also works). For each participant, takes the mean of their group A items minus the mean of their group B items; the value is the mean over participants. Only scale answers count.",
+        "outputs": [
+          {
+            "label": "Item contrast",
+            "unit": "scale points",
+            "description": "Mean over participants of (group A mean - group B mean)."
+          },
+          {
+            "label": "Details",
+            "description": "The value for each participant, so results can be split by persona."
+          }
+        ]
+      },
+      "config_schema": {
+        "type": "object",
+        "properties": {
+          "group_a": {
+            "type": "array",
+            "title": "Group A item IDs or prefixes",
+            "minItems": 1,
+            "maxItems": 30,
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 64
+            },
+            "default": [
+              "true_"
+            ]
+          },
+          "group_b": {
+            "type": "array",
+            "title": "Group B item IDs or prefixes",
+            "minItems": 1,
+            "maxItems": 30,
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 64
+            },
+            "default": [
+              "false_"
+            ]
+          },
+          "step": {
+            "type": "string",
+            "maxLength": 120,
+            "title": "Step (empty: whole run)",
+            "default": "",
+            "x-hnf-reference": "step"
+          }
+        },
+        "required": [
+          "group_a",
+          "group_b",
+          "step"
+        ],
+        "additionalProperties": false
+      }
+    },
+    {
+      "id": "hnf.survey_measures.answer_key_accuracy",
+      "family": "evaluator",
+      "entrypoint": "answer_key_accuracy",
+      "description": "Answer-key accuracy",
+      "about": {
+        "summary": "The share of questionnaire items each participant answered correctly, against an answer key.",
+        "how_it_works": "Uses each participant's latest questionnaire answers in the step. An answer is correct when its text equals the key's answer (numbers are compared as text, so write 8 for the scale answer 8). Items a participant did not answer are left out of their share. The value is the mean share over participants; details also give the share correct per item.",
+        "outputs": [
+          {
+            "label": "Answer-key accuracy",
+            "unit": "share correct",
+            "description": "Mean over participants of the share of key items answered correctly."
+          },
+          {
+            "label": "Details",
+            "description": "The value for each participant, so results can be split by persona."
+          }
+        ]
+      },
+      "config_schema": {
+        "type": "object",
+        "properties": {
+          "answer_key": {
+            "type": "array",
+            "title": "Answer key",
+            "minItems": 1,
+            "maxItems": 30,
+            "default": [
+              {
+                "item": "q1",
+                "answer": "8"
+              }
+            ],
+            "items": {
+              "type": "object",
+              "properties": {
+                "item": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 64,
+                  "title": "Item ID"
+                },
+                "answer": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 200,
+                  "title": "Correct answer"
+                }
+              },
+              "required": [
+                "item",
+                "answer"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "step": {
+            "type": "string",
+            "maxLength": 120,
+            "title": "Step (empty: whole run)",
+            "default": "",
+            "x-hnf-reference": "step"
+          }
+        },
+        "required": [
+          "answer_key",
+          "step"
+        ],
+        "additionalProperties": false
+      }
+    },
+    {
+      "id": "hnf.survey_measures.weight_of_advice",
+      "family": "evaluator",
+      "entrypoint": "weight_of_advice",
+      "description": "Weight of advice",
+      "about": {
+        "summary": "How far participants moved from their first estimate toward the advice they were given: 0 means they ignored it, 1 that they adopted it.",
+        "how_it_works": "For each participant and each advised item: (final estimate - first estimate) / (advice - first estimate), from their latest numeric answers in the two steps. Items where the advice equals the first estimate are skipped, because the weight is undefined. With 'Limit to 0-1' on, weights below 0 count as 0 and above 1 as 1. The value is the mean over participants of their mean weight.",
+        "outputs": [
+          {
+            "label": "Weight of advice",
+            "unit": "weight of advice",
+            "description": "Mean weight of advice over participants."
+          },
+          {
+            "label": "Details",
+            "description": "The value for each participant, so results can be split by persona."
+          }
+        ]
+      },
+      "config_schema": {
+        "type": "object",
+        "properties": {
+          "advice": {
+            "type": "array",
+            "title": "Advice given per item",
+            "minItems": 1,
+            "maxItems": 30,
+            "default": [
+              {
+                "item": "estimate",
+                "value": 100
+              }
+            ],
+            "items": {
+              "type": "object",
+              "properties": {
+                "item": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 64,
+                  "title": "Item ID"
+                },
+                "value": {
+                  "type": "number",
+                  "title": "Advice"
+                }
+              },
+              "required": [
+                "item",
+                "value"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "first_step": {
+            "type": "string",
+            "maxLength": 120,
+            "title": "Step with the first estimates",
+            "default": "",
+            "x-hnf-reference": "step"
+          },
+          "final_step": {
+            "type": "string",
+            "maxLength": 120,
+            "title": "Step with the final estimates",
+            "default": "",
+            "x-hnf-reference": "step"
+          },
+          "truncate": {
+            "type": "boolean",
+            "title": "Limit to 0-1",
+            "default": true
+          }
+        },
+        "required": [
+          "advice",
+          "first_step",
+          "final_step",
+          "truncate"
+        ],
+        "additionalProperties": false
+      }
+    },
+    {
+      "id": "hnf.survey_measures.step_change",
+      "family": "evaluator",
+      "entrypoint": "step_change",
+      "description": "Change between steps",
+      "about": {
+        "summary": "How the answers to one questionnaire item changed between two steps, such as vaccination intent before and after a message.",
+        "how_it_works": "Uses the latest answers of participants who answered the item in both steps. With an answer to count, the value is the share giving that answer after minus the share before. Without one, it is the mean answer after minus the mean before (scale items).",
+        "outputs": [
+          {
+            "label": "Change between steps",
+            "unit": "change",
+            "description": "Change in the share giving the chosen answer, or in the mean answer."
+          },
+          {
+            "label": "Details",
+            "description": "The value for each participant, so results can be split by persona."
+          }
+        ]
+      },
+      "config_schema": {
+        "type": "object",
+        "properties": {
+          "item": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 64,
+            "title": "Item ID",
+            "default": "intent"
+          },
+          "target": {
+            "type": "string",
+            "maxLength": 200,
+            "title": "Answer to count (empty: change in the mean)",
+            "default": ""
+          },
+          "before_step": {
+            "type": "string",
+            "maxLength": 120,
+            "title": "Step before",
+            "default": "",
+            "x-hnf-reference": "step"
+          },
+          "after_step": {
+            "type": "string",
+            "maxLength": 120,
+            "title": "Step after",
+            "default": "",
+            "x-hnf-reference": "step"
+          }
+        },
+        "required": [
+          "item",
+          "target",
+          "before_step",
+          "after_step"
+        ],
+        "additionalProperties": false
+      }
+    }
+  ]
+}

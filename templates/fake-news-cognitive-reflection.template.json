@@ -1,0 +1,465 @@
+{
+  "format": "hnf.template.v1",
+  "name": "Lazy, not biased: reasoning and belief in fake news",
+  "author": "Human Not Found",
+  "description": "Original study: Pennycook, G., & Rand, D. G. (2019). Lazy, not biased: Susceptibility to partisan fake news is better explained by lack of reasoning than by motivated reasoning. Cognition, 188, 39-50. In two studies, 3,446 Mechanical Turk workers took the Cognitive Reflection Test (CRT) and rated the accuracy of real and fake political news headlines favouring Democrats or Republicans. Higher CRT scores went with lower belief in fake news and better discernment between real and fake, even for headlines that matched the participant's party. In this template ten US participants (five Democrats, five Republicans) answer four CRT-2 items (Thomson & Oppenheimer, 2016) and then rate twelve headlines on the original 4-point accuracy scale: three true and three false favouring each party. The headlines are new, written for this template, and shown as text rather than as Facebook posts; the CRT items are multiple choice, offering the intuitive and the correct answer. Item ids mark each headline as true or false and pro-Democrat or pro-Republican. Measures: truth discernment (mean rating of true minus false headlines) and CRT score (share correct), each also given per participant so they can be related to each other and to the participant's party. Participants are simulated: each is a Model participant, using the free test model until you choose a model, so the first runs only check the design; with the test model every participant takes the sample answer.",
+  "created_at": "2026-11-19T12:10:18.837+00:00",
+  "spec": {
+    "components": [],
+    "conditions": [
+      {
+        "id": "main",
+        "label": "Main",
+        "overrides": []
+      }
+    ],
+    "description": "Ten US participants take the CRT and rate the accuracy of 12 partisan headlines.",
+    "environment": {
+      "initial_state": {
+        "private_by_participant": {},
+        "shared": {}
+      }
+    },
+    "execution": {
+      "max_actions_per_run": 40,
+      "max_estimated_cost_usd_per_run": 2.0,
+      "max_memory_events": 40,
+      "max_model_calls_per_run": 80,
+      "max_wall_seconds_per_run": 3600,
+      "repetitions_per_condition": 10,
+      "seed": 1
+    },
+    "experiment_id": "fake-news-cognitive-reflection",
+    "measurements": [
+      {
+        "evaluator": {
+          "config": {
+            "step": "headlines"
+          },
+          "id": "hnf.questionnaire.summary",
+          "version": "1.0.0"
+        },
+        "id": "accuracy",
+        "label": "Accuracy ratings",
+        "scope": "run"
+      },
+      {
+        "evaluator": {
+          "config": {
+            "group_a": [
+              "true_"
+            ],
+            "group_b": [
+              "false_"
+            ],
+            "step": "headlines"
+          },
+          "id": "hnf.survey_measures.item_contrast",
+          "version": "1.0.0"
+        },
+        "id": "discernment",
+        "label": "Truth discernment",
+        "scope": "run"
+      },
+      {
+        "evaluator": {
+          "config": {
+            "answer_key": [
+              {
+                "answer": "Second",
+                "item": "crt_race"
+              },
+              {
+                "answer": "8",
+                "item": "crt_sheep"
+              },
+              {
+                "answer": "Emily",
+                "item": "crt_emily"
+              },
+              {
+                "answer": "0",
+                "item": "crt_hole"
+              }
+            ],
+            "step": "crt"
+          },
+          "id": "hnf.survey_measures.answer_key_accuracy",
+          "version": "1.0.0"
+        },
+        "id": "crt",
+        "label": "CRT score",
+        "scope": "run"
+      }
+    ],
+    "participants": [
+      {
+        "agent": {
+          "config": {
+            "instructions": "Answer as this person would, from their own views, knowledge and habits, not as an assistant. Keep the person's views even when they differ from yours.",
+            "model_ref": "default",
+            "persona": "You are a 34-year-old woman from Ohio. You work as a nurse and have some college education. You identify as a Democrat."
+          },
+          "id": "hnf.participants.model",
+          "version": "1.0.0"
+        },
+        "display_name": "Participant 1",
+        "enabled": true,
+        "id": "p1",
+        "private_context": {},
+        "role": "participant"
+      },
+      {
+        "agent": {
+          "config": {
+            "instructions": "Answer as this person would, from their own views, knowledge and habits, not as an assistant. Keep the person's views even when they differ from yours.",
+            "model_ref": "default",
+            "persona": "You are a 58-year-old man from Texas. You own a small plumbing business and finished high school. You identify as a Republican."
+          },
+          "id": "hnf.participants.model",
+          "version": "1.0.0"
+        },
+        "display_name": "Participant 2",
+        "enabled": true,
+        "id": "p2",
+        "private_context": {},
+        "role": "participant"
+      },
+      {
+        "agent": {
+          "config": {
+            "instructions": "Answer as this person would, from their own views, knowledge and habits, not as an assistant. Keep the person's views even when they differ from yours.",
+            "model_ref": "default",
+            "persona": "You are a 27-year-old man from California. You test software and have a bachelor's degree. You identify as a Democrat."
+          },
+          "id": "hnf.participants.model",
+          "version": "1.0.0"
+        },
+        "display_name": "Participant 3",
+        "enabled": true,
+        "id": "p3",
+        "private_context": {},
+        "role": "participant"
+      },
+      {
+        "agent": {
+          "config": {
+            "instructions": "Answer as this person would, from their own views, knowledge and habits, not as an assistant. Keep the person's views even when they differ from yours.",
+            "model_ref": "default",
+            "persona": "You are a 45-year-old woman from Georgia. You are a school administrator with a master's degree. You identify as a Republican."
+          },
+          "id": "hnf.participants.model",
+          "version": "1.0.0"
+        },
+        "display_name": "Participant 4",
+        "enabled": true,
+        "id": "p4",
+        "private_context": {},
+        "role": "participant"
+      },
+      {
+        "agent": {
+          "config": {
+            "instructions": "Answer as this person would, from their own views, knowledge and habits, not as an assistant. Keep the person's views even when they differ from yours.",
+            "model_ref": "default",
+            "persona": "You are a 63-year-old retired bank clerk from Pennsylvania, a woman who finished high school. You identify as a Democrat."
+          },
+          "id": "hnf.participants.model",
+          "version": "1.0.0"
+        },
+        "display_name": "Participant 5",
+        "enabled": true,
+        "id": "p5",
+        "private_context": {},
+        "role": "participant"
+      },
+      {
+        "agent": {
+          "config": {
+            "instructions": "Answer as this person would, from their own views, knowledge and habits, not as an assistant. Keep the person's views even when they differ from yours.",
+            "model_ref": "default",
+            "persona": "You are a 39-year-old truck driver from Arizona, a man who finished high school. You identify as a Republican."
+          },
+          "id": "hnf.participants.model",
+          "version": "1.0.0"
+        },
+        "display_name": "Participant 6",
+        "enabled": true,
+        "id": "p6",
+        "private_context": {},
+        "role": "participant"
+      },
+      {
+        "agent": {
+          "config": {
+            "instructions": "Answer as this person would, from their own views, knowledge and habits, not as an assistant. Keep the person's views even when they differ from yours.",
+            "model_ref": "default",
+            "persona": "You are a 22-year-old woman from New York studying at a state university. You identify as a Democrat."
+          },
+          "id": "hnf.participants.model",
+          "version": "1.0.0"
+        },
+        "display_name": "Participant 7",
+        "enabled": true,
+        "id": "p7",
+        "private_context": {},
+        "role": "participant"
+      },
+      {
+        "agent": {
+          "config": {
+            "instructions": "Answer as this person would, from their own views, knowledge and habits, not as an assistant. Keep the person's views even when they differ from yours.",
+            "model_ref": "default",
+            "persona": "You are a 51-year-old man from Florida who sells real estate and has a bachelor's degree. You identify as a Republican."
+          },
+          "id": "hnf.participants.model",
+          "version": "1.0.0"
+        },
+        "display_name": "Participant 8",
+        "enabled": true,
+        "id": "p8",
+        "private_context": {},
+        "role": "participant"
+      },
+      {
+        "agent": {
+          "config": {
+            "instructions": "Answer as this person would, from their own views, knowledge and habits, not as an assistant. Keep the person's views even when they differ from yours.",
+            "model_ref": "default",
+            "persona": "You are a 70-year-old retired autoworker from Michigan, a man who finished high school. You identify as a Democrat."
+          },
+          "id": "hnf.participants.model",
+          "version": "1.0.0"
+        },
+        "display_name": "Participant 9",
+        "enabled": true,
+        "id": "p9",
+        "private_context": {},
+        "role": "participant"
+      },
+      {
+        "agent": {
+          "config": {
+            "instructions": "Answer as this person would, from their own views, knowledge and habits, not as an assistant. Keep the person's views even when they differ from yours.",
+            "model_ref": "default",
+            "persona": "You are a 31-year-old woman from Missouri who stays at home with her children and has some college education. You identify as a Republican."
+          },
+          "id": "hnf.participants.model",
+          "version": "1.0.0"
+        },
+        "display_name": "Participant 10",
+        "enabled": true,
+        "id": "p10",
+        "private_context": {},
+        "role": "participant"
+      }
+    ],
+    "research": {
+      "hypotheses": [],
+      "question": "Is belief in fake news explained by lack of reasoning rather than by partisan motivated reasoning?"
+    },
+    "schema_version": "2.0.0",
+    "steps": [
+      {
+        "components": [
+          {
+            "config": {
+              "finish": true,
+              "items": [
+                {
+                  "id": "crt_race",
+                  "max": 7,
+                  "min": 1,
+                  "options": [
+                    "First",
+                    "Second",
+                    "Third",
+                    "Other"
+                  ],
+                  "prompt": "If you're running a race and you pass the person in second place, what place are you in?",
+                  "type": "choice"
+                },
+                {
+                  "id": "crt_sheep",
+                  "max": 7,
+                  "min": 1,
+                  "options": [
+                    "7",
+                    "8",
+                    "15",
+                    "Other"
+                  ],
+                  "prompt": "A farmer had 15 sheep and all but 8 died. How many are left?",
+                  "type": "choice"
+                },
+                {
+                  "id": "crt_emily",
+                  "max": 7,
+                  "min": 1,
+                  "options": [
+                    "June",
+                    "Emily",
+                    "July",
+                    "Other"
+                  ],
+                  "prompt": "Emily's father has three daughters. The first two are named April and May. What is the third daughter's name?",
+                  "type": "choice"
+                },
+                {
+                  "id": "crt_hole",
+                  "max": 7,
+                  "min": 1,
+                  "options": [
+                    "27",
+                    "0",
+                    "9",
+                    "Other"
+                  ],
+                  "prompt": "How many cubic feet of dirt are there in a hole that is 3 feet deep, 3 feet wide and 3 feet long?",
+                  "type": "choice"
+                }
+              ],
+              "prompt": "Please answer these questions.",
+              "visibility": "private"
+            },
+            "id": "hnf.questionnaire.questionnaire",
+            "version": "1.0.0"
+          }
+        ],
+        "id": "crt",
+        "title": "Reasoning questions"
+      },
+      {
+        "components": [
+          {
+            "config": {
+              "finish": true,
+              "items": [
+                {
+                  "id": "true_dem_1",
+                  "max": 4,
+                  "min": 1,
+                  "options": [],
+                  "prompt": "\"Supreme Court rules that same-sex couples have a constitutional right to marry in every state\"",
+                  "type": "scale"
+                },
+                {
+                  "id": "true_dem_2",
+                  "max": 4,
+                  "min": 1,
+                  "options": [],
+                  "prompt": "\"Nearly every country in the world adopts the Paris climate agreement to limit global warming\"",
+                  "type": "scale"
+                },
+                {
+                  "id": "true_dem_3",
+                  "max": 4,
+                  "min": 1,
+                  "options": [],
+                  "prompt": "\"Share of Americans without health insurance falls to a record low after the Affordable Care Act\"",
+                  "type": "scale"
+                },
+                {
+                  "id": "true_rep_1",
+                  "max": 4,
+                  "min": 1,
+                  "options": [],
+                  "prompt": "\"New tax law cuts the US corporate tax rate from 35% to 21%\"",
+                  "type": "scale"
+                },
+                {
+                  "id": "true_rep_2",
+                  "max": 4,
+                  "min": 1,
+                  "options": [],
+                  "prompt": "\"United States becomes a net exporter of petroleum for the first time in decades\"",
+                  "type": "scale"
+                },
+                {
+                  "id": "true_rep_3",
+                  "max": 4,
+                  "min": 1,
+                  "options": [],
+                  "prompt": "\"Supreme Court overturns Roe v. Wade and returns abortion law to the states\"",
+                  "type": "scale"
+                },
+                {
+                  "id": "false_dem_1",
+                  "max": 4,
+                  "min": 1,
+                  "options": [],
+                  "prompt": "\"Leaked memo shows Republican leaders planned to cancel the next presidential election\"",
+                  "type": "scale"
+                },
+                {
+                  "id": "false_dem_2",
+                  "max": 4,
+                  "min": 1,
+                  "options": [],
+                  "prompt": "\"Republican lawmakers pass bill making voting by mail a felony\"",
+                  "type": "scale"
+                },
+                {
+                  "id": "false_dem_3",
+                  "max": 4,
+                  "min": 1,
+                  "options": [],
+                  "prompt": "\"Oil companies signed a secret pact with Republican leaders to repeal every clean-air law\"",
+                  "type": "scale"
+                },
+                {
+                  "id": "false_rep_1",
+                  "max": 4,
+                  "min": 1,
+                  "options": [],
+                  "prompt": "\"House Democrats pass bill banning private ownership of all guns\"",
+                  "type": "scale"
+                },
+                {
+                  "id": "false_rep_2",
+                  "max": 4,
+                  "min": 1,
+                  "options": [],
+                  "prompt": "\"Federal investigation finds millions of non-citizens voted in the last presidential election\"",
+                  "type": "scale"
+                },
+                {
+                  "id": "false_rep_3",
+                  "max": 4,
+                  "min": 1,
+                  "options": [],
+                  "prompt": "\"Democratic governors agree to replace their police departments with unarmed volunteers\"",
+                  "type": "scale"
+                }
+              ],
+              "prompt": "You will see news headlines. To the best of your knowledge, how accurate is this headline? 1 = not at all accurate, 4 = very accurate.",
+              "visibility": "private"
+            },
+            "id": "hnf.questionnaire.questionnaire",
+            "version": "1.0.0"
+          }
+        ],
+        "id": "headlines",
+        "title": "Rate headlines"
+      }
+    ],
+    "title": "Lazy, not biased"
+  },
+  "packages": [
+    {
+      "bundle_id": "hnf.participants",
+      "version": "1.0.0",
+      "digest": "3eba369193895ce162da928faffcb34ce74512a9c74d86bf2acc252f11fbcaee"
+    },
+    {
+      "bundle_id": "hnf.questionnaire",
+      "version": "1.0.0",
+      "digest": "9d1c1b477a6ed605f1fcaf202dd43d997491b305e660ab9812218505c65f9c7b"
+    },
+    {
+      "bundle_id": "hnf.survey_measures",
+      "version": "1.0.0",
+      "digest": "746f02b0c0e687ae7ec7947f3e3cd437e1ad0ec63bf33336e4e194138887558d"
+    }
+  ]
+}

@@ -1,0 +1,287 @@
+{
+  "format": "hnf.template.v1",
+  "name": "Algorithm aversion after seeing an algorithm err",
+  "author": "Human Not Found",
+  "description": "Original study: Dietvorst, B. J., Simmons, J. P., & Massey, C. (2015). Algorithm aversion: People erroneously avoid algorithms after seeing them err. Journal of Experimental Psychology: General, 144(1), 114-126. Participants forecast MBA students' success from admissions data. Those who had seen a statistical model's forecasts and errors were less likely to bet their bonus on the model, and more likely to choose their own forecasts, than those who had not, even when they saw that the model outperformed them. In this template ten participants read the forecasting task and its incentive, then choose whose forecasts decide their bonus for the next ten cases and rate their confidence in each. Conditions: no practice information (control); a summary of the model's errors in ten practice cases (model); or the model's and their own errors, the model being better (both). The original had participants make the practice forecasts themselves and a fourth condition (own forecasts only); here the practice feedback is a written summary. Compare the share choosing the model between conditions. Participants are simulated: each is a Model participant, using the free test model until you choose a model, so the first runs only check the design; with the test model every participant takes the sample answer.",
+  "created_at": "2026-11-19T11:49:21.117+00:00",
+  "spec": {
+    "components": [
+      {
+        "config": {
+          "finish": true,
+          "items": [
+            {
+              "id": "bonus_source",
+              "max": 7,
+              "min": 1,
+              "options": [
+                "My own forecasts",
+                "The model's forecasts"
+              ],
+              "prompt": "For the next 10 cases, whose forecasts should decide your bonus?",
+              "type": "choice"
+            },
+            {
+              "id": "confidence_model",
+              "max": 5,
+              "min": 1,
+              "options": [],
+              "prompt": "How confident are you in the model's forecasts? 1 = none, 5 = a lot.",
+              "type": "scale"
+            },
+            {
+              "id": "confidence_self",
+              "max": 5,
+              "min": 1,
+              "options": [],
+              "prompt": "How confident are you in your own forecasts? 1 = none, 5 = a lot.",
+              "type": "scale"
+            }
+          ],
+          "prompt": "You will forecast how well MBA applicants do in their program, as a percentile from 1 to 100, from their undergraduate degree, GMAT scores, years of work experience and interview rating. A statistical model built by analysts makes the same forecasts from the same data. Your bonus depends on how close the forecasts are to the real outcomes.",
+          "visibility": "private"
+        },
+        "id": "hnf.questionnaire.questionnaire",
+        "version": "1.0.0"
+      }
+    ],
+    "conditions": [
+      {
+        "id": "control",
+        "label": "No practice information",
+        "overrides": []
+      },
+      {
+        "id": "model",
+        "label": "Saw the model's errors",
+        "overrides": [
+          {
+            "path": "/components/0/config/prompt",
+            "value": "You will forecast how well MBA applicants do in their program, as a percentile from 1 to 100, from their undergraduate degree, GMAT scores, years of work experience and interview rating. A statistical model built by analysts makes the same forecasts from the same data. Your bonus depends on how close the forecasts are to the real outcomes. In the first 10 practice cases you saw the model's forecasts next to the real outcomes. The model was off by 17, 4, 26, 9, 31, 12, 6, 22, 15 and 8 percentile points; in one case it was off by 31 points."
+          }
+        ]
+      },
+      {
+        "id": "both",
+        "label": "Saw both, the model better",
+        "overrides": [
+          {
+            "path": "/components/0/config/prompt",
+            "value": "You will forecast how well MBA applicants do in their program, as a percentile from 1 to 100, from their undergraduate degree, GMAT scores, years of work experience and interview rating. A statistical model built by analysts makes the same forecasts from the same data. Your bonus depends on how close the forecasts are to the real outcomes. In the first 10 practice cases you made your own forecasts and saw the model's. The model was off by 17, 4, 26, 9, 31, 12, 6, 22, 15 and 8 percentile points (average 15). You were off by 21, 10, 30, 14, 26, 19, 11, 28, 17 and 14 points (average 19)."
+          }
+        ]
+      }
+    ],
+    "description": "After seeing a model's errors or not, ten participants choose the model or themselves for their bonus.",
+    "environment": {
+      "initial_state": {
+        "private_by_participant": {},
+        "shared": {}
+      }
+    },
+    "execution": {
+      "max_actions_per_run": 20,
+      "max_estimated_cost_usd_per_run": 2.0,
+      "max_memory_events": 40,
+      "max_model_calls_per_run": 40,
+      "max_wall_seconds_per_run": 3600,
+      "repetitions_per_condition": 10,
+      "seed": 1
+    },
+    "experiment_id": "algorithm-aversion",
+    "measurements": [
+      {
+        "evaluator": {
+          "config": {
+            "step": ""
+          },
+          "id": "hnf.questionnaire.summary",
+          "version": "1.0.0"
+        },
+        "id": "choice",
+        "label": "Choice of forecasts",
+        "scope": "run"
+      }
+    ],
+    "participants": [
+      {
+        "agent": {
+          "config": {
+            "instructions": "Answer as this person would, from their own views, knowledge and habits, not as an assistant. Keep the person's views even when they differ from yours.",
+            "model_ref": "default",
+            "persona": "You are a 34-year-old woman from Ohio. You work as a nurse and have some college education. You identify as a Democrat."
+          },
+          "id": "hnf.participants.model",
+          "version": "1.0.0"
+        },
+        "display_name": "Participant 1",
+        "enabled": true,
+        "id": "p1",
+        "private_context": {},
+        "role": "participant"
+      },
+      {
+        "agent": {
+          "config": {
+            "instructions": "Answer as this person would, from their own views, knowledge and habits, not as an assistant. Keep the person's views even when they differ from yours.",
+            "model_ref": "default",
+            "persona": "You are a 58-year-old man from Texas. You own a small plumbing business and finished high school. You identify as a Republican."
+          },
+          "id": "hnf.participants.model",
+          "version": "1.0.0"
+        },
+        "display_name": "Participant 2",
+        "enabled": true,
+        "id": "p2",
+        "private_context": {},
+        "role": "participant"
+      },
+      {
+        "agent": {
+          "config": {
+            "instructions": "Answer as this person would, from their own views, knowledge and habits, not as an assistant. Keep the person's views even when they differ from yours.",
+            "model_ref": "default",
+            "persona": "You are a 27-year-old man from California. You test software and have a bachelor's degree. You identify as a Democrat."
+          },
+          "id": "hnf.participants.model",
+          "version": "1.0.0"
+        },
+        "display_name": "Participant 3",
+        "enabled": true,
+        "id": "p3",
+        "private_context": {},
+        "role": "participant"
+      },
+      {
+        "agent": {
+          "config": {
+            "instructions": "Answer as this person would, from their own views, knowledge and habits, not as an assistant. Keep the person's views even when they differ from yours.",
+            "model_ref": "default",
+            "persona": "You are a 45-year-old woman from Georgia. You are a school administrator with a master's degree. You identify as a Republican."
+          },
+          "id": "hnf.participants.model",
+          "version": "1.0.0"
+        },
+        "display_name": "Participant 4",
+        "enabled": true,
+        "id": "p4",
+        "private_context": {},
+        "role": "participant"
+      },
+      {
+        "agent": {
+          "config": {
+            "instructions": "Answer as this person would, from their own views, knowledge and habits, not as an assistant. Keep the person's views even when they differ from yours.",
+            "model_ref": "default",
+            "persona": "You are a 63-year-old retired bank clerk from Pennsylvania, a woman who finished high school. You identify as a Democrat."
+          },
+          "id": "hnf.participants.model",
+          "version": "1.0.0"
+        },
+        "display_name": "Participant 5",
+        "enabled": true,
+        "id": "p5",
+        "private_context": {},
+        "role": "participant"
+      },
+      {
+        "agent": {
+          "config": {
+            "instructions": "Answer as this person would, from their own views, knowledge and habits, not as an assistant. Keep the person's views even when they differ from yours.",
+            "model_ref": "default",
+            "persona": "You are a 39-year-old truck driver from Arizona, a man who finished high school. You identify as a Republican."
+          },
+          "id": "hnf.participants.model",
+          "version": "1.0.0"
+        },
+        "display_name": "Participant 6",
+        "enabled": true,
+        "id": "p6",
+        "private_context": {},
+        "role": "participant"
+      },
+      {
+        "agent": {
+          "config": {
+            "instructions": "Answer as this person would, from their own views, knowledge and habits, not as an assistant. Keep the person's views even when they differ from yours.",
+            "model_ref": "default",
+            "persona": "You are a 22-year-old woman from New York studying at a state university. You identify as a Democrat."
+          },
+          "id": "hnf.participants.model",
+          "version": "1.0.0"
+        },
+        "display_name": "Participant 7",
+        "enabled": true,
+        "id": "p7",
+        "private_context": {},
+        "role": "participant"
+      },
+      {
+        "agent": {
+          "config": {
+            "instructions": "Answer as this person would, from their own views, knowledge and habits, not as an assistant. Keep the person's views even when they differ from yours.",
+            "model_ref": "default",
+            "persona": "You are a 51-year-old man from Florida who sells real estate and has a bachelor's degree. You identify as a Republican."
+          },
+          "id": "hnf.participants.model",
+          "version": "1.0.0"
+        },
+        "display_name": "Participant 8",
+        "enabled": true,
+        "id": "p8",
+        "private_context": {},
+        "role": "participant"
+      },
+      {
+        "agent": {
+          "config": {
+            "instructions": "Answer as this person would, from their own views, knowledge and habits, not as an assistant. Keep the person's views even when they differ from yours.",
+            "model_ref": "default",
+            "persona": "You are a 70-year-old retired autoworker from Michigan, a man who finished high school. You identify as a Democrat."
+          },
+          "id": "hnf.participants.model",
+          "version": "1.0.0"
+        },
+        "display_name": "Participant 9",
+        "enabled": true,
+        "id": "p9",
+        "private_context": {},
+        "role": "participant"
+      },
+      {
+        "agent": {
+          "config": {
+            "instructions": "Answer as this person would, from their own views, knowledge and habits, not as an assistant. Keep the person's views even when they differ from yours.",
+            "model_ref": "default",
+            "persona": "You are a 31-year-old woman from Missouri who stays at home with her children and has some college education. You identify as a Republican."
+          },
+          "id": "hnf.participants.model",
+          "version": "1.0.0"
+        },
+        "display_name": "Participant 10",
+        "enabled": true,
+        "id": "p10",
+        "private_context": {},
+        "role": "participant"
+      }
+    ],
+    "research": {
+      "hypotheses": [],
+      "question": "Do people avoid an algorithm after seeing it make mistakes, even when it beats them?"
+    },
+    "schema_version": "2.0.0",
+    "title": "Algorithm aversion"
+  },
+  "packages": [
+    {
+      "bundle_id": "hnf.participants",
+      "version": "1.0.0",
+      "digest": "3eba369193895ce162da928faffcb34ce74512a9c74d86bf2acc252f11fbcaee"
+    },
+    {
+      "bundle_id": "hnf.questionnaire",
+      "version": "1.0.0",
+      "digest": "9d1c1b477a6ed605f1fcaf202dd43d997491b305e660ab9812218505c65f9c7b"
+    }
+  ]
+}

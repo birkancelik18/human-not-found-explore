@@ -1,0 +1,304 @@
+{
+  "manifest": {
+    "bundle_id": "hnf.survey_measures",
+    "version": "1.0.0",
+    "author": "Human Not Found",
+    "description": "Measures computed from questionnaire answers: item contrast (e.g. truth discernment), answer-key accuracy, weight of advice, and change between steps.",
+    "permissions": [
+      "read_shared_state",
+      "read_private_actions"
+    ],
+    "components": [
+      {
+        "id": "hnf.survey_measures.item_contrast",
+        "family": "evaluator",
+        "entrypoint": "item_contrast",
+        "description": "Item contrast",
+        "about": {
+          "summary": "The mean answer to one group of scale items minus another, such as true minus false headlines (truth discernment).",
+          "how_it_works": "Uses each participant's latest questionnaire answers in the step. An item belongs to a group when its ID starts with one of the group's prefixes (a full item ID also works). For each participant, takes the mean of their group A items minus the mean of their group B items; the value is the mean over participants. Only scale answers count.",
+          "outputs": [
+            {
+              "label": "Item contrast",
+              "unit": "scale points",
+              "description": "Mean over participants of (group A mean - group B mean)."
+            },
+            {
+              "label": "Details",
+              "description": "The value for each participant, so results can be split by persona."
+            }
+          ]
+        },
+        "config_schema": {
+          "type": "object",
+          "properties": {
+            "group_a": {
+              "type": "array",
+              "title": "Group A item IDs or prefixes",
+              "minItems": 1,
+              "maxItems": 30,
+              "items": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 64
+              },
+              "default": [
+                "true_"
+              ]
+            },
+            "group_b": {
+              "type": "array",
+              "title": "Group B item IDs or prefixes",
+              "minItems": 1,
+              "maxItems": 30,
+              "items": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 64
+              },
+              "default": [
+                "false_"
+              ]
+            },
+            "step": {
+              "type": "string",
+              "maxLength": 120,
+              "title": "Step (empty: whole run)",
+              "default": "",
+              "x-hnf-reference": "step"
+            }
+          },
+          "required": [
+            "group_a",
+            "group_b",
+            "step"
+          ],
+          "additionalProperties": false
+        }
+      },
+      {
+        "id": "hnf.survey_measures.answer_key_accuracy",
+        "family": "evaluator",
+        "entrypoint": "answer_key_accuracy",
+        "description": "Answer-key accuracy",
+        "about": {
+          "summary": "The share of questionnaire items each participant answered correctly, against an answer key.",
+          "how_it_works": "Uses each participant's latest questionnaire answers in the step. An answer is correct when its text equals the key's answer (numbers are compared as text, so write 8 for the scale answer 8). Items a participant did not answer are left out of their share. The value is the mean share over participants; details also give the share correct per item.",
+          "outputs": [
+            {
+              "label": "Answer-key accuracy",
+              "unit": "share correct",
+              "description": "Mean over participants of the share of key items answered correctly."
+            },
+            {
+              "label": "Details",
+              "description": "The value for each participant, so results can be split by persona."
+            }
+          ]
+        },
+        "config_schema": {
+          "type": "object",
+          "properties": {
+            "answer_key": {
+              "type": "array",
+              "title": "Answer key",
+              "minItems": 1,
+              "maxItems": 30,
+              "default": [
+                {
+                  "item": "q1",
+                  "answer": "8"
+                }
+              ],
+              "items": {
+                "type": "object",
+                "properties": {
+                  "item": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 64,
+                    "title": "Item ID"
+                  },
+                  "answer": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 200,
+                    "title": "Correct answer"
+                  }
+                },
+                "required": [
+                  "item",
+                  "answer"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "step": {
+              "type": "string",
+              "maxLength": 120,
+              "title": "Step (empty: whole run)",
+              "default": "",
+              "x-hnf-reference": "step"
+            }
+          },
+          "required": [
+            "answer_key",
+            "step"
+          ],
+          "additionalProperties": false
+        }
+      },
+      {
+        "id": "hnf.survey_measures.weight_of_advice",
+        "family": "evaluator",
+        "entrypoint": "weight_of_advice",
+        "description": "Weight of advice",
+        "about": {
+          "summary": "How far participants moved from their first estimate toward the advice they were given: 0 means they ignored it, 1 that they adopted it.",
+          "how_it_works": "For each participant and each advised item: (final estimate - first estimate) / (advice - first estimate), from their latest numeric answers in the two steps. Items where the advice equals the first estimate are skipped, because the weight is undefined. With 'Limit to 0-1' on, weights below 0 count as 0 and above 1 as 1. The value is the mean over participants of their mean weight.",
+          "outputs": [
+            {
+              "label": "Weight of advice",
+              "unit": "weight of advice",
+              "description": "Mean weight of advice over participants."
+            },
+            {
+              "label": "Details",
+              "description": "The value for each participant, so results can be split by persona."
+            }
+          ]
+        },
+        "config_schema": {
+          "type": "object",
+          "properties": {
+            "advice": {
+              "type": "array",
+              "title": "Advice given per item",
+              "minItems": 1,
+              "maxItems": 30,
+              "default": [
+                {
+                  "item": "estimate",
+                  "value": 100
+                }
+              ],
+              "items": {
+                "type": "object",
+                "properties": {
+                  "item": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 64,
+                    "title": "Item ID"
+                  },
+                  "value": {
+                    "type": "number",
+                    "title": "Advice"
+                  }
+                },
+                "required": [
+                  "item",
+                  "value"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "first_step": {
+              "type": "string",
+              "maxLength": 120,
+              "title": "Step with the first estimates",
+              "default": "",
+              "x-hnf-reference": "step"
+            },
+            "final_step": {
+              "type": "string",
+              "maxLength": 120,
+              "title": "Step with the final estimates",
+              "default": "",
+              "x-hnf-reference": "step"
+            },
+            "truncate": {
+              "type": "boolean",
+              "title": "Limit to 0-1",
+              "default": true
+            }
+          },
+          "required": [
+            "advice",
+            "first_step",
+            "final_step",
+            "truncate"
+          ],
+          "additionalProperties": false
+        }
+      },
+      {
+        "id": "hnf.survey_measures.step_change",
+        "family": "evaluator",
+        "entrypoint": "step_change",
+        "description": "Change between steps",
+        "about": {
+          "summary": "How the answers to one questionnaire item changed between two steps, such as vaccination intent before and after a message.",
+          "how_it_works": "Uses the latest answers of participants who answered the item in both steps. With an answer to count, the value is the share giving that answer after minus the share before. Without one, it is the mean answer after minus the mean before (scale items).",
+          "outputs": [
+            {
+              "label": "Change between steps",
+              "unit": "change",
+              "description": "Change in the share giving the chosen answer, or in the mean answer."
+            },
+            {
+              "label": "Details",
+              "description": "The value for each participant, so results can be split by persona."
+            }
+          ]
+        },
+        "config_schema": {
+          "type": "object",
+          "properties": {
+            "item": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 64,
+              "title": "Item ID",
+              "default": "intent"
+            },
+            "target": {
+              "type": "string",
+              "maxLength": 200,
+              "title": "Answer to count (empty: change in the mean)",
+              "default": ""
+            },
+            "before_step": {
+              "type": "string",
+              "maxLength": 120,
+              "title": "Step before",
+              "default": "",
+              "x-hnf-reference": "step"
+            },
+            "after_step": {
+              "type": "string",
+              "maxLength": 120,
+              "title": "Step after",
+              "default": "",
+              "x-hnf-reference": "step"
+            }
+          },
+          "required": [
+            "item",
+            "target",
+            "before_step",
+            "after_step"
+          ],
+          "additionalProperties": false
+        }
+      }
+    ],
+    "contract_version": "1.0.0",
+    "digest": "sha256:aee085fb8469c5ad9e4e0e31e05a19e8136cb42a6d7c94de753ced36a85479d4"
+  },
+  "artifact": {
+    "format": "python.source.v1",
+    "source": "\"\"\"Measures computed from questionnaire answers: item contrast, answer-key accuracy, weight of advice, change.\"\"\"\n\n\ndef answers(request, step):\n    \"\"\"Each participant's latest questionnaire answers in the step (empty step: whole run).\"\"\"\n    latest = {}\n    for record in request[\"authorized_events\"]:\n        if step and record[\"step_id\"] != step:\n            continue\n        if record[\"event_type\"] == \"action_applied\" and record[\"payload\"][\"action_type\"] == \"questionnaire.answers\":\n            latest[record[\"actor_id\"]] = record[\"payload\"][\"value\"]\n    return latest\n\n\ndef mean(values):\n    return round(sum(values) / len(values), 6) if values else None\n\n\ndef missing(reason):\n    return {\"status\": \"missing\", \"value\": None, \"details\": {\"reason\": reason}}\n\n\ndef in_group(item, prefixes):\n    return any(item.startswith(prefix) for prefix in prefixes)\n\n\ndef item_contrast(request):\n    config = request[\"config\"]\n    latest = answers(request, config[\"step\"])\n    by_participant = {}\n    for actor, answer in sorted(latest.items()):\n        numbers = {key: value for key, value in answer.items() if type(value) in (int, float)}\n        a = [value for key, value in numbers.items() if in_group(key, config[\"group_a\"])]\n        b = [value for key, value in numbers.items() if in_group(key, config[\"group_b\"])]\n        if a and b:\n            by_participant[actor] = {\"mean_a\": mean(a), \"mean_b\": mean(b), \"contrast\": round(mean(a) - mean(b), 6)}\n    if not by_participant:\n        return missing(\"No participant answered scale items in both groups in this step.\")\n    rows = list(by_participant.values())\n    return {\"status\": \"ok\", \"value\": mean([row[\"contrast\"] for row in rows]), \"unit\": \"scale points (group A - group B)\",\n            \"details\": {\"mean_a\": mean([row[\"mean_a\"] for row in rows]), \"mean_b\": mean([row[\"mean_b\"] for row in rows]),\n                        \"by_participant\": by_participant}}\n\n\ndef answer_key_accuracy(request):\n    config = request[\"config\"]\n    latest = answers(request, config[\"step\"])\n    key = {entry[\"item\"]: entry[\"answer\"] for entry in config[\"answer_key\"]}\n    by_participant, by_item = {}, {item: [] for item in key}\n    for actor, answer in sorted(latest.items()):\n        scored = [str(answer[item]) == correct for item, correct in key.items() if item in answer]\n        for item, correct in key.items():\n            if item in answer:\n                by_item[item].append(str(answer[item]) == correct)\n        if scored:\n            by_participant[actor] = {\"correct\": sum(scored), \"answered\": len(scored), \"accuracy\": mean(scored)}\n    if not by_participant:\n        return missing(\"No participant answered an item in the answer key in this step.\")\n    return {\"status\": \"ok\", \"value\": mean([row[\"accuracy\"] for row in by_participant.values()]), \"unit\": \"share correct\",\n            \"details\": {\"by_participant\": by_participant,\n                        \"by_item\": {item: mean(marks) for item, marks in by_item.items() if marks}}}\n\n\ndef weight_of_advice(request):\n    config = request[\"config\"]\n    first, final = answers(request, config[\"first_step\"]), answers(request, config[\"final_step\"])\n    advice = {entry[\"item\"]: entry[\"value\"] for entry in config[\"advice\"]}\n    by_participant = {}\n    for actor in sorted(set(first) & set(final)):\n        weights = {}\n        for item, offered in advice.items():\n            before, after = first[actor].get(item), final[actor].get(item)\n            if type(before) not in (int, float) or type(after) not in (int, float) or offered == before:\n                continue  # the weight is undefined when the advice equals the first estimate\n            weight = (after - before) / (offered - before)\n            weights[item] = round(min(max(weight, 0.0), 1.0) if config[\"truncate\"] else weight, 6)\n        if weights:\n            by_participant[actor] = {\"weights\": weights, \"mean\": mean(list(weights.values()))}\n    if not by_participant:\n        return missing(\"No participant gave a first and a final estimate that differ from the advice.\")\n    return {\"status\": \"ok\", \"value\": mean([row[\"mean\"] for row in by_participant.values()]), \"unit\": \"weight of advice (0 = ignored, 1 = adopted)\",\n            \"details\": {\"by_participant\": by_participant}}\n\n\ndef step_change(request):\n    config = request[\"config\"]\n    item, target = config[\"item\"], config[\"target\"]\n    before, after = answers(request, config[\"before_step\"]), answers(request, config[\"after_step\"])\n    pairs = {actor: (before[actor].get(item), after[actor].get(item)) for actor in sorted(set(before) & set(after))\n             if item in before[actor] and item in after[actor]}\n    if not pairs:\n        return missing(f\"No participant answered '{item}' in both steps.\")\n    if target:\n        share = lambda index: mean([pair[index] == target for pair in pairs.values()])\n        value, unit, details = round(share(1) - share(0), 6), f\"change in the share answering '{target}'\", {\n            \"before\": share(0), \"after\": share(1)}\n    else:\n        numbers = {actor: pair for actor, pair in pairs.items() if all(type(v) in (int, float) for v in pair)}\n        if not numbers:\n            return missing(f\"'{item}' has no numeric answers; set the answer to count.\")\n        avg = lambda index: mean([pair[index] for pair in numbers.values()])\n        value, unit, details = round(avg(1) - avg(0), 6), \"change in the mean answer\", {\"before\": avg(0), \"after\": avg(1)}\n    details[\"by_participant\"] = {actor: {\"before\": pair[0], \"after\": pair[1]} for actor, pair in pairs.items()}\n    return {\"status\": \"ok\", \"value\": value, \"unit\": unit, \"details\": details}\n\n\ndef self_test():\n    def run(function, config, events):\n        return function({\"config\": config, \"authorized_events\": events})[\"value\"]\n    def said(actor, step, value):\n        return {\"event_type\": \"action_applied\", \"step_id\": step, \"actor_id\": actor,\n                \"payload\": {\"action_type\": \"questionnaire.answers\", \"value\": value}}\n    rated = [said(\"p1\", \"s\", {\"true_1\": 4, \"false_1\": 1}), said(\"p2\", \"s\", {\"true_1\": 3, \"false_1\": 2})]\n    advice = [said(\"p1\", \"a\", {\"w\": 100}), said(\"p1\", \"b\", {\"w\": 150})]\n    intent = [said(\"p1\", \"a\", {\"i\": \"No\"}), said(\"p1\", \"b\", {\"i\": \"Yes\"}), said(\"p2\", \"a\", {\"i\": \"Yes\"}), said(\"p2\", \"b\", {\"i\": \"Yes\"})]\n    return {\"ok\": run(item_contrast, {\"step\": \"s\", \"group_a\": [\"true_\"], \"group_b\": [\"false_\"]}, rated) == 2.0\n            and run(answer_key_accuracy, {\"step\": \"s\", \"answer_key\": [{\"item\": \"true_1\", \"answer\": \"4\"}]}, rated) == 0.5\n            and run(weight_of_advice, {\"first_step\": \"a\", \"final_step\": \"b\", \"truncate\": True,\n                                       \"advice\": [{\"item\": \"w\", \"value\": 200}]}, advice) == 0.5\n            and run(step_change, {\"item\": \"i\", \"target\": \"Yes\", \"before_step\": \"a\", \"after_step\": \"b\"}, intent) == 0.5}\n",
+    "options": {}
+  }
+}
