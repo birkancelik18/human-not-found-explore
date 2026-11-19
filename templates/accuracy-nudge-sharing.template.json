@@ -1,0 +1,369 @@
+{
+  "format": "hnf.template.v1",
+  "name": "Accuracy nudge: sharing COVID-19 headlines",
+  "author": "Human Not Found",
+  "description": "Original study: Pennycook, G., McPhetres, J., Zhang, Y., Lu, J. G., & Rand, D. G. (2020). Fighting COVID-19 misinformation on social media: Experimental evidence for a scalable accuracy-nudge intervention. Psychological Science, 31(7), 770-780. Across two studies with more than 1,700 US adults, people were worse at telling true from false COVID-19 headlines when deciding what to share than when judging accuracy; in Study 2, asking people to judge the accuracy of a single unrelated headline first nearly tripled truth discernment in their sharing intentions. This template follows Study 2 with ten US participants: in the treatment condition they first rate the accuracy of one non-COVID headline, in the control condition they answer a neutral question instead (the original control had no first task), and both then rate how likely they would be to share each of ten COVID-19 headlines (five true, five false) on a 6-point scale. The headlines are new, written for this template from claims circulating in March 2020. Sharing discernment is the mean of true minus false items; compare it between the conditions. Participants are simulated: each is a Model participant, using the free test model until you choose a model, so the first runs only check the design; with the test model every participant takes the sample answer.",
+  "created_at": "2026-11-19T11:49:20.961+00:00",
+  "spec": {
+    "components": [],
+    "conditions": [
+      {
+        "id": "accuracy-prompt",
+        "label": "Accuracy prompt first",
+        "overrides": []
+      },
+      {
+        "id": "control",
+        "label": "Control",
+        "overrides": [
+          {
+            "path": "/steps/0/components/0/config/items/0",
+            "value": {
+              "id": "first",
+              "max": 4,
+              "min": 1,
+              "options": [],
+              "prompt": "How many hours a day do you usually spend on social media? 1 = less than one hour, 4 = more than three hours.",
+              "type": "scale"
+            }
+          }
+        ]
+      }
+    ],
+    "description": "Ten US participants rate sharing intentions for COVID-19 headlines, after an accuracy prompt or not.",
+    "environment": {
+      "initial_state": {
+        "private_by_participant": {},
+        "shared": {}
+      }
+    },
+    "execution": {
+      "max_actions_per_run": 40,
+      "max_estimated_cost_usd_per_run": 2.0,
+      "max_memory_events": 40,
+      "max_model_calls_per_run": 80,
+      "max_wall_seconds_per_run": 3600,
+      "repetitions_per_condition": 10,
+      "seed": 1
+    },
+    "experiment_id": "accuracy-nudge-sharing",
+    "measurements": [
+      {
+        "evaluator": {
+          "config": {
+            "step": "share"
+          },
+          "id": "hnf.questionnaire.summary",
+          "version": "1.0.0"
+        },
+        "id": "sharing",
+        "label": "Sharing intentions",
+        "scope": "run"
+      }
+    ],
+    "participants": [
+      {
+        "agent": {
+          "config": {
+            "instructions": "Answer as this person would, from their own views, knowledge and habits, not as an assistant. Keep the person's views even when they differ from yours.",
+            "model_ref": "default",
+            "persona": "You are a 34-year-old woman from Ohio. You work as a nurse and have some college education. You identify as a Democrat."
+          },
+          "id": "hnf.participants.model",
+          "version": "1.0.0"
+        },
+        "display_name": "Participant 1",
+        "enabled": true,
+        "id": "p1",
+        "private_context": {},
+        "role": "participant"
+      },
+      {
+        "agent": {
+          "config": {
+            "instructions": "Answer as this person would, from their own views, knowledge and habits, not as an assistant. Keep the person's views even when they differ from yours.",
+            "model_ref": "default",
+            "persona": "You are a 58-year-old man from Texas. You own a small plumbing business and finished high school. You identify as a Republican."
+          },
+          "id": "hnf.participants.model",
+          "version": "1.0.0"
+        },
+        "display_name": "Participant 2",
+        "enabled": true,
+        "id": "p2",
+        "private_context": {},
+        "role": "participant"
+      },
+      {
+        "agent": {
+          "config": {
+            "instructions": "Answer as this person would, from their own views, knowledge and habits, not as an assistant. Keep the person's views even when they differ from yours.",
+            "model_ref": "default",
+            "persona": "You are a 27-year-old man from California. You test software and have a bachelor's degree. You identify as a Democrat."
+          },
+          "id": "hnf.participants.model",
+          "version": "1.0.0"
+        },
+        "display_name": "Participant 3",
+        "enabled": true,
+        "id": "p3",
+        "private_context": {},
+        "role": "participant"
+      },
+      {
+        "agent": {
+          "config": {
+            "instructions": "Answer as this person would, from their own views, knowledge and habits, not as an assistant. Keep the person's views even when they differ from yours.",
+            "model_ref": "default",
+            "persona": "You are a 45-year-old woman from Georgia. You are a school administrator with a master's degree. You identify as a Republican."
+          },
+          "id": "hnf.participants.model",
+          "version": "1.0.0"
+        },
+        "display_name": "Participant 4",
+        "enabled": true,
+        "id": "p4",
+        "private_context": {},
+        "role": "participant"
+      },
+      {
+        "agent": {
+          "config": {
+            "instructions": "Answer as this person would, from their own views, knowledge and habits, not as an assistant. Keep the person's views even when they differ from yours.",
+            "model_ref": "default",
+            "persona": "You are a 63-year-old retired bank clerk from Pennsylvania, a woman who finished high school. You identify as a Democrat."
+          },
+          "id": "hnf.participants.model",
+          "version": "1.0.0"
+        },
+        "display_name": "Participant 5",
+        "enabled": true,
+        "id": "p5",
+        "private_context": {},
+        "role": "participant"
+      },
+      {
+        "agent": {
+          "config": {
+            "instructions": "Answer as this person would, from their own views, knowledge and habits, not as an assistant. Keep the person's views even when they differ from yours.",
+            "model_ref": "default",
+            "persona": "You are a 39-year-old truck driver from Arizona, a man who finished high school. You identify as a Republican."
+          },
+          "id": "hnf.participants.model",
+          "version": "1.0.0"
+        },
+        "display_name": "Participant 6",
+        "enabled": true,
+        "id": "p6",
+        "private_context": {},
+        "role": "participant"
+      },
+      {
+        "agent": {
+          "config": {
+            "instructions": "Answer as this person would, from their own views, knowledge and habits, not as an assistant. Keep the person's views even when they differ from yours.",
+            "model_ref": "default",
+            "persona": "You are a 22-year-old woman from New York studying at a state university. You identify as a Democrat."
+          },
+          "id": "hnf.participants.model",
+          "version": "1.0.0"
+        },
+        "display_name": "Participant 7",
+        "enabled": true,
+        "id": "p7",
+        "private_context": {},
+        "role": "participant"
+      },
+      {
+        "agent": {
+          "config": {
+            "instructions": "Answer as this person would, from their own views, knowledge and habits, not as an assistant. Keep the person's views even when they differ from yours.",
+            "model_ref": "default",
+            "persona": "You are a 51-year-old man from Florida who sells real estate and has a bachelor's degree. You identify as a Republican."
+          },
+          "id": "hnf.participants.model",
+          "version": "1.0.0"
+        },
+        "display_name": "Participant 8",
+        "enabled": true,
+        "id": "p8",
+        "private_context": {},
+        "role": "participant"
+      },
+      {
+        "agent": {
+          "config": {
+            "instructions": "Answer as this person would, from their own views, knowledge and habits, not as an assistant. Keep the person's views even when they differ from yours.",
+            "model_ref": "default",
+            "persona": "You are a 70-year-old retired autoworker from Michigan, a man who finished high school. You identify as a Democrat."
+          },
+          "id": "hnf.participants.model",
+          "version": "1.0.0"
+        },
+        "display_name": "Participant 9",
+        "enabled": true,
+        "id": "p9",
+        "private_context": {},
+        "role": "participant"
+      },
+      {
+        "agent": {
+          "config": {
+            "instructions": "Answer as this person would, from their own views, knowledge and habits, not as an assistant. Keep the person's views even when they differ from yours.",
+            "model_ref": "default",
+            "persona": "You are a 31-year-old woman from Missouri who stays at home with her children and has some college education. You identify as a Republican."
+          },
+          "id": "hnf.participants.model",
+          "version": "1.0.0"
+        },
+        "display_name": "Participant 10",
+        "enabled": true,
+        "id": "p10",
+        "private_context": {},
+        "role": "participant"
+      }
+    ],
+    "research": {
+      "hypotheses": [],
+      "question": "Does a prompt to think about accuracy improve truth discernment in sharing?"
+    },
+    "schema_version": "2.0.0",
+    "steps": [
+      {
+        "components": [
+          {
+            "config": {
+              "finish": true,
+              "items": [
+                {
+                  "id": "first",
+                  "max": 4,
+                  "min": 1,
+                  "options": [],
+                  "prompt": "To the best of your knowledge, how accurate is this headline? \"Scientists confirm that the Moon has water ice in craters at its south pole\" 1 = not at all accurate, 4 = very accurate.",
+                  "type": "scale"
+                }
+              ],
+              "prompt": "Before the main task, please answer this question.",
+              "visibility": "private"
+            },
+            "id": "hnf.questionnaire.questionnaire",
+            "version": "1.0.0"
+          }
+        ],
+        "id": "first",
+        "title": "First question"
+      },
+      {
+        "components": [
+          {
+            "config": {
+              "finish": true,
+              "items": [
+                {
+                  "id": "true_1",
+                  "max": 6,
+                  "min": 1,
+                  "options": [],
+                  "prompt": "\"Washing your hands with soap for 20 seconds removes the coronavirus from your skin\"",
+                  "type": "scale"
+                },
+                {
+                  "id": "true_2",
+                  "max": 6,
+                  "min": 1,
+                  "options": [],
+                  "prompt": "\"People without symptoms can still spread the coronavirus\"",
+                  "type": "scale"
+                },
+                {
+                  "id": "true_3",
+                  "max": 6,
+                  "min": 1,
+                  "options": [],
+                  "prompt": "\"Older adults face the highest risk of severe illness from COVID-19\"",
+                  "type": "scale"
+                },
+                {
+                  "id": "true_4",
+                  "max": 6,
+                  "min": 1,
+                  "options": [],
+                  "prompt": "\"Health agencies say vitamin C supplements do not prevent COVID-19\"",
+                  "type": "scale"
+                },
+                {
+                  "id": "true_5",
+                  "max": 6,
+                  "min": 1,
+                  "options": [],
+                  "prompt": "\"Face masks reduce the spread of the respiratory droplets that carry the coronavirus\"",
+                  "type": "scale"
+                },
+                {
+                  "id": "false_1",
+                  "max": 6,
+                  "min": 1,
+                  "options": [],
+                  "prompt": "\"Drinking hot water every 15 minutes flushes the coronavirus into the stomach, where acid kills it\"",
+                  "type": "scale"
+                },
+                {
+                  "id": "false_2",
+                  "max": 6,
+                  "min": 1,
+                  "options": [],
+                  "prompt": "\"5G mobile networks are spreading the coronavirus\"",
+                  "type": "scale"
+                },
+                {
+                  "id": "false_3",
+                  "max": 6,
+                  "min": 1,
+                  "options": [],
+                  "prompt": "\"Gargling with salt water every morning prevents COVID-19 infection\"",
+                  "type": "scale"
+                },
+                {
+                  "id": "false_4",
+                  "max": 6,
+                  "min": 1,
+                  "options": [],
+                  "prompt": "\"Eating raw garlic protects you from catching the coronavirus\"",
+                  "type": "scale"
+                },
+                {
+                  "id": "false_5",
+                  "max": 6,
+                  "min": 1,
+                  "options": [],
+                  "prompt": "\"Hot-air hand dryers kill the coronavirus on your hands\"",
+                  "type": "scale"
+                }
+              ],
+              "prompt": "It is March 2020. You will see news headlines about the coronavirus. For each, how likely would you be to share it online, for example on Facebook or Twitter? 1 = extremely unlikely, 6 = extremely likely.",
+              "visibility": "private"
+            },
+            "id": "hnf.questionnaire.questionnaire",
+            "version": "1.0.0"
+          }
+        ],
+        "id": "share",
+        "title": "Sharing"
+      }
+    ],
+    "title": "Accuracy nudge"
+  },
+  "packages": [
+    {
+      "bundle_id": "hnf.participants",
+      "version": "1.0.0",
+      "digest": "3eba369193895ce162da928faffcb34ce74512a9c74d86bf2acc252f11fbcaee"
+    },
+    {
+      "bundle_id": "hnf.questionnaire",
+      "version": "1.0.0",
+      "digest": "9d1c1b477a6ed605f1fcaf202dd43d997491b305e660ab9812218505c65f9c7b"
+    }
+  ]
+}

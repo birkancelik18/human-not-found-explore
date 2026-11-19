@@ -377,3 +377,439 @@ TEMPLATES = [
                              reporter="", visibility="shared", finish=True)]}],
                   actions=30)},
 ]
+
+# Recent high-citation studies (2015-2026) -----------------------------------------------------------------------
+
+ROLEPLAY = ("Answer as this person would, from their own views, knowledge and habits, not as an assistant. "
+            "Keep the person's views even when they differ from yours.")
+
+# Ten US adults, balanced on party, gender, age and education. Used by the US survey templates.
+US_PANEL = [
+    "You are a 34-year-old woman from Ohio. You work as a nurse and have some college education. You identify as a Democrat.",
+    "You are a 58-year-old man from Texas. You own a small plumbing business and finished high school. You identify as a Republican.",
+    "You are a 27-year-old man from California. You test software and have a bachelor's degree. You identify as a Democrat.",
+    "You are a 45-year-old woman from Georgia. You are a school administrator with a master's degree. You identify as a Republican.",
+    "You are a 63-year-old retired bank clerk from Pennsylvania, a woman who finished high school. You identify as a Democrat.",
+    "You are a 39-year-old truck driver from Arizona, a man who finished high school. You identify as a Republican.",
+    "You are a 22-year-old woman from New York studying at a state university. You identify as a Democrat.",
+    "You are a 51-year-old man from Florida who sells real estate and has a bachelor's degree. You identify as a Republican.",
+    "You are a 70-year-old retired autoworker from Michigan, a man who finished high school. You identify as a Democrat.",
+    "You are a 31-year-old woman from Missouri who stays at home with her children and has some college education. "
+    "You identify as a Republican.",
+]
+
+# Ten adults of mixed age, gender, education and income; the country is added per condition.
+WORLD_PANEL = [
+    "a 24-year-old woman, a university student", "a 37-year-old man who works in a factory",
+    "a 52-year-old woman who runs a small shop", "a 68-year-old retired man who worked as a teacher",
+    "a 29-year-old man who drives for a delivery company", "a 45-year-old woman who works as an accountant",
+    "a 33-year-old woman who works in a hospital kitchen", "a 59-year-old man who farms his own land",
+    "a 41-year-old man who manages an office", "a 19-year-old woman who has just finished school",
+]
+
+
+def panel(personas):
+    """Model participants with a persona each."""
+    return [{"id": f"p{i}", "display_name": f"Participant {i}", "enabled": True, "role": "participant",
+             "agent": ref("hnf.participants.model", model_ref="default", persona=persona, instructions=ROLEPLAY),
+             "private_context": {}} for i, persona in enumerate(personas, 1)]
+
+
+def world(country):
+    return [f"You are {who} living in {country}. You grew up there and share its everyday culture." for who in WORLD_PANEL]
+
+
+def country_condition(identifier, country):
+    return condition(identifier, country, *((f"/participants/{i}/agent/config/persona", persona)
+                                           for i, persona in enumerate(world(country))))
+
+
+def ask(prompt, items, finish=True):
+    return ref("hnf.questionnaire.questionnaire", prompt=prompt, items=items, visibility="private", finish=finish)
+
+
+def scale(identifier, prompt, low, high):
+    return {"id": identifier, "prompt": prompt, "type": "scale", "min": low, "max": high, "options": []}
+
+
+def choice(identifier, prompt, options):
+    return {"id": identifier, "prompt": prompt, "type": "choice", "min": 1, "max": 7, "options": options}
+
+
+def summary(identifier, label, step):
+    return measure(identifier, label, "hnf.questionnaire.summary", step=step)
+
+
+# Political headlines written for these templates. Item ids say whether the headline is true and which party it favours.
+HEADLINES = [
+    ("true_dem_1", "Supreme Court rules that same-sex couples have a constitutional right to marry in every state"),
+    ("true_dem_2", "Nearly every country in the world adopts the Paris climate agreement to limit global warming"),
+    ("true_dem_3", "Share of Americans without health insurance falls to a record low after the Affordable Care Act"),
+    ("true_rep_1", "New tax law cuts the US corporate tax rate from 35% to 21%"),
+    ("true_rep_2", "United States becomes a net exporter of petroleum for the first time in decades"),
+    ("true_rep_3", "Supreme Court overturns Roe v. Wade and returns abortion law to the states"),
+    ("false_dem_1", "Leaked memo shows Republican leaders planned to cancel the next presidential election"),
+    ("false_dem_2", "Republican lawmakers pass bill making voting by mail a felony"),
+    ("false_dem_3", "Oil companies signed a secret pact with Republican leaders to repeal every clean-air law"),
+    ("false_rep_1", "House Democrats pass bill banning private ownership of all guns"),
+    ("false_rep_2", "Federal investigation finds millions of non-citizens voted in the last presidential election"),
+    ("false_rep_3", "Democratic governors agree to replace their police departments with unarmed volunteers"),
+]
+SEEN_HEADLINES = ("true_dem_1", "true_rep_1", "false_dem_1", "false_rep_1")  # shown in the exposure step
+ACCURACY_Q = "To the best of your knowledge, how accurate is this headline? 1 = not at all accurate, 4 = very accurate."
+
+COVID_HEADLINES = [
+    ("true_1", "Washing your hands with soap for 20 seconds removes the coronavirus from your skin"),
+    ("true_2", "People without symptoms can still spread the coronavirus"),
+    ("true_3", "Older adults face the highest risk of severe illness from COVID-19"),
+    ("true_4", "Health agencies say vitamin C supplements do not prevent COVID-19"),
+    ("true_5", "Face masks reduce the spread of the respiratory droplets that carry the coronavirus"),
+    ("false_1", "Drinking hot water every 15 minutes flushes the coronavirus into the stomach, where acid kills it"),
+    ("false_2", "5G mobile networks are spreading the coronavirus"),
+    ("false_3", "Gargling with salt water every morning prevents COVID-19 infection"),
+    ("false_4", "Eating raw garlic protects you from catching the coronavirus"),
+    ("false_5", "Hot-air hand dryers kill the coronavirus on your hands"),
+]
+
+CRT = [  # Thomson & Oppenheimer (2016) CRT-2 items; options add the intuitive and the correct answer.
+    choice("crt_race", "If you're running a race and you pass the person in second place, what place are you in?",
+           ["First", "Second", "Third", "Other"]),
+    choice("crt_sheep", "A farmer had 15 sheep and all but 8 died. How many are left?", ["7", "8", "15", "Other"]),
+    choice("crt_emily", "Emily's father has three daughters. The first two are named April and May. What is the third "
+           "daughter's name?", ["June", "Emily", "July", "Other"]),
+    choice("crt_hole", "How many cubic feet of dirt are there in a hole that is 3 feet deep, 3 feet wide and 3 feet long?",
+           ["27", "0", "9", "Other"]),
+]
+
+# Moral Machine dilemmas, one per attribute. The original randomised the side of each group; here the option order
+# alternates. Option text names the group that is SPARED.
+MM_PROMPT = ("A self-driving car with sudden brake failure will hit one of two groups. It can stay in its lane or swerve. "
+             "For each case, choose which group the car should spare. Everyone else in the case dies.")
+MM = [
+    ("species", "Staying kills 3 people crossing; swerving kills 3 dogs crossing in the other lane.", ["Spare the 3 people", "Spare the 3 dogs"]),
+    ("number", "Staying kills 5 pedestrians; swerving kills 1 pedestrian.", ["Spare the 1 pedestrian", "Spare the 5 pedestrians"]),
+    ("age", "Staying kills 2 children; swerving kills 2 elderly people.", ["Spare the 2 children", "Spare the 2 elderly people"]),
+    ("gender", "Staying kills 2 women; swerving kills 2 men.", ["Spare the 2 men", "Spare the 2 women"]),
+    ("status", "Staying kills 2 business executives; swerving kills 2 homeless people.",
+     ["Spare the 2 business executives", "Spare the 2 homeless people"]),
+    ("fitness", "Staying kills 2 athletes; swerving kills 2 large, unfit people.", ["Spare the 2 large, unfit people", "Spare the 2 athletes"]),
+    ("law", "Staying kills 2 people crossing on a green signal; swerving kills 2 people crossing on a red signal.",
+     ["Spare those crossing on green", "Spare those crossing on red"]),
+    ("intervention", "Staying kills 2 pedestrians ahead; swerving kills 2 other pedestrians in the other lane.",
+     ["Stay (spare those in the other lane)", "Swerve (spare those ahead)"]),
+    ("passengers", "Staying kills 3 pedestrians; swerving into a barrier kills the 3 passengers in the car.",
+     ["Spare the 3 passengers", "Spare the 3 pedestrians"]),
+]
+
+GPS_ITEMS = [  # Qualitative items of the Global Preference Survey (Falk et al., 2016 module description).
+    scale("risk", "In general, how willing or unwilling are you to take risks? 0 = completely unwilling, 10 = very willing.", 0, 10),
+    scale("patience", "How willing are you to give up something that is beneficial for you today in order to benefit more "
+          "from that in the future? 0 = completely unwilling, 10 = very willing.", 0, 10),
+    scale("pos_reciprocity", "When someone does me a favor I am willing to return it. 0 = does not describe me at all, "
+          "10 = describes me perfectly.", 0, 10),
+    scale("neg_reciprocity_revenge", "If I am treated very unjustly, I will take revenge at the first occasion, even if there "
+          "is a cost to do so. 0 = does not describe me at all, 10 = describes me perfectly.", 0, 10),
+    scale("neg_reciprocity_self", "How willing are you to punish someone who treats you unfairly, even if there may be costs "
+          "for you? 0 = completely unwilling, 10 = very willing.", 0, 10),
+    scale("neg_reciprocity_others", "How willing are you to punish someone who treats others unfairly, even if there may be "
+          "costs for you? 0 = completely unwilling, 10 = very willing.", 0, 10),
+    scale("altruism", "How willing are you to give to good causes without expecting anything in return? 0 = completely "
+          "unwilling, 10 = very willing.", 0, 10),
+    scale("donation", "Imagine that today you unexpectedly received an amount equal to about 1,000 euro in your local "
+          "currency. How much of it, in euro, would you donate to a good cause? (0 to 1000)", 0, 1000),
+    scale("trust", "I assume that people have only the best intentions. 0 = does not describe me at all, 10 = describes me "
+          "perfectly.", 0, 10),
+]
+
+# Algorithm appreciation: estimate, receive advice, revise (Logg, Minson & Moore, 2019, Experiment 1A style).
+PEOPLE_TO_ESTIMATE = [
+    ("weight_1", "A man, 5 feet 10 inches tall, broad shoulders, slightly rounded stomach, wearing a medium T-shirt."),
+    ("weight_2", "A woman, 5 feet 4 inches tall, slim, runs regularly, wearing size small running clothes."),
+    ("weight_3", "A man, 6 feet 2 inches tall, heavily built, works in construction, wearing an XXL jacket."),
+]
+ADVICE = {"weight_1": 186, "weight_2": 121, "weight_3": 238}
+ESTIMATE_PROMPT = "Estimate each person's weight in pounds from the description (80 to 350)."
+ADVICE_SOURCE = {"algorithm": "an algorithm that estimates weight from descriptions",
+                 "person": "the average estimate of 275 participants in a previous study"}
+
+
+def advice_prompt(source):
+    lines = "; ".join(f"{key}: {value} lb" for key, value in ADVICE.items())
+    return (f"You have already given your own estimates. Here are the estimates of {ADVICE_SOURCE[source]}: {lines}. "
+            f"Now give your final estimate for each person (80 to 350). You may keep your first estimate or change it.")
+
+
+# Algorithm aversion: forecasting MBA applicants' success (Dietvorst, Simmons & Massey, 2015, after Study 1).
+FORECAST_TASK = ("You will forecast how well MBA applicants do in their program, as a percentile from 1 to 100, from "
+                 "their undergraduate degree, GMAT scores, years of work experience and interview rating. A statistical "
+                 "model built by analysts makes the same forecasts from the same data. Your bonus depends on how close "
+                 "the forecasts are to the real outcomes.")
+SEEN = {
+    "control": "",
+    "model": (" In the first 10 practice cases you saw the model's forecasts next to the real outcomes. The model was "
+              "off by 17, 4, 26, 9, 31, 12, 6, 22, 15 and 8 percentile points; in one case it was off by 31 points."),
+    "both": (" In the first 10 practice cases you made your own forecasts and saw the model's. The model was off by 17, 4, "
+             "26, 9, 31, 12, 6, 22, 15 and 8 percentile points (average 15). You were off by 21, 10, 30, 14, 26, 19, 11, "
+             "28, 17 and 14 points (average 19)."),
+}
+FORECAST_ITEMS = [choice("bonus_source", "For the next 10 cases, whose forecasts should decide your bonus?",
+                         ["My own forecasts", "The model's forecasts"]),
+                  scale("confidence_model", "How confident are you in the model's forecasts? 1 = none, 5 = a lot.", 1, 5),
+                  scale("confidence_self", "How confident are you in your own forecasts? 1 = none, 5 = a lot.", 1, 5)]
+
+# Vaccine misinformation (Loomba et al., 2021): posts written for this template, paraphrasing claims circulating in 2020.
+VACCINE_INTENT = choice("intent", "If a new coronavirus vaccine became available, would you accept it for yourself?",
+                        ["Yes, definitely", "Unsure, but leaning towards yes", "Unsure, but leaning towards no",
+                         "No, definitely not"])
+MISINFORMATION_POSTS = (
+    "Post 1: 'The new coronavirus vaccines use technology that will permanently change your DNA. Don't be a guinea pig.' "
+    "Post 2: 'Over 99% of people survive COVID. Why take a rushed vaccine that skipped safety testing?' "
+    "Post 3: 'Doctors are warning that the vaccine could make women infertile. They are not telling you this on TV.' "
+    "Post 4: 'Leaked documents show the vaccine contains a tracking chip.' "
+    "Post 5: 'A nurse fainted on live TV minutes after getting the vaccine. Share before this is deleted.'")
+FACTUAL_POSTS = (
+    "Post 1: 'Coronavirus vaccine trials have enrolled tens of thousands of volunteers to test safety and effectiveness.' "
+    "Post 2: 'mRNA vaccines teach cells to make a harmless protein; they do not enter the nucleus or change your DNA.' "
+    "Post 3: 'Vaccines are reviewed by independent regulators before they are approved for use.' "
+    "Post 4: 'Common side effects of vaccines include a sore arm and tiredness for a day or two.' "
+    "Post 5: 'Getting vaccinated also helps protect people who cannot be vaccinated, such as some cancer patients.'")
+POST_PROMPT = ("It is September 2020. Here are five posts you might see on social media about a coronavirus vaccine. {posts} "
+               "Answer the questions about them.")
+POST_ITEMS = [scale("trustworthy", "Overall, how trustworthy do these posts seem? 1 = not at all, 5 = very.", 1, 5),
+              scale("share", "How likely would you be to share posts like these? 1 = very unlikely, 5 = very likely.", 1, 5)]
+
+AV_PROMPT = ("Imagine a self-driving car with {who} inside, driving at the speed limit. Ten pedestrians suddenly appear in "
+             "its path and it cannot stop. The car can stay on course and kill the ten pedestrians, or swerve into a wall, "
+             "killing {victims} but saving the ten pedestrians.")
+AV_ITEMS = [scale("moral_swerve", "How moral is it for the car to swerve and sacrifice its passengers to save the ten "
+                  "pedestrians? 0 = not at all moral, 100 = completely moral.", 0, 100),
+            scale("buy_utilitarian", "How likely would you be to buy a car programmed to sacrifice its passengers to save "
+                  "more people? 0 = not at all, 100 = extremely likely.", 0, 100),
+            scale("buy_self_protective", "How likely would you be to buy a car programmed to protect its passengers at all "
+                  "costs? 0 = not at all, 100 = extremely likely.", 0, 100),
+            scale("support_regulation", "Should the government require self-driving cars to sacrifice their passengers to "
+                  "save more people? 0 = strongly oppose, 100 = strongly support.", 0, 100)]
+
+TEMPLATES += [
+    {"id": "moral-machine",
+     "name": "Moral Machine: whom should a self-driving car spare?",
+     "description": (
+         "Original study: Awad, E., Dsouza, S., Kim, R., Schulz, J., Henrich, J., Shariff, A., Bonnefon, J.-F., & "
+         "Rahwan, I. (2018). The Moral Machine experiment. Nature, 563(7729), 59-64. An online platform collected about "
+         "40 million decisions from millions of people in 233 countries and territories on dilemmas in which a "
+         "self-driving car must kill one of two groups. Globally, people preferred to spare humans over animals, more "
+         "lives over fewer and the young over the old; countries formed Western, Eastern and Southern clusters that "
+         "weighed these preferences differently. This template gives ten participants nine dilemmas, each varying one "
+         "attribute (species, number, age, gender, social status, fitness, lawfulness, intervention, passengers versus "
+         "pedestrians), and runs three conditions whose participants live in the United States, Japan or Brazil, one "
+         "country from each cluster. The original randomised every attribute of each scene and estimated effects with "
+         "conjoint analysis; here each dilemma isolates one attribute and the option order alternates. Compare the share "
+         "choosing each side per dilemma with the paper's Figure 2 and across conditions with its Figure 3. " + SIM),
+     "spec": spec("moral-machine", "Moral Machine", "Ten participants decide nine self-driving-car dilemmas; three countries.",
+                  "Which lives do people prefer a self-driving car to spare, and does this differ between cultures?",
+                  panel(world("the United States")), [summary("choices", "Choices per dilemma", "")],
+                  components=[ask(MM_PROMPT, [choice(key, text, options) for key, text, options in MM])],
+                  conditions=[country_condition("united-states", "the United States"),
+                              country_condition("japan", "Japan"), country_condition("brazil", "Brazil")],
+                  actions=20)},
+    {"id": "fake-news-cognitive-reflection",
+     "name": "Lazy, not biased: reasoning and belief in fake news",
+     "description": (
+         "Original study: Pennycook, G., & Rand, D. G. (2019). Lazy, not biased: Susceptibility to partisan fake news is "
+         "better explained by lack of reasoning than by motivated reasoning. Cognition, 188, 39-50. In two studies, "
+         "3,446 Mechanical Turk workers took the Cognitive Reflection Test (CRT) and rated the accuracy of real and fake "
+         "political news headlines favouring Democrats or Republicans. Higher CRT scores went with lower belief in fake "
+         "news and better discernment between real and fake, even for headlines that matched the participant's party. "
+         "In this template ten US participants (five Democrats, five Republicans) answer four CRT-2 items (Thomson & "
+         "Oppenheimer, 2016) and then rate twelve headlines on the original 4-point accuracy scale: three true and "
+         "three false favouring each party. The headlines are new, written for this template, and shown as text rather "
+         "than as Facebook posts; the CRT items are multiple choice, offering the intuitive and the correct answer. "
+         "Item ids mark each headline as true or false and pro-Democrat or pro-Republican; discernment is the mean "
+         "rating of true minus false headlines. Export the answers to relate CRT score to discernment by party. " + SIM),
+     "spec": spec("fake-news-cognitive-reflection", "Lazy, not biased",
+                  "Ten US participants take the CRT and rate the accuracy of 12 partisan headlines.",
+                  "Is belief in fake news explained by lack of reasoning rather than by partisan motivated reasoning?",
+                  panel(US_PANEL), [summary("crt", "CRT answers", "crt"), summary("accuracy", "Accuracy ratings", "headlines")],
+                  steps=[{"id": "crt", "title": "Reasoning questions", "components": [ask("Please answer these questions.", CRT)]},
+                         {"id": "headlines", "title": "Rate headlines", "components": [ask(
+                             "You will see news headlines. " + ACCURACY_Q,
+                             [scale(key, f'"{text}"', 1, 4) for key, text in HEADLINES])]}],
+                  actions=40)},
+    {"id": "accuracy-nudge-sharing",
+     "name": "Accuracy nudge: sharing COVID-19 headlines",
+     "description": (
+         "Original study: Pennycook, G., McPhetres, J., Zhang, Y., Lu, J. G., & Rand, D. G. (2020). Fighting COVID-19 "
+         "misinformation on social media: Experimental evidence for a scalable accuracy-nudge intervention. "
+         "Psychological Science, 31(7), 770-780. Across two studies with more than 1,700 US adults, people were worse "
+         "at telling true from false COVID-19 headlines when deciding what to share than when judging accuracy; in "
+         "Study 2, asking people to judge the accuracy of a single unrelated headline first nearly tripled truth "
+         "discernment in their sharing intentions. This template follows Study 2 with ten US participants: in the "
+         "treatment condition they first rate the accuracy of one non-COVID headline, in the control condition they "
+         "answer a neutral question instead (the original control had no first task), and both then rate how likely "
+         "they would be to share each of ten COVID-19 headlines (five true, five false) on a 6-point scale. The "
+         "headlines are new, written for this template from claims circulating in March 2020. Sharing discernment is "
+         "the mean of true minus false items; compare it between the conditions. " + SIM),
+     "spec": spec("accuracy-nudge-sharing", "Accuracy nudge",
+                  "Ten US participants rate sharing intentions for COVID-19 headlines, after an accuracy prompt or not.",
+                  "Does a prompt to think about accuracy improve truth discernment in sharing?",
+                  panel(US_PANEL), [summary("sharing", "Sharing intentions", "share")],
+                  steps=[{"id": "first", "title": "First question", "components": [ask(
+                             "Before the main task, please answer this question.",
+                             [scale("first", "To the best of your knowledge, how accurate is this headline? \"Scientists "
+                                    "confirm that the Moon has water ice in craters at its south pole\" 1 = not at all "
+                                    "accurate, 4 = very accurate.", 1, 4)])]},
+                         {"id": "share", "title": "Sharing", "components": [ask(
+                             "It is March 2020. You will see news headlines about the coronavirus. For each, how likely "
+                             "would you be to share it online, for example on Facebook or Twitter? 1 = extremely "
+                             "unlikely, 6 = extremely likely.",
+                             [scale(key, f'"{text}"', 1, 6) for key, text in COVID_HEADLINES])]}],
+                  conditions=[condition("accuracy-prompt", "Accuracy prompt first"),
+                              condition("control", "Control", ("/steps/0/components/0/config/items/0", scale(
+                                  "first", "How many hours a day do you usually spend on social media? 1 = less than "
+                                  "one hour, 4 = more than three hours.", 1, 4)))],
+                  actions=40)},
+    {"id": "illusory-truth-fake-news",
+     "name": "Prior exposure and belief in fake news",
+     "description": (
+         "Original study: Pennycook, G., Cannon, T. D., & Rand, D. G. (2018). Prior exposure increases perceived accuracy "
+         "of fake news. Journal of Experimental Psychology: General, 147(12), 1865-1880. Mechanical Turk participants "
+         "first saw a set of real and fake headlines and said whether they would share them; after a distractor task "
+         "they rated the accuracy of those headlines and new ones. A single prior exposure raised the perceived "
+         "accuracy of fake news, even when the fake headlines had carried a 'Disputed by 3rd Party Fact-Checkers' "
+         "warning, and even for headlines against the participant's politics. In this template ten US participants "
+         "see four headlines (two true, two false) and say whether they would share each, then rate the accuracy "
+         "of all twelve headlines (the four seen and eight new). The warning condition labels the false headlines as "
+         "disputed during exposure. There is no distractor task, and the headlines are new, written for this template. "
+         "Compare the mean accuracy of seen false headlines (false_dem_1, false_rep_1) with new ones. " + SIM),
+     "spec": spec("illusory-truth-fake-news", "Prior exposure to fake news",
+                  "Ten US participants see four headlines, then rate the accuracy of twelve, four of them seen before.",
+                  "Does seeing a fake headline once make it seem more accurate later?",
+                  panel(US_PANEL), [summary("accuracy", "Accuracy ratings", "rate")],
+                  steps=[{"id": "expose", "title": "Headlines", "components": [ask(
+                             "Here are some news headlines. For each, would you consider sharing it on social media?",
+                             [choice(key, f'"{text}"', ["Yes", "No"]) for key, text in HEADLINES
+                              if key in SEEN_HEADLINES])]},
+                         {"id": "rate", "title": "Rate headlines", "components": [ask(
+                             "You will see news headlines; some you may have seen earlier. " + ACCURACY_Q,
+                             [scale(key, f'"{text}"', 1, 4) for key, text in HEADLINES])]}],
+                  conditions=[condition("no-warning", "No warning"),
+                              condition("warning", "Disputed warning on false headlines", *(
+                                  (f"/steps/0/components/0/config/items/{i}/prompt", f'"{text}" [Disputed by 3rd Party Fact-Checkers]')
+                                  for i, (key, text) in enumerate(item for item in HEADLINES if item[0] in SEEN_HEADLINES)
+                                  if key.startswith("false")))],
+                  actions=40)},
+    {"id": "algorithm-appreciation",
+     "name": "Algorithm appreciation: advice from an algorithm or from people",
+     "description": (
+         "Original study: Logg, J. M., Minson, J. A., & Moore, D. A. (2019). Algorithm appreciation: People prefer "
+         "algorithmic to human judgment. Organizational Behavior and Human Decision Processes, 151, 90-103. In six "
+         "experiments, people made an estimate, received advice, and made a final estimate. They moved further toward "
+         "the advice when it was said to come from an algorithm than from people; the effect waned when they chose "
+         "between the algorithm and their own judgment, and among experienced forecasters. In Experiment 1A people "
+         "estimated a person's weight from a photograph. In this template ten US participants estimate the weight of "
+         "three people from written descriptions (the photographs are not used), then see advice labelled as coming "
+         "from an algorithm or from the average of 275 earlier participants, and give final estimates. The advice is the "
+         "same in both conditions. Weight of advice is (final - first) / (advice - first) per person; compare its mean "
+         "between the conditions. The advice values are " + ", ".join(f"{k}: {v} lb" for k, v in ADVICE.items()) + ". " + SIM),
+     "spec": spec("algorithm-appreciation", "Algorithm appreciation",
+                  "Ten participants estimate, receive advice labelled as algorithmic or human, and revise.",
+                  "Do people weigh advice more when it comes from an algorithm than from other people?",
+                  panel(US_PANEL), [summary("first", "First estimates", "first"), summary("final", "Final estimates", "final")],
+                  steps=[{"id": "first", "title": "Your estimate", "components": [ask(
+                             ESTIMATE_PROMPT, [scale(key, text, 80, 350) for key, text in PEOPLE_TO_ESTIMATE])]},
+                         {"id": "final", "title": "Final estimate", "components": [ask(
+                             advice_prompt("algorithm"), [scale(key, text, 80, 350) for key, text in PEOPLE_TO_ESTIMATE])]}],
+                  conditions=[condition("algorithm", "Advice from an algorithm"),
+                              condition("people", "Advice from people", ("/steps/1/components/0/config/prompt", advice_prompt("person")))],
+                  actions=40)},
+    {"id": "algorithm-aversion",
+     "name": "Algorithm aversion after seeing an algorithm err",
+     "description": (
+         "Original study: Dietvorst, B. J., Simmons, J. P., & Massey, C. (2015). Algorithm aversion: People erroneously "
+         "avoid algorithms after seeing them err. Journal of Experimental Psychology: General, 144(1), 114-126. "
+         "Participants forecast MBA students' success from admissions data. Those who had seen a statistical model's "
+         "forecasts and errors were less likely to bet their bonus on the model, and more likely to choose their own "
+         "forecasts, than those who had not, even when they saw that the model outperformed them. In this template ten "
+         "participants read the forecasting task and its incentive, then choose whose forecasts decide their bonus for "
+         "the next ten cases and rate their confidence in each. Conditions: no practice information (control); a "
+         "summary of the model's errors in ten practice cases (model); or the model's and their own errors, the model "
+         "being better (both). The original had participants make the practice forecasts themselves and a fourth "
+         "condition (own forecasts only); here the practice feedback is a written summary. Compare the share choosing "
+         "the model between conditions. " + SIM),
+     "spec": spec("algorithm-aversion", "Algorithm aversion",
+                  "After seeing a model's errors or not, ten participants choose the model or themselves for their bonus.",
+                  "Do people avoid an algorithm after seeing it make mistakes, even when it beats them?",
+                  panel(US_PANEL), [summary("choice", "Choice of forecasts", "")],
+                  components=[ask(FORECAST_TASK + SEEN["control"], FORECAST_ITEMS)],
+                  conditions=[condition("control", "No practice information"),
+                              condition("model", "Saw the model's errors", ("/components/0/config/prompt", FORECAST_TASK + SEEN["model"])),
+                              condition("both", "Saw both, the model better", ("/components/0/config/prompt", FORECAST_TASK + SEEN["both"]))],
+                  actions=20)},
+    {"id": "vaccine-misinformation-intent",
+     "name": "COVID-19 vaccine misinformation and vaccination intent",
+     "description": (
+         "Original study: Loomba, S., de Figueiredo, A., Piatek, S. J., de Graaf, K., & Larson, H. J. (2021). Measuring "
+         "the impact of COVID-19 vaccine misinformation on vaccination intent in the UK and USA. Nature Human Behaviour, "
+         "5(3), 337-348. In a pre-registered randomized controlled trial with 8,001 respondents in the UK and the US in "
+         "September 2020, people stated whether they would accept a COVID-19 vaccine, were shown five recent social "
+         "media posts containing vaccine misinformation or five factual posts, and stated their intent again. "
+         "Misinformation lowered intent relative to the factual posts. This template runs the US arm with ten US "
+         "participants: intent before (the original 4-point item), five posts with questions about trust and sharing, "
+         "and intent after. The posts are new, written for this template, paraphrasing claims that circulated in 2020; "
+         "the original used real posts with images. Compare the change in the share answering 'Yes, definitely' "
+         "between the conditions. " + SIM),
+     "spec": spec("vaccine-misinformation-intent", "Vaccine misinformation and intent",
+                  "Ten US participants state vaccination intent before and after seeing misinformation or factual posts.",
+                  "Does exposure to vaccine misinformation lower the intent to get vaccinated?",
+                  panel(US_PANEL), [summary("before", "Intent before", "before"), summary("posts", "Ratings of posts", "posts"),
+                                    summary("after", "Intent after", "after")],
+                  steps=[{"id": "before", "title": "Before", "components": [ask("It is September 2020.", [VACCINE_INTENT])]},
+                         {"id": "posts", "title": "Posts", "components": [ask(POST_PROMPT.format(posts=MISINFORMATION_POSTS), POST_ITEMS)]},
+                         {"id": "after", "title": "After", "components": [ask("Please answer this question again.", [VACCINE_INTENT])]}],
+                  conditions=[condition("misinformation", "Misinformation posts"),
+                              condition("factual", "Factual posts", ("/steps/1/components/0/config/prompt", POST_PROMPT.format(posts=FACTUAL_POSTS)))],
+                  actions=40)},
+    {"id": "global-preference-survey",
+     "name": "Global Preference Survey: risk, patience, reciprocity, altruism and trust",
+     "description": (
+         "Original study: Falk, A., Becker, A., Dohmen, T., Enke, B., Huffman, D., & Sunde, U. (2018). Global evidence on "
+         "economic preferences. The Quarterly Journal of Economics, 133(4), 1645-1692. The Global Preference Survey "
+         "measured risk taking, patience, positive and negative reciprocity, altruism and trust among 80,000 people in "
+         "representative samples of 76 countries, with survey items validated against incentivized experiments. "
+         "Preferences varied strongly between countries and even more within them, and predicted saving, schooling, "
+         "health and prosocial behaviour. This template asks ten participants of mixed age, gender and occupation the "
+         "survey's qualitative items, with six conditions placing them in the United States, Germany, Sweden, Japan, "
+         "Nigeria or Brazil. The original's quantitative staircase items (lottery and time-delay choices) are left out, "
+         "so the composite preference indices cannot be rebuilt exactly; compare item means across countries with the "
+         "country-level data published by the authors. " + SIM),
+     "spec": spec("global-preference-survey", "Global Preference Survey",
+                  "Ten participants answer the GPS qualitative items; six countries as conditions.",
+                  "How do economic preferences differ between countries?",
+                  panel(world("the United States")), [summary("preferences", "Preference items", "")],
+                  components=[ask("Please answer each question about yourself.", GPS_ITEMS)],
+                  conditions=[country_condition(slug, name) for slug, name in (
+                      ("united-states", "the United States"), ("germany", "Germany"), ("sweden", "Sweden"),
+                      ("japan", "Japan"), ("nigeria", "Nigeria"), ("brazil", "Brazil"))],
+                  actions=20)},
+    {"id": "autonomous-vehicle-dilemma",
+     "name": "The social dilemma of autonomous vehicles",
+     "description": (
+         "Original study: Bonnefon, J.-F., Shariff, A., & Rahwan, I. (2016). The social dilemma of autonomous vehicles. "
+         "Science, 352(6293), 1573-1576. In six online studies with US Mechanical Turk participants, most people judged "
+         "it moral for a self-driving car to sacrifice its passenger to save ten pedestrians, but were less willing to "
+         "buy such a car than a self-protective one, and opposed regulations that would require it, especially when "
+         "imagining family members in the car. This template asks ten US participants how moral the sacrifice is, how "
+         "likely they would be to buy a utilitarian or a self-protective car, and whether they support regulation, on "
+         "the original 0-100 scales, with two conditions: alone in the car, or with a family member. The wording is "
+         "written for this template and the six studies' other variations are not included. Compare moral approval "
+         "with willingness to buy the utilitarian car, and both conditions. " + SIM),
+     "spec": spec("autonomous-vehicle-dilemma", "Social dilemma of autonomous vehicles",
+                  "Ten US participants judge, would buy and would regulate self-sacrificing self-driving cars.",
+                  "Do people approve of self-sacrificing cars but not want to buy them?",
+                  panel(US_PANEL), [summary("ratings", "Ratings", "")],
+                  components=[ask(AV_PROMPT.format(who="you alone", victims="you"), AV_ITEMS)],
+                  conditions=[condition("alone", "You alone in the car"),
+                              condition("family", "You and a family member", ("/components/0/config/prompt",
+                                        AV_PROMPT.format(who="you and a family member", victims="you and your family member")))],
+                  actions=20)},
+]

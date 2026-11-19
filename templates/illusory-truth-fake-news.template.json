@@ -1,0 +1,418 @@
+{
+  "format": "hnf.template.v1",
+  "name": "Prior exposure and belief in fake news",
+  "author": "Human Not Found",
+  "description": "Original study: Pennycook, G., Cannon, T. D., & Rand, D. G. (2018). Prior exposure increases perceived accuracy of fake news. Journal of Experimental Psychology: General, 147(12), 1865-1880. Mechanical Turk participants first saw a set of real and fake headlines and said whether they would share them; after a distractor task they rated the accuracy of those headlines and new ones. A single prior exposure raised the perceived accuracy of fake news, even when the fake headlines had carried a 'Disputed by 3rd Party Fact-Checkers' warning, and even for headlines against the participant's politics. In this template ten US participants see four headlines (two true, two false) and say whether they would share each, then rate the accuracy of all twelve headlines (the four seen and eight new). The warning condition labels the false headlines as disputed during exposure. There is no distractor task, and the headlines are new, written for this template. Compare the mean accuracy of seen false headlines (false_dem_1, false_rep_1) with new ones. Participants are simulated: each is a Model participant, using the free test model until you choose a model, so the first runs only check the design; with the test model every participant takes the sample answer.",
+  "created_at": "2026-11-19T11:49:21.025+00:00",
+  "spec": {
+    "components": [],
+    "conditions": [
+      {
+        "id": "no-warning",
+        "label": "No warning",
+        "overrides": []
+      },
+      {
+        "id": "warning",
+        "label": "Disputed warning on false headlines",
+        "overrides": [
+          {
+            "path": "/steps/0/components/0/config/items/2/prompt",
+            "value": "\"Leaked memo shows Republican leaders planned to cancel the next presidential election\" [Disputed by 3rd Party Fact-Checkers]"
+          },
+          {
+            "path": "/steps/0/components/0/config/items/3/prompt",
+            "value": "\"House Democrats pass bill banning private ownership of all guns\" [Disputed by 3rd Party Fact-Checkers]"
+          }
+        ]
+      }
+    ],
+    "description": "Ten US participants see four headlines, then rate the accuracy of twelve, four of them seen before.",
+    "environment": {
+      "initial_state": {
+        "private_by_participant": {},
+        "shared": {}
+      }
+    },
+    "execution": {
+      "max_actions_per_run": 40,
+      "max_estimated_cost_usd_per_run": 2.0,
+      "max_memory_events": 40,
+      "max_model_calls_per_run": 80,
+      "max_wall_seconds_per_run": 3600,
+      "repetitions_per_condition": 10,
+      "seed": 1
+    },
+    "experiment_id": "illusory-truth-fake-news",
+    "measurements": [
+      {
+        "evaluator": {
+          "config": {
+            "step": "rate"
+          },
+          "id": "hnf.questionnaire.summary",
+          "version": "1.0.0"
+        },
+        "id": "accuracy",
+        "label": "Accuracy ratings",
+        "scope": "run"
+      }
+    ],
+    "participants": [
+      {
+        "agent": {
+          "config": {
+            "instructions": "Answer as this person would, from their own views, knowledge and habits, not as an assistant. Keep the person's views even when they differ from yours.",
+            "model_ref": "default",
+            "persona": "You are a 34-year-old woman from Ohio. You work as a nurse and have some college education. You identify as a Democrat."
+          },
+          "id": "hnf.participants.model",
+          "version": "1.0.0"
+        },
+        "display_name": "Participant 1",
+        "enabled": true,
+        "id": "p1",
+        "private_context": {},
+        "role": "participant"
+      },
+      {
+        "agent": {
+          "config": {
+            "instructions": "Answer as this person would, from their own views, knowledge and habits, not as an assistant. Keep the person's views even when they differ from yours.",
+            "model_ref": "default",
+            "persona": "You are a 58-year-old man from Texas. You own a small plumbing business and finished high school. You identify as a Republican."
+          },
+          "id": "hnf.participants.model",
+          "version": "1.0.0"
+        },
+        "display_name": "Participant 2",
+        "enabled": true,
+        "id": "p2",
+        "private_context": {},
+        "role": "participant"
+      },
+      {
+        "agent": {
+          "config": {
+            "instructions": "Answer as this person would, from their own views, knowledge and habits, not as an assistant. Keep the person's views even when they differ from yours.",
+            "model_ref": "default",
+            "persona": "You are a 27-year-old man from California. You test software and have a bachelor's degree. You identify as a Democrat."
+          },
+          "id": "hnf.participants.model",
+          "version": "1.0.0"
+        },
+        "display_name": "Participant 3",
+        "enabled": true,
+        "id": "p3",
+        "private_context": {},
+        "role": "participant"
+      },
+      {
+        "agent": {
+          "config": {
+            "instructions": "Answer as this person would, from their own views, knowledge and habits, not as an assistant. Keep the person's views even when they differ from yours.",
+            "model_ref": "default",
+            "persona": "You are a 45-year-old woman from Georgia. You are a school administrator with a master's degree. You identify as a Republican."
+          },
+          "id": "hnf.participants.model",
+          "version": "1.0.0"
+        },
+        "display_name": "Participant 4",
+        "enabled": true,
+        "id": "p4",
+        "private_context": {},
+        "role": "participant"
+      },
+      {
+        "agent": {
+          "config": {
+            "instructions": "Answer as this person would, from their own views, knowledge and habits, not as an assistant. Keep the person's views even when they differ from yours.",
+            "model_ref": "default",
+            "persona": "You are a 63-year-old retired bank clerk from Pennsylvania, a woman who finished high school. You identify as a Democrat."
+          },
+          "id": "hnf.participants.model",
+          "version": "1.0.0"
+        },
+        "display_name": "Participant 5",
+        "enabled": true,
+        "id": "p5",
+        "private_context": {},
+        "role": "participant"
+      },
+      {
+        "agent": {
+          "config": {
+            "instructions": "Answer as this person would, from their own views, knowledge and habits, not as an assistant. Keep the person's views even when they differ from yours.",
+            "model_ref": "default",
+            "persona": "You are a 39-year-old truck driver from Arizona, a man who finished high school. You identify as a Republican."
+          },
+          "id": "hnf.participants.model",
+          "version": "1.0.0"
+        },
+        "display_name": "Participant 6",
+        "enabled": true,
+        "id": "p6",
+        "private_context": {},
+        "role": "participant"
+      },
+      {
+        "agent": {
+          "config": {
+            "instructions": "Answer as this person would, from their own views, knowledge and habits, not as an assistant. Keep the person's views even when they differ from yours.",
+            "model_ref": "default",
+            "persona": "You are a 22-year-old woman from New York studying at a state university. You identify as a Democrat."
+          },
+          "id": "hnf.participants.model",
+          "version": "1.0.0"
+        },
+        "display_name": "Participant 7",
+        "enabled": true,
+        "id": "p7",
+        "private_context": {},
+        "role": "participant"
+      },
+      {
+        "agent": {
+          "config": {
+            "instructions": "Answer as this person would, from their own views, knowledge and habits, not as an assistant. Keep the person's views even when they differ from yours.",
+            "model_ref": "default",
+            "persona": "You are a 51-year-old man from Florida who sells real estate and has a bachelor's degree. You identify as a Republican."
+          },
+          "id": "hnf.participants.model",
+          "version": "1.0.0"
+        },
+        "display_name": "Participant 8",
+        "enabled": true,
+        "id": "p8",
+        "private_context": {},
+        "role": "participant"
+      },
+      {
+        "agent": {
+          "config": {
+            "instructions": "Answer as this person would, from their own views, knowledge and habits, not as an assistant. Keep the person's views even when they differ from yours.",
+            "model_ref": "default",
+            "persona": "You are a 70-year-old retired autoworker from Michigan, a man who finished high school. You identify as a Democrat."
+          },
+          "id": "hnf.participants.model",
+          "version": "1.0.0"
+        },
+        "display_name": "Participant 9",
+        "enabled": true,
+        "id": "p9",
+        "private_context": {},
+        "role": "participant"
+      },
+      {
+        "agent": {
+          "config": {
+            "instructions": "Answer as this person would, from their own views, knowledge and habits, not as an assistant. Keep the person's views even when they differ from yours.",
+            "model_ref": "default",
+            "persona": "You are a 31-year-old woman from Missouri who stays at home with her children and has some college education. You identify as a Republican."
+          },
+          "id": "hnf.participants.model",
+          "version": "1.0.0"
+        },
+        "display_name": "Participant 10",
+        "enabled": true,
+        "id": "p10",
+        "private_context": {},
+        "role": "participant"
+      }
+    ],
+    "research": {
+      "hypotheses": [],
+      "question": "Does seeing a fake headline once make it seem more accurate later?"
+    },
+    "schema_version": "2.0.0",
+    "steps": [
+      {
+        "components": [
+          {
+            "config": {
+              "finish": true,
+              "items": [
+                {
+                  "id": "true_dem_1",
+                  "max": 7,
+                  "min": 1,
+                  "options": [
+                    "Yes",
+                    "No"
+                  ],
+                  "prompt": "\"Supreme Court rules that same-sex couples have a constitutional right to marry in every state\"",
+                  "type": "choice"
+                },
+                {
+                  "id": "true_rep_1",
+                  "max": 7,
+                  "min": 1,
+                  "options": [
+                    "Yes",
+                    "No"
+                  ],
+                  "prompt": "\"New tax law cuts the US corporate tax rate from 35% to 21%\"",
+                  "type": "choice"
+                },
+                {
+                  "id": "false_dem_1",
+                  "max": 7,
+                  "min": 1,
+                  "options": [
+                    "Yes",
+                    "No"
+                  ],
+                  "prompt": "\"Leaked memo shows Republican leaders planned to cancel the next presidential election\"",
+                  "type": "choice"
+                },
+                {
+                  "id": "false_rep_1",
+                  "max": 7,
+                  "min": 1,
+                  "options": [
+                    "Yes",
+                    "No"
+                  ],
+                  "prompt": "\"House Democrats pass bill banning private ownership of all guns\"",
+                  "type": "choice"
+                }
+              ],
+              "prompt": "Here are some news headlines. For each, would you consider sharing it on social media?",
+              "visibility": "private"
+            },
+            "id": "hnf.questionnaire.questionnaire",
+            "version": "1.0.0"
+          }
+        ],
+        "id": "expose",
+        "title": "Headlines"
+      },
+      {
+        "components": [
+          {
+            "config": {
+              "finish": true,
+              "items": [
+                {
+                  "id": "true_dem_1",
+                  "max": 4,
+                  "min": 1,
+                  "options": [],
+                  "prompt": "\"Supreme Court rules that same-sex couples have a constitutional right to marry in every state\"",
+                  "type": "scale"
+                },
+                {
+                  "id": "true_dem_2",
+                  "max": 4,
+                  "min": 1,
+                  "options": [],
+                  "prompt": "\"Nearly every country in the world adopts the Paris climate agreement to limit global warming\"",
+                  "type": "scale"
+                },
+                {
+                  "id": "true_dem_3",
+                  "max": 4,
+                  "min": 1,
+                  "options": [],
+                  "prompt": "\"Share of Americans without health insurance falls to a record low after the Affordable Care Act\"",
+                  "type": "scale"
+                },
+                {
+                  "id": "true_rep_1",
+                  "max": 4,
+                  "min": 1,
+                  "options": [],
+                  "prompt": "\"New tax law cuts the US corporate tax rate from 35% to 21%\"",
+                  "type": "scale"
+                },
+                {
+                  "id": "true_rep_2",
+                  "max": 4,
+                  "min": 1,
+                  "options": [],
+                  "prompt": "\"United States becomes a net exporter of petroleum for the first time in decades\"",
+                  "type": "scale"
+                },
+                {
+                  "id": "true_rep_3",
+                  "max": 4,
+                  "min": 1,
+                  "options": [],
+                  "prompt": "\"Supreme Court overturns Roe v. Wade and returns abortion law to the states\"",
+                  "type": "scale"
+                },
+                {
+                  "id": "false_dem_1",
+                  "max": 4,
+                  "min": 1,
+                  "options": [],
+                  "prompt": "\"Leaked memo shows Republican leaders planned to cancel the next presidential election\"",
+                  "type": "scale"
+                },
+                {
+                  "id": "false_dem_2",
+                  "max": 4,
+                  "min": 1,
+                  "options": [],
+                  "prompt": "\"Republican lawmakers pass bill making voting by mail a felony\"",
+                  "type": "scale"
+                },
+                {
+                  "id": "false_dem_3",
+                  "max": 4,
+                  "min": 1,
+                  "options": [],
+                  "prompt": "\"Oil companies signed a secret pact with Republican leaders to repeal every clean-air law\"",
+                  "type": "scale"
+                },
+                {
+                  "id": "false_rep_1",
+                  "max": 4,
+                  "min": 1,
+                  "options": [],
+                  "prompt": "\"House Democrats pass bill banning private ownership of all guns\"",
+                  "type": "scale"
+                },
+                {
+                  "id": "false_rep_2",
+                  "max": 4,
+                  "min": 1,
+                  "options": [],
+                  "prompt": "\"Federal investigation finds millions of non-citizens voted in the last presidential election\"",
+                  "type": "scale"
+                },
+                {
+                  "id": "false_rep_3",
+                  "max": 4,
+                  "min": 1,
+                  "options": [],
+                  "prompt": "\"Democratic governors agree to replace their police departments with unarmed volunteers\"",
+                  "type": "scale"
+                }
+              ],
+              "prompt": "You will see news headlines; some you may have seen earlier. To the best of your knowledge, how accurate is this headline? 1 = not at all accurate, 4 = very accurate.",
+              "visibility": "private"
+            },
+            "id": "hnf.questionnaire.questionnaire",
+            "version": "1.0.0"
+          }
+        ],
+        "id": "rate",
+        "title": "Rate headlines"
+      }
+    ],
+    "title": "Prior exposure to fake news"
+  },
+  "packages": [
+    {
+      "bundle_id": "hnf.participants",
+      "version": "1.0.0",
+      "digest": "3eba369193895ce162da928faffcb34ce74512a9c74d86bf2acc252f11fbcaee"
+    },
+    {
+      "bundle_id": "hnf.questionnaire",
+      "version": "1.0.0",
+      "digest": "9d1c1b477a6ed605f1fcaf202dd43d997491b305e660ab9812218505c65f9c7b"
+    }
+  ]
+}

@@ -1,0 +1,472 @@
+{
+  "format": "hnf.template.v1",
+  "name": "Moral Machine: whom should a self-driving car spare?",
+  "author": "Human Not Found",
+  "description": "Original study: Awad, E., Dsouza, S., Kim, R., Schulz, J., Henrich, J., Shariff, A., Bonnefon, J.-F., & Rahwan, I. (2018). The Moral Machine experiment. Nature, 563(7729), 59-64. An online platform collected about 40 million decisions from millions of people in 233 countries and territories on dilemmas in which a self-driving car must kill one of two groups. Globally, people preferred to spare humans over animals, more lives over fewer and the young over the old; countries formed Western, Eastern and Southern clusters that weighed these preferences differently. This template gives ten participants nine dilemmas, each varying one attribute (species, number, age, gender, social status, fitness, lawfulness, intervention, passengers versus pedestrians), and runs three conditions whose participants live in the United States, Japan or Brazil, one country from each cluster. The original randomised every attribute of each scene and estimated effects with conjoint analysis; here each dilemma isolates one attribute and the option order alternates. Compare the share choosing each side per dilemma with the paper's Figure 2 and across conditions with its Figure 3. Participants are simulated: each is a Model participant, using the free test model until you choose a model, so the first runs only check the design; with the test model every participant takes the sample answer.",
+  "created_at": "2026-11-19T11:49:20.870+00:00",
+  "spec": {
+    "components": [
+      {
+        "config": {
+          "finish": true,
+          "items": [
+            {
+              "id": "species",
+              "max": 7,
+              "min": 1,
+              "options": [
+                "Spare the 3 people",
+                "Spare the 3 dogs"
+              ],
+              "prompt": "Staying kills 3 people crossing; swerving kills 3 dogs crossing in the other lane.",
+              "type": "choice"
+            },
+            {
+              "id": "number",
+              "max": 7,
+              "min": 1,
+              "options": [
+                "Spare the 1 pedestrian",
+                "Spare the 5 pedestrians"
+              ],
+              "prompt": "Staying kills 5 pedestrians; swerving kills 1 pedestrian.",
+              "type": "choice"
+            },
+            {
+              "id": "age",
+              "max": 7,
+              "min": 1,
+              "options": [
+                "Spare the 2 children",
+                "Spare the 2 elderly people"
+              ],
+              "prompt": "Staying kills 2 children; swerving kills 2 elderly people.",
+              "type": "choice"
+            },
+            {
+              "id": "gender",
+              "max": 7,
+              "min": 1,
+              "options": [
+                "Spare the 2 men",
+                "Spare the 2 women"
+              ],
+              "prompt": "Staying kills 2 women; swerving kills 2 men.",
+              "type": "choice"
+            },
+            {
+              "id": "status",
+              "max": 7,
+              "min": 1,
+              "options": [
+                "Spare the 2 business executives",
+                "Spare the 2 homeless people"
+              ],
+              "prompt": "Staying kills 2 business executives; swerving kills 2 homeless people.",
+              "type": "choice"
+            },
+            {
+              "id": "fitness",
+              "max": 7,
+              "min": 1,
+              "options": [
+                "Spare the 2 large, unfit people",
+                "Spare the 2 athletes"
+              ],
+              "prompt": "Staying kills 2 athletes; swerving kills 2 large, unfit people.",
+              "type": "choice"
+            },
+            {
+              "id": "law",
+              "max": 7,
+              "min": 1,
+              "options": [
+                "Spare those crossing on green",
+                "Spare those crossing on red"
+              ],
+              "prompt": "Staying kills 2 people crossing on a green signal; swerving kills 2 people crossing on a red signal.",
+              "type": "choice"
+            },
+            {
+              "id": "intervention",
+              "max": 7,
+              "min": 1,
+              "options": [
+                "Stay (spare those in the other lane)",
+                "Swerve (spare those ahead)"
+              ],
+              "prompt": "Staying kills 2 pedestrians ahead; swerving kills 2 other pedestrians in the other lane.",
+              "type": "choice"
+            },
+            {
+              "id": "passengers",
+              "max": 7,
+              "min": 1,
+              "options": [
+                "Spare the 3 passengers",
+                "Spare the 3 pedestrians"
+              ],
+              "prompt": "Staying kills 3 pedestrians; swerving into a barrier kills the 3 passengers in the car.",
+              "type": "choice"
+            }
+          ],
+          "prompt": "A self-driving car with sudden brake failure will hit one of two groups. It can stay in its lane or swerve. For each case, choose which group the car should spare. Everyone else in the case dies.",
+          "visibility": "private"
+        },
+        "id": "hnf.questionnaire.questionnaire",
+        "version": "1.0.0"
+      }
+    ],
+    "conditions": [
+      {
+        "id": "united-states",
+        "label": "the United States",
+        "overrides": [
+          {
+            "path": "/participants/0/agent/config/persona",
+            "value": "You are a 24-year-old woman, a university student living in the United States. You grew up there and share its everyday culture."
+          },
+          {
+            "path": "/participants/1/agent/config/persona",
+            "value": "You are a 37-year-old man who works in a factory living in the United States. You grew up there and share its everyday culture."
+          },
+          {
+            "path": "/participants/2/agent/config/persona",
+            "value": "You are a 52-year-old woman who runs a small shop living in the United States. You grew up there and share its everyday culture."
+          },
+          {
+            "path": "/participants/3/agent/config/persona",
+            "value": "You are a 68-year-old retired man who worked as a teacher living in the United States. You grew up there and share its everyday culture."
+          },
+          {
+            "path": "/participants/4/agent/config/persona",
+            "value": "You are a 29-year-old man who drives for a delivery company living in the United States. You grew up there and share its everyday culture."
+          },
+          {
+            "path": "/participants/5/agent/config/persona",
+            "value": "You are a 45-year-old woman who works as an accountant living in the United States. You grew up there and share its everyday culture."
+          },
+          {
+            "path": "/participants/6/agent/config/persona",
+            "value": "You are a 33-year-old woman who works in a hospital kitchen living in the United States. You grew up there and share its everyday culture."
+          },
+          {
+            "path": "/participants/7/agent/config/persona",
+            "value": "You are a 59-year-old man who farms his own land living in the United States. You grew up there and share its everyday culture."
+          },
+          {
+            "path": "/participants/8/agent/config/persona",
+            "value": "You are a 41-year-old man who manages an office living in the United States. You grew up there and share its everyday culture."
+          },
+          {
+            "path": "/participants/9/agent/config/persona",
+            "value": "You are a 19-year-old woman who has just finished school living in the United States. You grew up there and share its everyday culture."
+          }
+        ]
+      },
+      {
+        "id": "japan",
+        "label": "Japan",
+        "overrides": [
+          {
+            "path": "/participants/0/agent/config/persona",
+            "value": "You are a 24-year-old woman, a university student living in Japan. You grew up there and share its everyday culture."
+          },
+          {
+            "path": "/participants/1/agent/config/persona",
+            "value": "You are a 37-year-old man who works in a factory living in Japan. You grew up there and share its everyday culture."
+          },
+          {
+            "path": "/participants/2/agent/config/persona",
+            "value": "You are a 52-year-old woman who runs a small shop living in Japan. You grew up there and share its everyday culture."
+          },
+          {
+            "path": "/participants/3/agent/config/persona",
+            "value": "You are a 68-year-old retired man who worked as a teacher living in Japan. You grew up there and share its everyday culture."
+          },
+          {
+            "path": "/participants/4/agent/config/persona",
+            "value": "You are a 29-year-old man who drives for a delivery company living in Japan. You grew up there and share its everyday culture."
+          },
+          {
+            "path": "/participants/5/agent/config/persona",
+            "value": "You are a 45-year-old woman who works as an accountant living in Japan. You grew up there and share its everyday culture."
+          },
+          {
+            "path": "/participants/6/agent/config/persona",
+            "value": "You are a 33-year-old woman who works in a hospital kitchen living in Japan. You grew up there and share its everyday culture."
+          },
+          {
+            "path": "/participants/7/agent/config/persona",
+            "value": "You are a 59-year-old man who farms his own land living in Japan. You grew up there and share its everyday culture."
+          },
+          {
+            "path": "/participants/8/agent/config/persona",
+            "value": "You are a 41-year-old man who manages an office living in Japan. You grew up there and share its everyday culture."
+          },
+          {
+            "path": "/participants/9/agent/config/persona",
+            "value": "You are a 19-year-old woman who has just finished school living in Japan. You grew up there and share its everyday culture."
+          }
+        ]
+      },
+      {
+        "id": "brazil",
+        "label": "Brazil",
+        "overrides": [
+          {
+            "path": "/participants/0/agent/config/persona",
+            "value": "You are a 24-year-old woman, a university student living in Brazil. You grew up there and share its everyday culture."
+          },
+          {
+            "path": "/participants/1/agent/config/persona",
+            "value": "You are a 37-year-old man who works in a factory living in Brazil. You grew up there and share its everyday culture."
+          },
+          {
+            "path": "/participants/2/agent/config/persona",
+            "value": "You are a 52-year-old woman who runs a small shop living in Brazil. You grew up there and share its everyday culture."
+          },
+          {
+            "path": "/participants/3/agent/config/persona",
+            "value": "You are a 68-year-old retired man who worked as a teacher living in Brazil. You grew up there and share its everyday culture."
+          },
+          {
+            "path": "/participants/4/agent/config/persona",
+            "value": "You are a 29-year-old man who drives for a delivery company living in Brazil. You grew up there and share its everyday culture."
+          },
+          {
+            "path": "/participants/5/agent/config/persona",
+            "value": "You are a 45-year-old woman who works as an accountant living in Brazil. You grew up there and share its everyday culture."
+          },
+          {
+            "path": "/participants/6/agent/config/persona",
+            "value": "You are a 33-year-old woman who works in a hospital kitchen living in Brazil. You grew up there and share its everyday culture."
+          },
+          {
+            "path": "/participants/7/agent/config/persona",
+            "value": "You are a 59-year-old man who farms his own land living in Brazil. You grew up there and share its everyday culture."
+          },
+          {
+            "path": "/participants/8/agent/config/persona",
+            "value": "You are a 41-year-old man who manages an office living in Brazil. You grew up there and share its everyday culture."
+          },
+          {
+            "path": "/participants/9/agent/config/persona",
+            "value": "You are a 19-year-old woman who has just finished school living in Brazil. You grew up there and share its everyday culture."
+          }
+        ]
+      }
+    ],
+    "description": "Ten participants decide nine self-driving-car dilemmas; three countries.",
+    "environment": {
+      "initial_state": {
+        "private_by_participant": {},
+        "shared": {}
+      }
+    },
+    "execution": {
+      "max_actions_per_run": 20,
+      "max_estimated_cost_usd_per_run": 2.0,
+      "max_memory_events": 40,
+      "max_model_calls_per_run": 40,
+      "max_wall_seconds_per_run": 3600,
+      "repetitions_per_condition": 10,
+      "seed": 1
+    },
+    "experiment_id": "moral-machine",
+    "measurements": [
+      {
+        "evaluator": {
+          "config": {
+            "step": ""
+          },
+          "id": "hnf.questionnaire.summary",
+          "version": "1.0.0"
+        },
+        "id": "choices",
+        "label": "Choices per dilemma",
+        "scope": "run"
+      }
+    ],
+    "participants": [
+      {
+        "agent": {
+          "config": {
+            "instructions": "Answer as this person would, from their own views, knowledge and habits, not as an assistant. Keep the person's views even when they differ from yours.",
+            "model_ref": "default",
+            "persona": "You are a 24-year-old woman, a university student living in the United States. You grew up there and share its everyday culture."
+          },
+          "id": "hnf.participants.model",
+          "version": "1.0.0"
+        },
+        "display_name": "Participant 1",
+        "enabled": true,
+        "id": "p1",
+        "private_context": {},
+        "role": "participant"
+      },
+      {
+        "agent": {
+          "config": {
+            "instructions": "Answer as this person would, from their own views, knowledge and habits, not as an assistant. Keep the person's views even when they differ from yours.",
+            "model_ref": "default",
+            "persona": "You are a 37-year-old man who works in a factory living in the United States. You grew up there and share its everyday culture."
+          },
+          "id": "hnf.participants.model",
+          "version": "1.0.0"
+        },
+        "display_name": "Participant 2",
+        "enabled": true,
+        "id": "p2",
+        "private_context": {},
+        "role": "participant"
+      },
+      {
+        "agent": {
+          "config": {
+            "instructions": "Answer as this person would, from their own views, knowledge and habits, not as an assistant. Keep the person's views even when they differ from yours.",
+            "model_ref": "default",
+            "persona": "You are a 52-year-old woman who runs a small shop living in the United States. You grew up there and share its everyday culture."
+          },
+          "id": "hnf.participants.model",
+          "version": "1.0.0"
+        },
+        "display_name": "Participant 3",
+        "enabled": true,
+        "id": "p3",
+        "private_context": {},
+        "role": "participant"
+      },
+      {
+        "agent": {
+          "config": {
+            "instructions": "Answer as this person would, from their own views, knowledge and habits, not as an assistant. Keep the person's views even when they differ from yours.",
+            "model_ref": "default",
+            "persona": "You are a 68-year-old retired man who worked as a teacher living in the United States. You grew up there and share its everyday culture."
+          },
+          "id": "hnf.participants.model",
+          "version": "1.0.0"
+        },
+        "display_name": "Participant 4",
+        "enabled": true,
+        "id": "p4",
+        "private_context": {},
+        "role": "participant"
+      },
+      {
+        "agent": {
+          "config": {
+            "instructions": "Answer as this person would, from their own views, knowledge and habits, not as an assistant. Keep the person's views even when they differ from yours.",
+            "model_ref": "default",
+            "persona": "You are a 29-year-old man who drives for a delivery company living in the United States. You grew up there and share its everyday culture."
+          },
+          "id": "hnf.participants.model",
+          "version": "1.0.0"
+        },
+        "display_name": "Participant 5",
+        "enabled": true,
+        "id": "p5",
+        "private_context": {},
+        "role": "participant"
+      },
+      {
+        "agent": {
+          "config": {
+            "instructions": "Answer as this person would, from their own views, knowledge and habits, not as an assistant. Keep the person's views even when they differ from yours.",
+            "model_ref": "default",
+            "persona": "You are a 45-year-old woman who works as an accountant living in the United States. You grew up there and share its everyday culture."
+          },
+          "id": "hnf.participants.model",
+          "version": "1.0.0"
+        },
+        "display_name": "Participant 6",
+        "enabled": true,
+        "id": "p6",
+        "private_context": {},
+        "role": "participant"
+      },
+      {
+        "agent": {
+          "config": {
+            "instructions": "Answer as this person would, from their own views, knowledge and habits, not as an assistant. Keep the person's views even when they differ from yours.",
+            "model_ref": "default",
+            "persona": "You are a 33-year-old woman who works in a hospital kitchen living in the United States. You grew up there and share its everyday culture."
+          },
+          "id": "hnf.participants.model",
+          "version": "1.0.0"
+        },
+        "display_name": "Participant 7",
+        "enabled": true,
+        "id": "p7",
+        "private_context": {},
+        "role": "participant"
+      },
+      {
+        "agent": {
+          "config": {
+            "instructions": "Answer as this person would, from their own views, knowledge and habits, not as an assistant. Keep the person's views even when they differ from yours.",
+            "model_ref": "default",
+            "persona": "You are a 59-year-old man who farms his own land living in the United States. You grew up there and share its everyday culture."
+          },
+          "id": "hnf.participants.model",
+          "version": "1.0.0"
+        },
+        "display_name": "Participant 8",
+        "enabled": true,
+        "id": "p8",
+        "private_context": {},
+        "role": "participant"
+      },
+      {
+        "agent": {
+          "config": {
+            "instructions": "Answer as this person would, from their own views, knowledge and habits, not as an assistant. Keep the person's views even when they differ from yours.",
+            "model_ref": "default",
+            "persona": "You are a 41-year-old man who manages an office living in the United States. You grew up there and share its everyday culture."
+          },
+          "id": "hnf.participants.model",
+          "version": "1.0.0"
+        },
+        "display_name": "Participant 9",
+        "enabled": true,
+        "id": "p9",
+        "private_context": {},
+        "role": "participant"
+      },
+      {
+        "agent": {
+          "config": {
+            "instructions": "Answer as this person would, from their own views, knowledge and habits, not as an assistant. Keep the person's views even when they differ from yours.",
+            "model_ref": "default",
+            "persona": "You are a 19-year-old woman who has just finished school living in the United States. You grew up there and share its everyday culture."
+          },
+          "id": "hnf.participants.model",
+          "version": "1.0.0"
+        },
+        "display_name": "Participant 10",
+        "enabled": true,
+        "id": "p10",
+        "private_context": {},
+        "role": "participant"
+      }
+    ],
+    "research": {
+      "hypotheses": [],
+      "question": "Which lives do people prefer a self-driving car to spare, and does this differ between cultures?"
+    },
+    "schema_version": "2.0.0",
+    "title": "Moral Machine"
+  },
+  "packages": [
+    {
+      "bundle_id": "hnf.participants",
+      "version": "1.0.0",
+      "digest": "3eba369193895ce162da928faffcb34ce74512a9c74d86bf2acc252f11fbcaee"
+    },
+    {
+      "bundle_id": "hnf.questionnaire",
+      "version": "1.0.0",
+      "digest": "9d1c1b477a6ed605f1fcaf202dd43d997491b305e660ab9812218505c65f9c7b"
+    }
+  ]
+}

@@ -1,0 +1,334 @@
+{
+  "format": "hnf.template.v1",
+  "name": "Algorithm appreciation: advice from an algorithm or from people",
+  "author": "Human Not Found",
+  "description": "Original study: Logg, J. M., Minson, J. A., & Moore, D. A. (2019). Algorithm appreciation: People prefer algorithmic to human judgment. Organizational Behavior and Human Decision Processes, 151, 90-103. In six experiments, people made an estimate, received advice, and made a final estimate. They moved further toward the advice when it was said to come from an algorithm than from people; the effect waned when they chose between the algorithm and their own judgment, and among experienced forecasters. In Experiment 1A people estimated a person's weight from a photograph. In this template ten US participants estimate the weight of three people from written descriptions (the photographs are not used), then see advice labelled as coming from an algorithm or from the average of 275 earlier participants, and give final estimates. The advice is the same in both conditions. Weight of advice is (final - first) / (advice - first) per person; compare its mean between the conditions. The advice values are weight_1: 186 lb, weight_2: 121 lb, weight_3: 238 lb. Participants are simulated: each is a Model participant, using the free test model until you choose a model, so the first runs only check the design; with the test model every participant takes the sample answer.",
+  "created_at": "2026-11-19T11:49:21.068+00:00",
+  "spec": {
+    "components": [],
+    "conditions": [
+      {
+        "id": "algorithm",
+        "label": "Advice from an algorithm",
+        "overrides": []
+      },
+      {
+        "id": "people",
+        "label": "Advice from people",
+        "overrides": [
+          {
+            "path": "/steps/1/components/0/config/prompt",
+            "value": "You have already given your own estimates. Here are the estimates of the average estimate of 275 participants in a previous study: weight_1: 186 lb; weight_2: 121 lb; weight_3: 238 lb. Now give your final estimate for each person (80 to 350). You may keep your first estimate or change it."
+          }
+        ]
+      }
+    ],
+    "description": "Ten participants estimate, receive advice labelled as algorithmic or human, and revise.",
+    "environment": {
+      "initial_state": {
+        "private_by_participant": {},
+        "shared": {}
+      }
+    },
+    "execution": {
+      "max_actions_per_run": 40,
+      "max_estimated_cost_usd_per_run": 2.0,
+      "max_memory_events": 40,
+      "max_model_calls_per_run": 80,
+      "max_wall_seconds_per_run": 3600,
+      "repetitions_per_condition": 10,
+      "seed": 1
+    },
+    "experiment_id": "algorithm-appreciation",
+    "measurements": [
+      {
+        "evaluator": {
+          "config": {
+            "step": "first"
+          },
+          "id": "hnf.questionnaire.summary",
+          "version": "1.0.0"
+        },
+        "id": "first",
+        "label": "First estimates",
+        "scope": "run"
+      },
+      {
+        "evaluator": {
+          "config": {
+            "step": "final"
+          },
+          "id": "hnf.questionnaire.summary",
+          "version": "1.0.0"
+        },
+        "id": "final",
+        "label": "Final estimates",
+        "scope": "run"
+      }
+    ],
+    "participants": [
+      {
+        "agent": {
+          "config": {
+            "instructions": "Answer as this person would, from their own views, knowledge and habits, not as an assistant. Keep the person's views even when they differ from yours.",
+            "model_ref": "default",
+            "persona": "You are a 34-year-old woman from Ohio. You work as a nurse and have some college education. You identify as a Democrat."
+          },
+          "id": "hnf.participants.model",
+          "version": "1.0.0"
+        },
+        "display_name": "Participant 1",
+        "enabled": true,
+        "id": "p1",
+        "private_context": {},
+        "role": "participant"
+      },
+      {
+        "agent": {
+          "config": {
+            "instructions": "Answer as this person would, from their own views, knowledge and habits, not as an assistant. Keep the person's views even when they differ from yours.",
+            "model_ref": "default",
+            "persona": "You are a 58-year-old man from Texas. You own a small plumbing business and finished high school. You identify as a Republican."
+          },
+          "id": "hnf.participants.model",
+          "version": "1.0.0"
+        },
+        "display_name": "Participant 2",
+        "enabled": true,
+        "id": "p2",
+        "private_context": {},
+        "role": "participant"
+      },
+      {
+        "agent": {
+          "config": {
+            "instructions": "Answer as this person would, from their own views, knowledge and habits, not as an assistant. Keep the person's views even when they differ from yours.",
+            "model_ref": "default",
+            "persona": "You are a 27-year-old man from California. You test software and have a bachelor's degree. You identify as a Democrat."
+          },
+          "id": "hnf.participants.model",
+          "version": "1.0.0"
+        },
+        "display_name": "Participant 3",
+        "enabled": true,
+        "id": "p3",
+        "private_context": {},
+        "role": "participant"
+      },
+      {
+        "agent": {
+          "config": {
+            "instructions": "Answer as this person would, from their own views, knowledge and habits, not as an assistant. Keep the person's views even when they differ from yours.",
+            "model_ref": "default",
+            "persona": "You are a 45-year-old woman from Georgia. You are a school administrator with a master's degree. You identify as a Republican."
+          },
+          "id": "hnf.participants.model",
+          "version": "1.0.0"
+        },
+        "display_name": "Participant 4",
+        "enabled": true,
+        "id": "p4",
+        "private_context": {},
+        "role": "participant"
+      },
+      {
+        "agent": {
+          "config": {
+            "instructions": "Answer as this person would, from their own views, knowledge and habits, not as an assistant. Keep the person's views even when they differ from yours.",
+            "model_ref": "default",
+            "persona": "You are a 63-year-old retired bank clerk from Pennsylvania, a woman who finished high school. You identify as a Democrat."
+          },
+          "id": "hnf.participants.model",
+          "version": "1.0.0"
+        },
+        "display_name": "Participant 5",
+        "enabled": true,
+        "id": "p5",
+        "private_context": {},
+        "role": "participant"
+      },
+      {
+        "agent": {
+          "config": {
+            "instructions": "Answer as this person would, from their own views, knowledge and habits, not as an assistant. Keep the person's views even when they differ from yours.",
+            "model_ref": "default",
+            "persona": "You are a 39-year-old truck driver from Arizona, a man who finished high school. You identify as a Republican."
+          },
+          "id": "hnf.participants.model",
+          "version": "1.0.0"
+        },
+        "display_name": "Participant 6",
+        "enabled": true,
+        "id": "p6",
+        "private_context": {},
+        "role": "participant"
+      },
+      {
+        "agent": {
+          "config": {
+            "instructions": "Answer as this person would, from their own views, knowledge and habits, not as an assistant. Keep the person's views even when they differ from yours.",
+            "model_ref": "default",
+            "persona": "You are a 22-year-old woman from New York studying at a state university. You identify as a Democrat."
+          },
+          "id": "hnf.participants.model",
+          "version": "1.0.0"
+        },
+        "display_name": "Participant 7",
+        "enabled": true,
+        "id": "p7",
+        "private_context": {},
+        "role": "participant"
+      },
+      {
+        "agent": {
+          "config": {
+            "instructions": "Answer as this person would, from their own views, knowledge and habits, not as an assistant. Keep the person's views even when they differ from yours.",
+            "model_ref": "default",
+            "persona": "You are a 51-year-old man from Florida who sells real estate and has a bachelor's degree. You identify as a Republican."
+          },
+          "id": "hnf.participants.model",
+          "version": "1.0.0"
+        },
+        "display_name": "Participant 8",
+        "enabled": true,
+        "id": "p8",
+        "private_context": {},
+        "role": "participant"
+      },
+      {
+        "agent": {
+          "config": {
+            "instructions": "Answer as this person would, from their own views, knowledge and habits, not as an assistant. Keep the person's views even when they differ from yours.",
+            "model_ref": "default",
+            "persona": "You are a 70-year-old retired autoworker from Michigan, a man who finished high school. You identify as a Democrat."
+          },
+          "id": "hnf.participants.model",
+          "version": "1.0.0"
+        },
+        "display_name": "Participant 9",
+        "enabled": true,
+        "id": "p9",
+        "private_context": {},
+        "role": "participant"
+      },
+      {
+        "agent": {
+          "config": {
+            "instructions": "Answer as this person would, from their own views, knowledge and habits, not as an assistant. Keep the person's views even when they differ from yours.",
+            "model_ref": "default",
+            "persona": "You are a 31-year-old woman from Missouri who stays at home with her children and has some college education. You identify as a Republican."
+          },
+          "id": "hnf.participants.model",
+          "version": "1.0.0"
+        },
+        "display_name": "Participant 10",
+        "enabled": true,
+        "id": "p10",
+        "private_context": {},
+        "role": "participant"
+      }
+    ],
+    "research": {
+      "hypotheses": [],
+      "question": "Do people weigh advice more when it comes from an algorithm than from other people?"
+    },
+    "schema_version": "2.0.0",
+    "steps": [
+      {
+        "components": [
+          {
+            "config": {
+              "finish": true,
+              "items": [
+                {
+                  "id": "weight_1",
+                  "max": 350,
+                  "min": 80,
+                  "options": [],
+                  "prompt": "A man, 5 feet 10 inches tall, broad shoulders, slightly rounded stomach, wearing a medium T-shirt.",
+                  "type": "scale"
+                },
+                {
+                  "id": "weight_2",
+                  "max": 350,
+                  "min": 80,
+                  "options": [],
+                  "prompt": "A woman, 5 feet 4 inches tall, slim, runs regularly, wearing size small running clothes.",
+                  "type": "scale"
+                },
+                {
+                  "id": "weight_3",
+                  "max": 350,
+                  "min": 80,
+                  "options": [],
+                  "prompt": "A man, 6 feet 2 inches tall, heavily built, works in construction, wearing an XXL jacket.",
+                  "type": "scale"
+                }
+              ],
+              "prompt": "Estimate each person's weight in pounds from the description (80 to 350).",
+              "visibility": "private"
+            },
+            "id": "hnf.questionnaire.questionnaire",
+            "version": "1.0.0"
+          }
+        ],
+        "id": "first",
+        "title": "Your estimate"
+      },
+      {
+        "components": [
+          {
+            "config": {
+              "finish": true,
+              "items": [
+                {
+                  "id": "weight_1",
+                  "max": 350,
+                  "min": 80,
+                  "options": [],
+                  "prompt": "A man, 5 feet 10 inches tall, broad shoulders, slightly rounded stomach, wearing a medium T-shirt.",
+                  "type": "scale"
+                },
+                {
+                  "id": "weight_2",
+                  "max": 350,
+                  "min": 80,
+                  "options": [],
+                  "prompt": "A woman, 5 feet 4 inches tall, slim, runs regularly, wearing size small running clothes.",
+                  "type": "scale"
+                },
+                {
+                  "id": "weight_3",
+                  "max": 350,
+                  "min": 80,
+                  "options": [],
+                  "prompt": "A man, 6 feet 2 inches tall, heavily built, works in construction, wearing an XXL jacket.",
+                  "type": "scale"
+                }
+              ],
+              "prompt": "You have already given your own estimates. Here are the estimates of an algorithm that estimates weight from descriptions: weight_1: 186 lb; weight_2: 121 lb; weight_3: 238 lb. Now give your final estimate for each person (80 to 350). You may keep your first estimate or change it.",
+              "visibility": "private"
+            },
+            "id": "hnf.questionnaire.questionnaire",
+            "version": "1.0.0"
+          }
+        ],
+        "id": "final",
+        "title": "Final estimate"
+      }
+    ],
+    "title": "Algorithm appreciation"
+  },
+  "packages": [
+    {
+      "bundle_id": "hnf.participants",
+      "version": "1.0.0",
+      "digest": "3eba369193895ce162da928faffcb34ce74512a9c74d86bf2acc252f11fbcaee"
+    },
+    {
+      "bundle_id": "hnf.questionnaire",
+      "version": "1.0.0",
+      "digest": "9d1c1b477a6ed605f1fcaf202dd43d997491b305e660ab9812218505c65f9c7b"
+    }
+  ]
+}

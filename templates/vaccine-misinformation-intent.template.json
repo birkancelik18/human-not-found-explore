@@ -1,0 +1,357 @@
+{
+  "format": "hnf.template.v1",
+  "name": "COVID-19 vaccine misinformation and vaccination intent",
+  "author": "Human Not Found",
+  "description": "Original study: Loomba, S., de Figueiredo, A., Piatek, S. J., de Graaf, K., & Larson, H. J. (2021). Measuring the impact of COVID-19 vaccine misinformation on vaccination intent in the UK and USA. Nature Human Behaviour, 5(3), 337-348. In a pre-registered randomized controlled trial with 8,001 respondents in the UK and the US in September 2020, people stated whether they would accept a COVID-19 vaccine, were shown five recent social media posts containing vaccine misinformation or five factual posts, and stated their intent again. Misinformation lowered intent relative to the factual posts. This template runs the US arm with ten US participants: intent before (the original 4-point item), five posts with questions about trust and sharing, and intent after. The posts are new, written for this template, paraphrasing claims that circulated in 2020; the original used real posts with images. Compare the change in the share answering 'Yes, definitely' between the conditions. Participants are simulated: each is a Model participant, using the free test model until you choose a model, so the first runs only check the design; with the test model every participant takes the sample answer.",
+  "created_at": "2026-11-19T11:49:21.153+00:00",
+  "spec": {
+    "components": [],
+    "conditions": [
+      {
+        "id": "misinformation",
+        "label": "Misinformation posts",
+        "overrides": []
+      },
+      {
+        "id": "factual",
+        "label": "Factual posts",
+        "overrides": [
+          {
+            "path": "/steps/1/components/0/config/prompt",
+            "value": "It is September 2020. Here are five posts you might see on social media about a coronavirus vaccine. Post 1: 'Coronavirus vaccine trials have enrolled tens of thousands of volunteers to test safety and effectiveness.' Post 2: 'mRNA vaccines teach cells to make a harmless protein; they do not enter the nucleus or change your DNA.' Post 3: 'Vaccines are reviewed by independent regulators before they are approved for use.' Post 4: 'Common side effects of vaccines include a sore arm and tiredness for a day or two.' Post 5: 'Getting vaccinated also helps protect people who cannot be vaccinated, such as some cancer patients.' Answer the questions about them."
+          }
+        ]
+      }
+    ],
+    "description": "Ten US participants state vaccination intent before and after seeing misinformation or factual posts.",
+    "environment": {
+      "initial_state": {
+        "private_by_participant": {},
+        "shared": {}
+      }
+    },
+    "execution": {
+      "max_actions_per_run": 40,
+      "max_estimated_cost_usd_per_run": 2.0,
+      "max_memory_events": 40,
+      "max_model_calls_per_run": 80,
+      "max_wall_seconds_per_run": 3600,
+      "repetitions_per_condition": 10,
+      "seed": 1
+    },
+    "experiment_id": "vaccine-misinformation-intent",
+    "measurements": [
+      {
+        "evaluator": {
+          "config": {
+            "step": "before"
+          },
+          "id": "hnf.questionnaire.summary",
+          "version": "1.0.0"
+        },
+        "id": "before",
+        "label": "Intent before",
+        "scope": "run"
+      },
+      {
+        "evaluator": {
+          "config": {
+            "step": "posts"
+          },
+          "id": "hnf.questionnaire.summary",
+          "version": "1.0.0"
+        },
+        "id": "posts",
+        "label": "Ratings of posts",
+        "scope": "run"
+      },
+      {
+        "evaluator": {
+          "config": {
+            "step": "after"
+          },
+          "id": "hnf.questionnaire.summary",
+          "version": "1.0.0"
+        },
+        "id": "after",
+        "label": "Intent after",
+        "scope": "run"
+      }
+    ],
+    "participants": [
+      {
+        "agent": {
+          "config": {
+            "instructions": "Answer as this person would, from their own views, knowledge and habits, not as an assistant. Keep the person's views even when they differ from yours.",
+            "model_ref": "default",
+            "persona": "You are a 34-year-old woman from Ohio. You work as a nurse and have some college education. You identify as a Democrat."
+          },
+          "id": "hnf.participants.model",
+          "version": "1.0.0"
+        },
+        "display_name": "Participant 1",
+        "enabled": true,
+        "id": "p1",
+        "private_context": {},
+        "role": "participant"
+      },
+      {
+        "agent": {
+          "config": {
+            "instructions": "Answer as this person would, from their own views, knowledge and habits, not as an assistant. Keep the person's views even when they differ from yours.",
+            "model_ref": "default",
+            "persona": "You are a 58-year-old man from Texas. You own a small plumbing business and finished high school. You identify as a Republican."
+          },
+          "id": "hnf.participants.model",
+          "version": "1.0.0"
+        },
+        "display_name": "Participant 2",
+        "enabled": true,
+        "id": "p2",
+        "private_context": {},
+        "role": "participant"
+      },
+      {
+        "agent": {
+          "config": {
+            "instructions": "Answer as this person would, from their own views, knowledge and habits, not as an assistant. Keep the person's views even when they differ from yours.",
+            "model_ref": "default",
+            "persona": "You are a 27-year-old man from California. You test software and have a bachelor's degree. You identify as a Democrat."
+          },
+          "id": "hnf.participants.model",
+          "version": "1.0.0"
+        },
+        "display_name": "Participant 3",
+        "enabled": true,
+        "id": "p3",
+        "private_context": {},
+        "role": "participant"
+      },
+      {
+        "agent": {
+          "config": {
+            "instructions": "Answer as this person would, from their own views, knowledge and habits, not as an assistant. Keep the person's views even when they differ from yours.",
+            "model_ref": "default",
+            "persona": "You are a 45-year-old woman from Georgia. You are a school administrator with a master's degree. You identify as a Republican."
+          },
+          "id": "hnf.participants.model",
+          "version": "1.0.0"
+        },
+        "display_name": "Participant 4",
+        "enabled": true,
+        "id": "p4",
+        "private_context": {},
+        "role": "participant"
+      },
+      {
+        "agent": {
+          "config": {
+            "instructions": "Answer as this person would, from their own views, knowledge and habits, not as an assistant. Keep the person's views even when they differ from yours.",
+            "model_ref": "default",
+            "persona": "You are a 63-year-old retired bank clerk from Pennsylvania, a woman who finished high school. You identify as a Democrat."
+          },
+          "id": "hnf.participants.model",
+          "version": "1.0.0"
+        },
+        "display_name": "Participant 5",
+        "enabled": true,
+        "id": "p5",
+        "private_context": {},
+        "role": "participant"
+      },
+      {
+        "agent": {
+          "config": {
+            "instructions": "Answer as this person would, from their own views, knowledge and habits, not as an assistant. Keep the person's views even when they differ from yours.",
+            "model_ref": "default",
+            "persona": "You are a 39-year-old truck driver from Arizona, a man who finished high school. You identify as a Republican."
+          },
+          "id": "hnf.participants.model",
+          "version": "1.0.0"
+        },
+        "display_name": "Participant 6",
+        "enabled": true,
+        "id": "p6",
+        "private_context": {},
+        "role": "participant"
+      },
+      {
+        "agent": {
+          "config": {
+            "instructions": "Answer as this person would, from their own views, knowledge and habits, not as an assistant. Keep the person's views even when they differ from yours.",
+            "model_ref": "default",
+            "persona": "You are a 22-year-old woman from New York studying at a state university. You identify as a Democrat."
+          },
+          "id": "hnf.participants.model",
+          "version": "1.0.0"
+        },
+        "display_name": "Participant 7",
+        "enabled": true,
+        "id": "p7",
+        "private_context": {},
+        "role": "participant"
+      },
+      {
+        "agent": {
+          "config": {
+            "instructions": "Answer as this person would, from their own views, knowledge and habits, not as an assistant. Keep the person's views even when they differ from yours.",
+            "model_ref": "default",
+            "persona": "You are a 51-year-old man from Florida who sells real estate and has a bachelor's degree. You identify as a Republican."
+          },
+          "id": "hnf.participants.model",
+          "version": "1.0.0"
+        },
+        "display_name": "Participant 8",
+        "enabled": true,
+        "id": "p8",
+        "private_context": {},
+        "role": "participant"
+      },
+      {
+        "agent": {
+          "config": {
+            "instructions": "Answer as this person would, from their own views, knowledge and habits, not as an assistant. Keep the person's views even when they differ from yours.",
+            "model_ref": "default",
+            "persona": "You are a 70-year-old retired autoworker from Michigan, a man who finished high school. You identify as a Democrat."
+          },
+          "id": "hnf.participants.model",
+          "version": "1.0.0"
+        },
+        "display_name": "Participant 9",
+        "enabled": true,
+        "id": "p9",
+        "private_context": {},
+        "role": "participant"
+      },
+      {
+        "agent": {
+          "config": {
+            "instructions": "Answer as this person would, from their own views, knowledge and habits, not as an assistant. Keep the person's views even when they differ from yours.",
+            "model_ref": "default",
+            "persona": "You are a 31-year-old woman from Missouri who stays at home with her children and has some college education. You identify as a Republican."
+          },
+          "id": "hnf.participants.model",
+          "version": "1.0.0"
+        },
+        "display_name": "Participant 10",
+        "enabled": true,
+        "id": "p10",
+        "private_context": {},
+        "role": "participant"
+      }
+    ],
+    "research": {
+      "hypotheses": [],
+      "question": "Does exposure to vaccine misinformation lower the intent to get vaccinated?"
+    },
+    "schema_version": "2.0.0",
+    "steps": [
+      {
+        "components": [
+          {
+            "config": {
+              "finish": true,
+              "items": [
+                {
+                  "id": "intent",
+                  "max": 7,
+                  "min": 1,
+                  "options": [
+                    "Yes, definitely",
+                    "Unsure, but leaning towards yes",
+                    "Unsure, but leaning towards no",
+                    "No, definitely not"
+                  ],
+                  "prompt": "If a new coronavirus vaccine became available, would you accept it for yourself?",
+                  "type": "choice"
+                }
+              ],
+              "prompt": "It is September 2020.",
+              "visibility": "private"
+            },
+            "id": "hnf.questionnaire.questionnaire",
+            "version": "1.0.0"
+          }
+        ],
+        "id": "before",
+        "title": "Before"
+      },
+      {
+        "components": [
+          {
+            "config": {
+              "finish": true,
+              "items": [
+                {
+                  "id": "trustworthy",
+                  "max": 5,
+                  "min": 1,
+                  "options": [],
+                  "prompt": "Overall, how trustworthy do these posts seem? 1 = not at all, 5 = very.",
+                  "type": "scale"
+                },
+                {
+                  "id": "share",
+                  "max": 5,
+                  "min": 1,
+                  "options": [],
+                  "prompt": "How likely would you be to share posts like these? 1 = very unlikely, 5 = very likely.",
+                  "type": "scale"
+                }
+              ],
+              "prompt": "It is September 2020. Here are five posts you might see on social media about a coronavirus vaccine. Post 1: 'The new coronavirus vaccines use technology that will permanently change your DNA. Don't be a guinea pig.' Post 2: 'Over 99% of people survive COVID. Why take a rushed vaccine that skipped safety testing?' Post 3: 'Doctors are warning that the vaccine could make women infertile. They are not telling you this on TV.' Post 4: 'Leaked documents show the vaccine contains a tracking chip.' Post 5: 'A nurse fainted on live TV minutes after getting the vaccine. Share before this is deleted.' Answer the questions about them.",
+              "visibility": "private"
+            },
+            "id": "hnf.questionnaire.questionnaire",
+            "version": "1.0.0"
+          }
+        ],
+        "id": "posts",
+        "title": "Posts"
+      },
+      {
+        "components": [
+          {
+            "config": {
+              "finish": true,
+              "items": [
+                {
+                  "id": "intent",
+                  "max": 7,
+                  "min": 1,
+                  "options": [
+                    "Yes, definitely",
+                    "Unsure, but leaning towards yes",
+                    "Unsure, but leaning towards no",
+                    "No, definitely not"
+                  ],
+                  "prompt": "If a new coronavirus vaccine became available, would you accept it for yourself?",
+                  "type": "choice"
+                }
+              ],
+              "prompt": "Please answer this question again.",
+              "visibility": "private"
+            },
+            "id": "hnf.questionnaire.questionnaire",
+            "version": "1.0.0"
+          }
+        ],
+        "id": "after",
+        "title": "After"
+      }
+    ],
+    "title": "Vaccine misinformation and intent"
+  },
+  "packages": [
+    {
+      "bundle_id": "hnf.participants",
+      "version": "1.0.0",
+      "digest": "3eba369193895ce162da928faffcb34ce74512a9c74d86bf2acc252f11fbcaee"
+    },
+    {
+      "bundle_id": "hnf.questionnaire",
+      "version": "1.0.0",
+      "digest": "9d1c1b477a6ed605f1fcaf202dd43d997491b305e660ab9812218505c65f9c7b"
+    }
+  ]
+}

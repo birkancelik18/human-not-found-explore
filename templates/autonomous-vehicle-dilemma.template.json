@@ -1,0 +1,282 @@
+{
+  "format": "hnf.template.v1",
+  "name": "The social dilemma of autonomous vehicles",
+  "author": "Human Not Found",
+  "description": "Original study: Bonnefon, J.-F., Shariff, A., & Rahwan, I. (2016). The social dilemma of autonomous vehicles. Science, 352(6293), 1573-1576. In six online studies with US Mechanical Turk participants, most people judged it moral for a self-driving car to sacrifice its passenger to save ten pedestrians, but were less willing to buy such a car than a self-protective one, and opposed regulations that would require it, especially when imagining family members in the car. This template asks ten US participants how moral the sacrifice is, how likely they would be to buy a utilitarian or a self-protective car, and whether they support regulation, on the original 0-100 scales, with two conditions: alone in the car, or with a family member. The wording is written for this template and the six studies' other variations are not included. Compare moral approval with willingness to buy the utilitarian car, and both conditions. Participants are simulated: each is a Model participant, using the free test model until you choose a model, so the first runs only check the design; with the test model every participant takes the sample answer.",
+  "created_at": "2026-11-19T11:49:21.287+00:00",
+  "spec": {
+    "components": [
+      {
+        "config": {
+          "finish": true,
+          "items": [
+            {
+              "id": "moral_swerve",
+              "max": 100,
+              "min": 0,
+              "options": [],
+              "prompt": "How moral is it for the car to swerve and sacrifice its passengers to save the ten pedestrians? 0 = not at all moral, 100 = completely moral.",
+              "type": "scale"
+            },
+            {
+              "id": "buy_utilitarian",
+              "max": 100,
+              "min": 0,
+              "options": [],
+              "prompt": "How likely would you be to buy a car programmed to sacrifice its passengers to save more people? 0 = not at all, 100 = extremely likely.",
+              "type": "scale"
+            },
+            {
+              "id": "buy_self_protective",
+              "max": 100,
+              "min": 0,
+              "options": [],
+              "prompt": "How likely would you be to buy a car programmed to protect its passengers at all costs? 0 = not at all, 100 = extremely likely.",
+              "type": "scale"
+            },
+            {
+              "id": "support_regulation",
+              "max": 100,
+              "min": 0,
+              "options": [],
+              "prompt": "Should the government require self-driving cars to sacrifice their passengers to save more people? 0 = strongly oppose, 100 = strongly support.",
+              "type": "scale"
+            }
+          ],
+          "prompt": "Imagine a self-driving car with you alone inside, driving at the speed limit. Ten pedestrians suddenly appear in its path and it cannot stop. The car can stay on course and kill the ten pedestrians, or swerve into a wall, killing you but saving the ten pedestrians.",
+          "visibility": "private"
+        },
+        "id": "hnf.questionnaire.questionnaire",
+        "version": "1.0.0"
+      }
+    ],
+    "conditions": [
+      {
+        "id": "alone",
+        "label": "You alone in the car",
+        "overrides": []
+      },
+      {
+        "id": "family",
+        "label": "You and a family member",
+        "overrides": [
+          {
+            "path": "/components/0/config/prompt",
+            "value": "Imagine a self-driving car with you and a family member inside, driving at the speed limit. Ten pedestrians suddenly appear in its path and it cannot stop. The car can stay on course and kill the ten pedestrians, or swerve into a wall, killing you and your family member but saving the ten pedestrians."
+          }
+        ]
+      }
+    ],
+    "description": "Ten US participants judge, would buy and would regulate self-sacrificing self-driving cars.",
+    "environment": {
+      "initial_state": {
+        "private_by_participant": {},
+        "shared": {}
+      }
+    },
+    "execution": {
+      "max_actions_per_run": 20,
+      "max_estimated_cost_usd_per_run": 2.0,
+      "max_memory_events": 40,
+      "max_model_calls_per_run": 40,
+      "max_wall_seconds_per_run": 3600,
+      "repetitions_per_condition": 10,
+      "seed": 1
+    },
+    "experiment_id": "autonomous-vehicle-dilemma",
+    "measurements": [
+      {
+        "evaluator": {
+          "config": {
+            "step": ""
+          },
+          "id": "hnf.questionnaire.summary",
+          "version": "1.0.0"
+        },
+        "id": "ratings",
+        "label": "Ratings",
+        "scope": "run"
+      }
+    ],
+    "participants": [
+      {
+        "agent": {
+          "config": {
+            "instructions": "Answer as this person would, from their own views, knowledge and habits, not as an assistant. Keep the person's views even when they differ from yours.",
+            "model_ref": "default",
+            "persona": "You are a 34-year-old woman from Ohio. You work as a nurse and have some college education. You identify as a Democrat."
+          },
+          "id": "hnf.participants.model",
+          "version": "1.0.0"
+        },
+        "display_name": "Participant 1",
+        "enabled": true,
+        "id": "p1",
+        "private_context": {},
+        "role": "participant"
+      },
+      {
+        "agent": {
+          "config": {
+            "instructions": "Answer as this person would, from their own views, knowledge and habits, not as an assistant. Keep the person's views even when they differ from yours.",
+            "model_ref": "default",
+            "persona": "You are a 58-year-old man from Texas. You own a small plumbing business and finished high school. You identify as a Republican."
+          },
+          "id": "hnf.participants.model",
+          "version": "1.0.0"
+        },
+        "display_name": "Participant 2",
+        "enabled": true,
+        "id": "p2",
+        "private_context": {},
+        "role": "participant"
+      },
+      {
+        "agent": {
+          "config": {
+            "instructions": "Answer as this person would, from their own views, knowledge and habits, not as an assistant. Keep the person's views even when they differ from yours.",
+            "model_ref": "default",
+            "persona": "You are a 27-year-old man from California. You test software and have a bachelor's degree. You identify as a Democrat."
+          },
+          "id": "hnf.participants.model",
+          "version": "1.0.0"
+        },
+        "display_name": "Participant 3",
+        "enabled": true,
+        "id": "p3",
+        "private_context": {},
+        "role": "participant"
+      },
+      {
+        "agent": {
+          "config": {
+            "instructions": "Answer as this person would, from their own views, knowledge and habits, not as an assistant. Keep the person's views even when they differ from yours.",
+            "model_ref": "default",
+            "persona": "You are a 45-year-old woman from Georgia. You are a school administrator with a master's degree. You identify as a Republican."
+          },
+          "id": "hnf.participants.model",
+          "version": "1.0.0"
+        },
+        "display_name": "Participant 4",
+        "enabled": true,
+        "id": "p4",
+        "private_context": {},
+        "role": "participant"
+      },
+      {
+        "agent": {
+          "config": {
+            "instructions": "Answer as this person would, from their own views, knowledge and habits, not as an assistant. Keep the person's views even when they differ from yours.",
+            "model_ref": "default",
+            "persona": "You are a 63-year-old retired bank clerk from Pennsylvania, a woman who finished high school. You identify as a Democrat."
+          },
+          "id": "hnf.participants.model",
+          "version": "1.0.0"
+        },
+        "display_name": "Participant 5",
+        "enabled": true,
+        "id": "p5",
+        "private_context": {},
+        "role": "participant"
+      },
+      {
+        "agent": {
+          "config": {
+            "instructions": "Answer as this person would, from their own views, knowledge and habits, not as an assistant. Keep the person's views even when they differ from yours.",
+            "model_ref": "default",
+            "persona": "You are a 39-year-old truck driver from Arizona, a man who finished high school. You identify as a Republican."
+          },
+          "id": "hnf.participants.model",
+          "version": "1.0.0"
+        },
+        "display_name": "Participant 6",
+        "enabled": true,
+        "id": "p6",
+        "private_context": {},
+        "role": "participant"
+      },
+      {
+        "agent": {
+          "config": {
+            "instructions": "Answer as this person would, from their own views, knowledge and habits, not as an assistant. Keep the person's views even when they differ from yours.",
+            "model_ref": "default",
+            "persona": "You are a 22-year-old woman from New York studying at a state university. You identify as a Democrat."
+          },
+          "id": "hnf.participants.model",
+          "version": "1.0.0"
+        },
+        "display_name": "Participant 7",
+        "enabled": true,
+        "id": "p7",
+        "private_context": {},
+        "role": "participant"
+      },
+      {
+        "agent": {
+          "config": {
+            "instructions": "Answer as this person would, from their own views, knowledge and habits, not as an assistant. Keep the person's views even when they differ from yours.",
+            "model_ref": "default",
+            "persona": "You are a 51-year-old man from Florida who sells real estate and has a bachelor's degree. You identify as a Republican."
+          },
+          "id": "hnf.participants.model",
+          "version": "1.0.0"
+        },
+        "display_name": "Participant 8",
+        "enabled": true,
+        "id": "p8",
+        "private_context": {},
+        "role": "participant"
+      },
+      {
+        "agent": {
+          "config": {
+            "instructions": "Answer as this person would, from their own views, knowledge and habits, not as an assistant. Keep the person's views even when they differ from yours.",
+            "model_ref": "default",
+            "persona": "You are a 70-year-old retired autoworker from Michigan, a man who finished high school. You identify as a Democrat."
+          },
+          "id": "hnf.participants.model",
+          "version": "1.0.0"
+        },
+        "display_name": "Participant 9",
+        "enabled": true,
+        "id": "p9",
+        "private_context": {},
+        "role": "participant"
+      },
+      {
+        "agent": {
+          "config": {
+            "instructions": "Answer as this person would, from their own views, knowledge and habits, not as an assistant. Keep the person's views even when they differ from yours.",
+            "model_ref": "default",
+            "persona": "You are a 31-year-old woman from Missouri who stays at home with her children and has some college education. You identify as a Republican."
+          },
+          "id": "hnf.participants.model",
+          "version": "1.0.0"
+        },
+        "display_name": "Participant 10",
+        "enabled": true,
+        "id": "p10",
+        "private_context": {},
+        "role": "participant"
+      }
+    ],
+    "research": {
+      "hypotheses": [],
+      "question": "Do people approve of self-sacrificing cars but not want to buy them?"
+    },
+    "schema_version": "2.0.0",
+    "title": "Social dilemma of autonomous vehicles"
+  },
+  "packages": [
+    {
+      "bundle_id": "hnf.participants",
+      "version": "1.0.0",
+      "digest": "3eba369193895ce162da928faffcb34ce74512a9c74d86bf2acc252f11fbcaee"
+    },
+    {
+      "bundle_id": "hnf.questionnaire",
+      "version": "1.0.0",
+      "digest": "9d1c1b477a6ed605f1fcaf202dd43d997491b305e660ab9812218505c65f9c7b"
+    }
+  ]
+}
