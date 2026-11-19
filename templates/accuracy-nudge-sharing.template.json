@@ -2,8 +2,8 @@
   "format": "hnf.template.v1",
   "name": "Accuracy nudge: sharing COVID-19 headlines",
   "author": "Human Not Found",
-  "description": "Original study: Pennycook, G., McPhetres, J., Zhang, Y., Lu, J. G., & Rand, D. G. (2020). Fighting COVID-19 misinformation on social media: Experimental evidence for a scalable accuracy-nudge intervention. Psychological Science, 31(7), 770-780. Across two studies with more than 1,700 US adults, people were worse at telling true from false COVID-19 headlines when deciding what to share than when judging accuracy; in Study 2, asking people to judge the accuracy of a single unrelated headline first nearly tripled truth discernment in their sharing intentions. This template follows Study 2 with ten US participants: in the treatment condition they first rate the accuracy of one non-COVID headline, in the control condition they answer a neutral question instead (the original control had no first task), and both then rate how likely they would be to share each of ten COVID-19 headlines (five true, five false) on a 6-point scale. The headlines are new, written for this template from claims circulating in March 2020. Sharing discernment is the mean of true minus false items; compare it between the conditions. Participants are simulated: each is a Model participant, using the free test model until you choose a model, so the first runs only check the design; with the test model every participant takes the sample answer.",
-  "created_at": "2026-11-19T11:49:20.961+00:00",
+  "description": "Original study: Pennycook, G., McPhetres, J., Zhang, Y., Lu, J. G., & Rand, D. G. (2020). Fighting COVID-19 misinformation on social media: Experimental evidence for a scalable accuracy-nudge intervention. Psychological Science, 31(7), 770-780. Across two studies with more than 1,700 US adults, people were worse at telling true from false COVID-19 headlines when deciding what to share than when judging accuracy; in Study 2, asking people to judge the accuracy of a single unrelated headline first nearly tripled truth discernment in their sharing intentions. This template follows Study 2 with ten US participants: in the treatment condition they first rate the accuracy of one non-COVID headline, in the control condition they answer a neutral question instead (the original control had no first task), and both then rate how likely they would be to share each of ten COVID-19 headlines (five true, five false) on a 6-point scale. The headlines are new, written for this template from claims circulating in March 2020. The sharing discernment measure is the mean of true minus false items; compare it between the conditions. Participants are simulated: each is a Model participant, using the free test model until you choose a model, so the first runs only check the design; with the test model every participant takes the sample answer.",
+  "created_at": "2026-11-19T12:10:18.852+00:00",
   "spec": {
     "components": [],
     "conditions": [
@@ -58,6 +58,24 @@
         },
         "id": "sharing",
         "label": "Sharing intentions",
+        "scope": "run"
+      },
+      {
+        "evaluator": {
+          "config": {
+            "group_a": [
+              "true_"
+            ],
+            "group_b": [
+              "false_"
+            ],
+            "step": "share"
+          },
+          "id": "hnf.survey_measures.item_contrast",
+          "version": "1.0.0"
+        },
+        "id": "discernment",
+        "label": "Sharing discernment",
         "scope": "run"
       }
     ],
@@ -364,6 +382,11 @@
       "bundle_id": "hnf.questionnaire",
       "version": "1.0.0",
       "digest": "9d1c1b477a6ed605f1fcaf202dd43d997491b305e660ab9812218505c65f9c7b"
+    },
+    {
+      "bundle_id": "hnf.survey_measures",
+      "version": "1.0.0",
+      "digest": "746f02b0c0e687ae7ec7947f3e3cd437e1ad0ec63bf33336e4e194138887558d"
     }
   ]
 }

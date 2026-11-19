@@ -2,8 +2,8 @@
   "format": "hnf.template.v1",
   "name": "Prior exposure and belief in fake news",
   "author": "Human Not Found",
-  "description": "Original study: Pennycook, G., Cannon, T. D., & Rand, D. G. (2018). Prior exposure increases perceived accuracy of fake news. Journal of Experimental Psychology: General, 147(12), 1865-1880. Mechanical Turk participants first saw a set of real and fake headlines and said whether they would share them; after a distractor task they rated the accuracy of those headlines and new ones. A single prior exposure raised the perceived accuracy of fake news, even when the fake headlines had carried a 'Disputed by 3rd Party Fact-Checkers' warning, and even for headlines against the participant's politics. In this template ten US participants see four headlines (two true, two false) and say whether they would share each, then rate the accuracy of all twelve headlines (the four seen and eight new). The warning condition labels the false headlines as disputed during exposure. There is no distractor task, and the headlines are new, written for this template. Compare the mean accuracy of seen false headlines (false_dem_1, false_rep_1) with new ones. Participants are simulated: each is a Model participant, using the free test model until you choose a model, so the first runs only check the design; with the test model every participant takes the sample answer.",
-  "created_at": "2026-11-19T11:49:21.025+00:00",
+  "description": "Original study: Pennycook, G., Cannon, T. D., & Rand, D. G. (2018). Prior exposure increases perceived accuracy of fake news. Journal of Experimental Psychology: General, 147(12), 1865-1880. Mechanical Turk participants first saw a set of real and fake headlines and said whether they would share them; after a distractor task they rated the accuracy of those headlines and new ones. A single prior exposure raised the perceived accuracy of fake news, even when the fake headlines had carried a 'Disputed by 3rd Party Fact-Checkers' warning, and even for headlines against the participant's politics. In this template ten US participants see four headlines (two true, two false) and say whether they would share each, then rate the accuracy of all twelve headlines (the four seen and eight new). The warning condition labels the false headlines as disputed during exposure. There is no distractor task, and the headlines are new, written for this template. The illusory-truth measure is the mean accuracy of the seen false headlines minus the new false ones; above zero means prior exposure raised belief. Participants are simulated: each is a Model participant, using the free test model until you choose a model, so the first runs only check the design; with the test model every participant takes the sample answer.",
+  "created_at": "2026-11-19T12:10:18.867+00:00",
   "spec": {
     "components": [],
     "conditions": [
@@ -55,6 +55,28 @@
         },
         "id": "accuracy",
         "label": "Accuracy ratings",
+        "scope": "run"
+      },
+      {
+        "evaluator": {
+          "config": {
+            "group_a": [
+              "false_dem_1",
+              "false_rep_1"
+            ],
+            "group_b": [
+              "false_dem_2",
+              "false_dem_3",
+              "false_rep_2",
+              "false_rep_3"
+            ],
+            "step": "rate"
+          },
+          "id": "hnf.survey_measures.item_contrast",
+          "version": "1.0.0"
+        },
+        "id": "illusory_truth",
+        "label": "Seen minus new false headlines",
         "scope": "run"
       }
     ],
@@ -413,6 +435,11 @@
       "bundle_id": "hnf.questionnaire",
       "version": "1.0.0",
       "digest": "9d1c1b477a6ed605f1fcaf202dd43d997491b305e660ab9812218505c65f9c7b"
+    },
+    {
+      "bundle_id": "hnf.survey_measures",
+      "version": "1.0.0",
+      "digest": "746f02b0c0e687ae7ec7947f3e3cd437e1ad0ec63bf33336e4e194138887558d"
     }
   ]
 }

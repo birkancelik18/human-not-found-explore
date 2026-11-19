@@ -436,6 +436,9 @@ def choice(identifier, prompt, options):
     return {"id": identifier, "prompt": prompt, "type": "choice", "min": 1, "max": 7, "options": options}
 
 
+SM = "hnf.survey_measures."
+
+
 def summary(identifier, label, step):
     return measure(identifier, label, "hnf.questionnaire.summary", step=step)
 
@@ -624,12 +627,17 @@ TEMPLATES += [
          "Oppenheimer, 2016) and then rate twelve headlines on the original 4-point accuracy scale: three true and "
          "three false favouring each party. The headlines are new, written for this template, and shown as text rather "
          "than as Facebook posts; the CRT items are multiple choice, offering the intuitive and the correct answer. "
-         "Item ids mark each headline as true or false and pro-Democrat or pro-Republican; discernment is the mean "
-         "rating of true minus false headlines. Export the answers to relate CRT score to discernment by party. " + SIM),
+         "Item ids mark each headline as true or false and pro-Democrat or pro-Republican. Measures: truth discernment "
+         "(mean rating of true minus false headlines) and CRT score (share correct), each also given per participant "
+         "so they can be related to each other and to the participant's party. " + SIM),
      "spec": spec("fake-news-cognitive-reflection", "Lazy, not biased",
                   "Ten US participants take the CRT and rate the accuracy of 12 partisan headlines.",
                   "Is belief in fake news explained by lack of reasoning rather than by partisan motivated reasoning?",
-                  panel(US_PANEL), [summary("crt", "CRT answers", "crt"), summary("accuracy", "Accuracy ratings", "headlines")],
+                  panel(US_PANEL), [summary("accuracy", "Accuracy ratings", "headlines"),
+                   measure("discernment", "Truth discernment", SM + "item_contrast", group_a=["true_"], group_b=["false_"], step="headlines"),
+                   measure("crt", "CRT score", SM + "answer_key_accuracy", step="crt", answer_key=[
+                       {"item": "crt_race", "answer": "Second"}, {"item": "crt_sheep", "answer": "8"},
+                       {"item": "crt_emily", "answer": "Emily"}, {"item": "crt_hole", "answer": "0"}])],
                   steps=[{"id": "crt", "title": "Reasoning questions", "components": [ask("Please answer these questions.", CRT)]},
                          {"id": "headlines", "title": "Rate headlines", "components": [ask(
                              "You will see news headlines. " + ACCURACY_Q,
@@ -647,12 +655,13 @@ TEMPLATES += [
          "treatment condition they first rate the accuracy of one non-COVID headline, in the control condition they "
          "answer a neutral question instead (the original control had no first task), and both then rate how likely "
          "they would be to share each of ten COVID-19 headlines (five true, five false) on a 6-point scale. The "
-         "headlines are new, written for this template from claims circulating in March 2020. Sharing discernment is "
-         "the mean of true minus false items; compare it between the conditions. " + SIM),
+         "headlines are new, written for this template from claims circulating in March 2020. The sharing discernment "
+         "measure is the mean of true minus false items; compare it between the conditions. " + SIM),
      "spec": spec("accuracy-nudge-sharing", "Accuracy nudge",
                   "Ten US participants rate sharing intentions for COVID-19 headlines, after an accuracy prompt or not.",
                   "Does a prompt to think about accuracy improve truth discernment in sharing?",
-                  panel(US_PANEL), [summary("sharing", "Sharing intentions", "share")],
+                  panel(US_PANEL), [summary("sharing", "Sharing intentions", "share"),
+                   measure("discernment", "Sharing discernment", SM + "item_contrast", group_a=["true_"], group_b=["false_"], step="share")],
                   steps=[{"id": "first", "title": "First question", "components": [ask(
                              "Before the main task, please answer this question.",
                              [scale("first", "To the best of your knowledge, how accurate is this headline? \"Scientists "
@@ -680,11 +689,14 @@ TEMPLATES += [
          "see four headlines (two true, two false) and say whether they would share each, then rate the accuracy "
          "of all twelve headlines (the four seen and eight new). The warning condition labels the false headlines as "
          "disputed during exposure. There is no distractor task, and the headlines are new, written for this template. "
-         "Compare the mean accuracy of seen false headlines (false_dem_1, false_rep_1) with new ones. " + SIM),
+         "The illusory-truth measure is the mean accuracy of the seen false headlines minus the new false ones; "
+         "above zero means prior exposure raised belief. " + SIM),
      "spec": spec("illusory-truth-fake-news", "Prior exposure to fake news",
                   "Ten US participants see four headlines, then rate the accuracy of twelve, four of them seen before.",
                   "Does seeing a fake headline once make it seem more accurate later?",
-                  panel(US_PANEL), [summary("accuracy", "Accuracy ratings", "rate")],
+                  panel(US_PANEL), [summary("accuracy", "Accuracy ratings", "rate"),
+                   measure("illusory_truth", "Seen minus new false headlines", SM + "item_contrast", step="rate",
+                           group_a=["false_dem_1", "false_rep_1"], group_b=["false_dem_2", "false_dem_3", "false_rep_2", "false_rep_3"])],
                   steps=[{"id": "expose", "title": "Headlines", "components": [ask(
                              "Here are some news headlines. For each, would you consider sharing it on social media?",
                              [choice(key, f'"{text}"', ["Yes", "No"]) for key, text in HEADLINES
@@ -709,12 +721,14 @@ TEMPLATES += [
          "estimated a person's weight from a photograph. In this template ten US participants estimate the weight of "
          "three people from written descriptions (the photographs are not used), then see advice labelled as coming "
          "from an algorithm or from the average of 275 earlier participants, and give final estimates. The advice is the "
-         "same in both conditions. Weight of advice is (final - first) / (advice - first) per person; compare its mean "
-         "between the conditions. The advice values are " + ", ".join(f"{k}: {v} lb" for k, v in ADVICE.items()) + ". " + SIM),
+         "same in both conditions. The weight-of-advice measure is (final - first) / (advice - first), limited to 0-1; "
+         "compare it between the conditions. The advice values are " + ", ".join(f"{k}: {v} lb" for k, v in ADVICE.items()) + ". " + SIM),
      "spec": spec("algorithm-appreciation", "Algorithm appreciation",
                   "Ten participants estimate, receive advice labelled as algorithmic or human, and revise.",
                   "Do people weigh advice more when it comes from an algorithm than from other people?",
-                  panel(US_PANEL), [summary("first", "First estimates", "first"), summary("final", "Final estimates", "final")],
+                  panel(US_PANEL), [summary("first", "First estimates", "first"), summary("final", "Final estimates", "final"),
+                   measure("woa", "Weight of advice", SM + "weight_of_advice", first_step="first", final_step="final", truncate=True,
+                           advice=[{"item": key, "value": value} for key, value in ADVICE.items()])],
                   steps=[{"id": "first", "title": "Your estimate", "components": [ask(
                              ESTIMATE_PROMPT, [scale(key, text, 80, 350) for key, text in PEOPLE_TO_ESTIMATE])]},
                          {"id": "final", "title": "Final estimate", "components": [ask(
@@ -756,13 +770,15 @@ TEMPLATES += [
          "Misinformation lowered intent relative to the factual posts. This template runs the US arm with ten US "
          "participants: intent before (the original 4-point item), five posts with questions about trust and sharing, "
          "and intent after. The posts are new, written for this template, paraphrasing claims that circulated in 2020; "
-         "the original used real posts with images. Compare the change in the share answering 'Yes, definitely' "
-         "between the conditions. " + SIM),
+         "the original used real posts with images. The intent-change measure is the share answering 'Yes, definitely' after "
+         "minus before; compare it between the conditions. " + SIM),
      "spec": spec("vaccine-misinformation-intent", "Vaccine misinformation and intent",
                   "Ten US participants state vaccination intent before and after seeing misinformation or factual posts.",
                   "Does exposure to vaccine misinformation lower the intent to get vaccinated?",
                   panel(US_PANEL), [summary("before", "Intent before", "before"), summary("posts", "Ratings of posts", "posts"),
-                                    summary("after", "Intent after", "after")],
+                                    summary("after", "Intent after", "after"),
+                                    measure("intent_change", "Change in definite acceptance", SM + "step_change", item="intent",
+                                            target="Yes, definitely", before_step="before", after_step="after")],
                   steps=[{"id": "before", "title": "Before", "components": [ask("It is September 2020.", [VACCINE_INTENT])]},
                          {"id": "posts", "title": "Posts", "components": [ask(POST_PROMPT.format(posts=MISINFORMATION_POSTS), POST_ITEMS)]},
                          {"id": "after", "title": "After", "components": [ask("Please answer this question again.", [VACCINE_INTENT])]}],

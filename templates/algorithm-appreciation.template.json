@@ -2,8 +2,8 @@
   "format": "hnf.template.v1",
   "name": "Algorithm appreciation: advice from an algorithm or from people",
   "author": "Human Not Found",
-  "description": "Original study: Logg, J. M., Minson, J. A., & Moore, D. A. (2019). Algorithm appreciation: People prefer algorithmic to human judgment. Organizational Behavior and Human Decision Processes, 151, 90-103. In six experiments, people made an estimate, received advice, and made a final estimate. They moved further toward the advice when it was said to come from an algorithm than from people; the effect waned when they chose between the algorithm and their own judgment, and among experienced forecasters. In Experiment 1A people estimated a person's weight from a photograph. In this template ten US participants estimate the weight of three people from written descriptions (the photographs are not used), then see advice labelled as coming from an algorithm or from the average of 275 earlier participants, and give final estimates. The advice is the same in both conditions. Weight of advice is (final - first) / (advice - first) per person; compare its mean between the conditions. The advice values are weight_1: 186 lb, weight_2: 121 lb, weight_3: 238 lb. Participants are simulated: each is a Model participant, using the free test model until you choose a model, so the first runs only check the design; with the test model every participant takes the sample answer.",
-  "created_at": "2026-11-19T11:49:21.068+00:00",
+  "description": "Original study: Logg, J. M., Minson, J. A., & Moore, D. A. (2019). Algorithm appreciation: People prefer algorithmic to human judgment. Organizational Behavior and Human Decision Processes, 151, 90-103. In six experiments, people made an estimate, received advice, and made a final estimate. They moved further toward the advice when it was said to come from an algorithm than from people; the effect waned when they chose between the algorithm and their own judgment, and among experienced forecasters. In Experiment 1A people estimated a person's weight from a photograph. In this template ten US participants estimate the weight of three people from written descriptions (the photographs are not used), then see advice labelled as coming from an algorithm or from the average of 275 earlier participants, and give final estimates. The advice is the same in both conditions. The weight-of-advice measure is (final - first) / (advice - first), limited to 0-1; compare it between the conditions. The advice values are weight_1: 186 lb, weight_2: 121 lb, weight_3: 238 lb. Participants are simulated: each is a Model participant, using the free test model until you choose a model, so the first runs only check the design; with the test model every participant takes the sample answer.",
+  "created_at": "2026-11-19T12:10:18.881+00:00",
   "spec": {
     "components": [],
     "conditions": [
@@ -63,6 +63,34 @@
         },
         "id": "final",
         "label": "Final estimates",
+        "scope": "run"
+      },
+      {
+        "evaluator": {
+          "config": {
+            "advice": [
+              {
+                "item": "weight_1",
+                "value": 186
+              },
+              {
+                "item": "weight_2",
+                "value": 121
+              },
+              {
+                "item": "weight_3",
+                "value": 238
+              }
+            ],
+            "final_step": "final",
+            "first_step": "first",
+            "truncate": true
+          },
+          "id": "hnf.survey_measures.weight_of_advice",
+          "version": "1.0.0"
+        },
+        "id": "woa",
+        "label": "Weight of advice",
         "scope": "run"
       }
     ],
@@ -329,6 +357,11 @@
       "bundle_id": "hnf.questionnaire",
       "version": "1.0.0",
       "digest": "9d1c1b477a6ed605f1fcaf202dd43d997491b305e660ab9812218505c65f9c7b"
+    },
+    {
+      "bundle_id": "hnf.survey_measures",
+      "version": "1.0.0",
+      "digest": "746f02b0c0e687ae7ec7947f3e3cd437e1ad0ec63bf33336e4e194138887558d"
     }
   ]
 }

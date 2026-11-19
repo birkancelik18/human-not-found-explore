@@ -2,8 +2,8 @@
   "format": "hnf.template.v1",
   "name": "COVID-19 vaccine misinformation and vaccination intent",
   "author": "Human Not Found",
-  "description": "Original study: Loomba, S., de Figueiredo, A., Piatek, S. J., de Graaf, K., & Larson, H. J. (2021). Measuring the impact of COVID-19 vaccine misinformation on vaccination intent in the UK and USA. Nature Human Behaviour, 5(3), 337-348. In a pre-registered randomized controlled trial with 8,001 respondents in the UK and the US in September 2020, people stated whether they would accept a COVID-19 vaccine, were shown five recent social media posts containing vaccine misinformation or five factual posts, and stated their intent again. Misinformation lowered intent relative to the factual posts. This template runs the US arm with ten US participants: intent before (the original 4-point item), five posts with questions about trust and sharing, and intent after. The posts are new, written for this template, paraphrasing claims that circulated in 2020; the original used real posts with images. Compare the change in the share answering 'Yes, definitely' between the conditions. Participants are simulated: each is a Model participant, using the free test model until you choose a model, so the first runs only check the design; with the test model every participant takes the sample answer.",
-  "created_at": "2026-11-19T11:49:21.153+00:00",
+  "description": "Original study: Loomba, S., de Figueiredo, A., Piatek, S. J., de Graaf, K., & Larson, H. J. (2021). Measuring the impact of COVID-19 vaccine misinformation on vaccination intent in the UK and USA. Nature Human Behaviour, 5(3), 337-348. In a pre-registered randomized controlled trial with 8,001 respondents in the UK and the US in September 2020, people stated whether they would accept a COVID-19 vaccine, were shown five recent social media posts containing vaccine misinformation or five factual posts, and stated their intent again. Misinformation lowered intent relative to the factual posts. This template runs the US arm with ten US participants: intent before (the original 4-point item), five posts with questions about trust and sharing, and intent after. The posts are new, written for this template, paraphrasing claims that circulated in 2020; the original used real posts with images. The intent-change measure is the share answering 'Yes, definitely' after minus before; compare it between the conditions. Participants are simulated: each is a Model participant, using the free test model until you choose a model, so the first runs only check the design; with the test model every participant takes the sample answer.",
+  "created_at": "2026-11-19T12:10:18.911+00:00",
   "spec": {
     "components": [],
     "conditions": [
@@ -75,6 +75,21 @@
         },
         "id": "after",
         "label": "Intent after",
+        "scope": "run"
+      },
+      {
+        "evaluator": {
+          "config": {
+            "after_step": "after",
+            "before_step": "before",
+            "item": "intent",
+            "target": "Yes, definitely"
+          },
+          "id": "hnf.survey_measures.step_change",
+          "version": "1.0.0"
+        },
+        "id": "intent_change",
+        "label": "Change in definite acceptance",
         "scope": "run"
       }
     ],
@@ -352,6 +367,11 @@
       "bundle_id": "hnf.questionnaire",
       "version": "1.0.0",
       "digest": "9d1c1b477a6ed605f1fcaf202dd43d997491b305e660ab9812218505c65f9c7b"
+    },
+    {
+      "bundle_id": "hnf.survey_measures",
+      "version": "1.0.0",
+      "digest": "746f02b0c0e687ae7ec7947f3e3cd437e1ad0ec63bf33336e4e194138887558d"
     }
   ]
 }
