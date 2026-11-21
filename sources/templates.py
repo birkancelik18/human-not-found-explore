@@ -6,7 +6,7 @@ SIM = ("Participants are simulated: each is a Model participant, using the free 
 
 
 # Packages with a newer version than V.
-VERSIONS = {"hnf.ranking_tasks": "1.0.1", "hnf.moderator": "1.0.2", "hnf.turn_taking": "1.0.2"}
+VERSIONS = {"hnf.ranking_tasks": "1.0.1", "hnf.moderator": "1.0.3", "hnf.turn_taking": "1.0.2"}
 
 
 def ref(component, **config):

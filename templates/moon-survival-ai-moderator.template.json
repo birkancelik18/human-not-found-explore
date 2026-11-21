@@ -3,7 +3,7 @@
   "name": "NASA Moon Survival with an AI moderator",
   "author": "Human Not Found",
   "description": "Original study: Conte, S. P. (2026). AI Moderation in Multi-Party Voice Conversations: Architecture, Strategies, and Evaluation (Master's thesis, Politecnico di Milano). Ten groups of three ranked 15 items alone, then discussed by voice for up to 30 minutes under the consensus ground rules of Hall & Watson (1970) and submitted one group ranking, once with an AI moderator that balanced participation and enforced the ground rules, and once without it. Each group did NASA Moon Survival in one session and Lost at Sea in the other, with task and moderator order counterbalanced. Rankings were scored against the expert ranking (error score, lower is better) and against the group's own members (synergy); participation balance was the Gini index of floor-holding time. In this template three members with personas (a talkative engineering student, an office administrator who takes part at an ordinary pace and a reserved shop assistant; the personas are ours, not the thesis's) rank the items alone and privately, discuss in text with the ground rules, speaking when they raise a hand, until nobody asks for the floor (they stop once they agree, like pressing 'ready to conclude') or 40 member turns, and then the first member submits the group ranking. In the 'Moderator on' condition an AI moderator follows the thesis's policy: after about 8 minutes of speaking it invites a member under half the group average by name, or opens up the point of a member over twice the average, with a cooldown; after each message it judges conflict, direct requests, off-topic drift and ground-rule breaks, with a severity floor of 0.4; it does not rank. Speaking time is estimated from the members' words at 150 words per minute, and the 2-minute cooldown is our choice, as the thesis does not give its value. In 'Moderator off' it is disabled and the ground rules are only stated at the start. Participation inequality uses the thesis's Gini formula on the members' words, which stand in for floor-holding time in a text discussion. Run this template and its sibling (Lost at Sea with an AI moderator) together to reproduce the within-group design; every repetition uses the same three personas, so repetitions differ only through the model's own variation. Participants are simulated: each is a Model participant, using the free test model until you choose a model, so the first runs only check the design; with the test model every participant takes the sample answer.",
-  "created_at": "2026-11-21T23:35:02.674+00:00",
+  "created_at": "2026-11-21T23:49:01.434+00:00",
   "spec": {
     "components": [],
     "conditions": [
@@ -226,7 +226,7 @@
             "words_per_minute": 150
           },
           "id": "hnf.moderator.moderator",
-          "version": "1.0.2"
+          "version": "1.0.3"
         },
         "display_name": "AI moderator",
         "enabled": true,
@@ -348,8 +348,8 @@
     },
     {
       "bundle_id": "hnf.moderator",
-      "version": "1.0.2",
-      "digest": "818088f4386a1bbfcd52dc0f79aa32a65ff0286383a4e698dbaf696fb228eba9"
+      "version": "1.0.3",
+      "digest": "40ebd559997735bbfe21075a706fc8b3b62203dbc8621d9e2af4085077ec0a8b"
     },
     {
       "bundle_id": "hnf.participants",

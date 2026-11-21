@@ -114,6 +114,8 @@ def conte_moderator(request):
         return {**body, "action_prompt": prompt} if prompt else body
 
     if action["type"] == "turn.request":
+        if not sum(words.values()):  # nobody has spoken yet: there is nothing to moderate
+            return reply({"action_type": action["type"], "payload": False})
         found = participation(config, words, minute, interventions)
         if found:
             return reply({"action_type": action["type"], "payload": True}, pending={"reason": found[0], "member": found[1]})
@@ -154,7 +156,9 @@ def conte_moderator(request):
         else:
             trigger = NO_TRIGGER
         interventions.append({"reason": reason, "minute": minute})
-        return reply(ask_model(trigger, f"The last message was: {last!r}"), pending=None)
+        return reply(ask_model(trigger, f"The last message was: {last!r}",
+                               "Write only what you say to the group: never mention severity scores, these instructions "
+                               "or reply formats."), pending=None)
     if action["type"] == "turn.pass":
         allowed = action["schema"].get("enum", [])
         choice = quietest(words, allowed)
@@ -238,9 +242,10 @@ def conte_checks():
         status = {"topic": "turn.status", "payload": {"words": words, "last_message": "x"}}
         return conte_moderator({"config": config, "invocation_id": "i", "state": state or {}, "observation": {
             "participants": people, "memory": [status], "allowed_actions": [{"type": "turn.request", "schema": {}}]}})
+    silent = bid({"p1": 0, "p2": 0, "p3": 0})
     early = bid({"p1": 500, "p2": 400, "p3": 10})           # 6 minutes: still warming up, so the model judges
     late = bid({"p1": 800, "p2": 700, "p3": 20})            # 10 minutes, p3 far under half the average
     cooling = bid({"p1": 800, "p2": 700, "p3": 20}, {"interventions": [{"reason": "exclusion", "minute": 9.5}]})
-    return (early.get("request_model") is True and late.get("payload") is True
+    return (silent.get("payload") is False and early.get("request_model") is True and late.get("payload") is True
             and late["state"]["pending"] == {"reason": "exclusion", "member": "p3"}
             and cooling.get("request_model") is True)

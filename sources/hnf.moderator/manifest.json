@@ -1,6 +1,6 @@
 {
   "bundle_id": "hnf.moderator",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "author": "Human Not Found",
   "description": "An AI moderator for group discussions that follows conversational strategies: balance participation, keep the discussion respectful, ask the right expert.",
   "permissions": [
