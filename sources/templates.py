@@ -6,7 +6,7 @@ SIM = ("Participants are simulated: each is a Model participant, using the free 
 
 
 # Packages with a newer version than V.
-VERSIONS = {"hnf.ranking_tasks": "1.0.1", "hnf.moderator": "1.0.1", "hnf.turn_taking": "1.0.1"}
+VERSIONS = {"hnf.ranking_tasks": "1.0.1", "hnf.moderator": "1.0.3", "hnf.turn_taking": "1.0.2"}
 
 
 def ref(component, **config):
@@ -421,7 +421,12 @@ CONTE_PERSONAS = [
              "rarely open a new point and tend to go along with the others unless someone asks for your view."),
 ]
 CONTE_ROLEPLAY = ("Take part as this person would, in their own way of speaking and of joining in, not as an assistant. "
-                  "Keep their manner throughout the discussion.")
+                  "Keep their manner throughout the discussion. The discussion is in English. In the discussion your "
+                  "group of three must agree on one shared ranking of the {task} items. When you are asked whether you "
+                  "want to speak next, answer true whenever you have something to say: your view, a disagreement, a "
+                  "question or a reaction, and always while the group has not yet discussed and agreed on a full "
+                  "ranking. Answer false only once your group has agreed on one complete ranking and you have nothing "
+                  "to add; this tells the group you are ready to conclude.")
 CONTE_SOURCE = (
     "Original study: Conte, S. P. (2026). AI Moderation in Multi-Party Voice Conversations: Architecture, Strategies, "
     "and Evaluation (Master's thesis, Politecnico di Milano). Ten groups of three ranked 15 items alone, then discussed "
@@ -433,9 +438,13 @@ CONTE_SOURCE = (
 CONTE_DESIGN = (
     "In this template three members with personas (a talkative engineering student, an office administrator who "
     "takes part at an ordinary pace and a reserved shop assistant; the personas are ours, not the thesis's) rank the items alone and privately, discuss in text with the ground rules, "
-    "speaking when they raise a hand (up to 15 member turns), and then the first member submits the group ranking. In "
-    "the 'Moderator on' condition an AI moderator joins the discussion: it invites the quietest member when "
-    "participation gets uneven and gently recalls a ground rule when a message breaks one; it does not rank. In "
+    "speaking when they raise a hand, until nobody asks for the floor (they stop once they agree, like pressing 'ready "
+    "to conclude') or 40 member turns, and then the first member submits the group ranking. In the 'Moderator on' "
+    "condition an AI moderator follows the thesis's policy: after about 8 minutes of speaking it invites a member under "
+    "half the group average by name, or opens up the point of a member over twice the average, with a cooldown; after "
+    "each message it judges conflict, direct requests, off-topic drift and ground-rule breaks, with a severity floor "
+    "of 0.4; it does not rank. Speaking time is estimated from the members' words at 150 words per minute, and the "
+    "2-minute cooldown is our choice, as the thesis does not give its value. In "
     "'Moderator off' it is disabled and the ground rules are only stated at the start. Participation inequality uses "
     "the thesis's Gini formula on the members' words, which stand in for floor-holding time in a text discussion. Run this template and "
     "its sibling together to reproduce the within-group design; every repetition uses the same three personas, so "
@@ -445,11 +454,13 @@ CONTE_DESIGN = (
 def moderated_survival(identifier, name, task, prompt, key, sample, sibling):
     items = sorted(key)
     members = [{"id": f"p{i}", "display_name": who, "enabled": True, "role": "participant",
-                "agent": ref("hnf.participants.model", model_ref="default", persona=persona, instructions=CONTE_ROLEPLAY),
+                "agent": ref("hnf.participants.model", model_ref="default", persona=persona, instructions=CONTE_ROLEPLAY.format(task=task)),
                 "private_context": {}} for i, (who, persona) in enumerate(CONTE_PERSONAS, 1)]
     moderator = {"id": "moderator", "display_name": "AI moderator", "enabled": True, "role": "moderator",
                  "agent": ref("hnf.moderator.moderator", model_ref="default", balance=True, civility=False,
                               expertise=False, ground_rules=GROUND_RULES, balance_threshold=0.3, persona="",
+                              policy="conte", warmup_minutes=8, words_per_minute=150, cooldown_minutes=2,
+                              under_ratio=0.5, over_ratio=2.0, min_severity=0.4,
                               instructions=f"The group is doing the {task} task and must agree on one shared ranking."),
                  "private_context": {}}
     measures = [measure("individual", "Individual error score", "hnf.ranking_tasks.error_score", answer_key=key, step="alone"),
@@ -457,7 +468,9 @@ def moderated_survival(identifier, name, task, prompt, key, sample, sibling):
                 measure("synergy", "Group synergy", "hnf.ranking_tasks.synergy", individual_step="alone",
                         group_step="group", answer_key=key),
                 measure("gini", "Participation inequality (Gini)", "hnf.turn_taking.gini",
-                        action_type="discussion.message", step="discuss")]
+                        action_type="discussion.message", step="discuss"),
+                measure("duration", "Discussion length (estimated speaking minutes)", "hnf.turn_taking.discussion_minutes",
+                        action_type="discussion.message", step="discuss", words_per_minute=150)]
     return {"id": identifier, "name": name,
             "description": CONTE_SOURCE + CONTE_DESIGN.replace("its sibling", f"its sibling ({sibling})"),
             "spec": spec(identifier, name,
@@ -474,14 +487,14 @@ def moderated_survival(identifier, name, task, prompt, key, sample, sibling):
                                         prompt=(prompt + " Discuss the ranking with your group and reach a consensus on "
                                                 "one shared ranking. Ground rules: " + GROUND_RULES),
                                         sample=sample),
-                                    ref("hnf.turn_taking.raise_hands", action_type="discussion.message", max_turns=15,
+                                    ref("hnf.turn_taking.raise_hands", action_type="discussion.message", max_turns=40,
                                         finish=True, quiet_rounds=2, tie_break="least_active")]},
                                 {"id": "group", "title": "Rank as a group", "components": [ref(
                                     "hnf.ranking_tasks.ranking", prompt=prompt, items=items, mode="group",
                                     reporter="", visibility="shared", finish=True)]}],
                          conditions=[condition("moderator_on", "Moderator on"),
                                      condition("moderator_off", "Moderator off", ("/participants/3/enabled", False))],
-                         actions=150)}
+                         actions=600)}
 
 
 TEMPLATES += [

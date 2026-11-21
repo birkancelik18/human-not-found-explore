@@ -244,8 +244,21 @@ def participation_gini(request):
             "details": {"messages": messages, "words": words, "message_gini": gini(list(messages.values()))}}
 
 
+def discussion_minutes(request):
+    """Estimated speaking time of the group members: their words divided by the words per minute."""
+    counted = contributions(request)
+    if counted is None:
+        return NO_MESSAGES
+    messages, words = counted
+    per_minute = request["config"]["words_per_minute"]
+    return {"status": "ok", "value": round(sum(words.values()) / per_minute, 2), "unit": "estimated speaking minutes",
+            "details": {"member_messages": sum(messages.values()), "member_words": sum(words.values()),
+                        "words_per_minute": per_minute}}
+
+
 def self_test():
     return {"ok": evenness([3, 3, 3]) == 1 and evenness([5, 0]) == 0 and evenness([1]) == 1
+            and discussion_minutes({"config": {"action_type": "m", "step": "", "words_per_minute": 150}, "experiment": {"participants": [{"id": "p1"}]}, "authorized_events": [{"event_type": "action_applied", "actor_id": "p1", "step_id": "s", "payload": {"action_type": "m", "value": "w " * 300}}]})["value"] == 2.0
             and gini([4, 4, 4]) == 0 and gini([0, 0, 9]) == round(2 / 3, 6) and gini([0, 0]) is None}
 
 
