@@ -201,7 +201,8 @@ def evenness(counts):
     return round(entropy / math.log(len(counts)), 6)
 
 
-def group_balance(request):
+def contributions(request):
+    """Discussion messages and words per group member (moderators left out), or None when no member wrote."""
     config = request["config"]
     members = group(request["experiment"].get("participants", []))
     messages, words = {key: 0 for key in members}, {key: 0 for key in members}
@@ -210,15 +211,42 @@ def group_balance(request):
                 and record["actor_id"] in messages and (not config["step"] or record["step_id"] == config["step"])):
             messages[record["actor_id"]] += 1
             words[record["actor_id"]] += len(str(record["payload"]["value"]).split())
-    if not sum(messages.values()):
-        return {"status": "missing", "value": None,
-                "details": {"reason": "No discussion messages from group members were recorded."}}
+    return (messages, words) if sum(messages.values()) else None
+
+
+NO_MESSAGES = {"status": "missing", "value": None,
+               "details": {"reason": "No discussion messages from group members were recorded."}}
+
+
+def group_balance(request):
+    counted = contributions(request)
+    if counted is None:
+        return NO_MESSAGES
+    messages, words = counted
     return {"status": "ok", "value": evenness(list(words.values())), "unit": "evenness (0-1)", "details": {
         "messages": messages, "words": words, "message_evenness": evenness(list(messages.values()))}}
 
 
+def gini(counts):
+    """Gini coefficient: sum of |t_i - t_j| over all pairs (i, j), divided by 2 n sum(t). 0 is perfectly equal."""
+    total = sum(counts)
+    if total == 0:
+        return None
+    return round(sum(abs(a - b) for a in counts for b in counts) / (2 * len(counts) * total), 6)
+
+
+def participation_gini(request):
+    counted = contributions(request)
+    if counted is None:
+        return NO_MESSAGES
+    messages, words = counted
+    return {"status": "ok", "value": gini(list(words.values())), "unit": "Gini of words (0-1, lower is more equal)",
+            "details": {"messages": messages, "words": words, "message_gini": gini(list(messages.values()))}}
+
+
 def self_test():
-    return {"ok": evenness([3, 3, 3]) == 1 and evenness([5, 0]) == 0 and evenness([1]) == 1}
+    return {"ok": evenness([3, 3, 3]) == 1 and evenness([5, 0]) == 0 and evenness([1]) == 1
+            and gini([4, 4, 4]) == 0 and gini([0, 0, 9]) == round(2 / 3, 6) and gini([0, 0]) is None}
 
 
 def raise_hands(request):

@@ -2,8 +2,8 @@
   "format": "hnf.template.v1",
   "name": "Lost at Sea with an AI moderator",
   "author": "Human Not Found",
-  "description": "Original study: Conte, S. P. (2026). AI Moderation in Multi-Party Voice Conversations: Architecture, Strategies, and Evaluation (Master's thesis, Politecnico di Milano). Ten groups of three ranked 15 items alone, then discussed by voice for up to 30 minutes under the consensus ground rules of Hall & Watson (1970) and submitted one group ranking, once with an AI moderator that balanced participation and enforced the ground rules, and once without it. Each group did NASA Moon Survival in one session and Lost at Sea in the other, with task and moderator order counterbalanced. Rankings were scored against the expert ranking (error score, lower is better) and against the group's own members (synergy); participation balance was measured from speaking time. In this template three members rank the items alone and privately, discuss in text with the ground rules, speaking when they raise a hand (up to 15 member turns), and then the first member submits the group ranking. In the 'Moderator on' condition an AI moderator joins the discussion: it invites the quietest member when participation gets uneven and gently recalls a ground rule when a message breaks one; it does not rank. In 'Moderator off' it is disabled and the ground rules are only stated at the start. Participation balance is the evenness of the members' words, not the Gini index of speaking time used in the thesis. Run this template and its sibling (NASA Moon Survival with an AI moderator) together to reproduce the within-group design. Participants are simulated: each is a Model participant, using the free test model until you choose a model, so the first runs only check the design; with the test model every participant takes the sample answer.",
-  "created_at": "2026-11-21T22:13:38.854+00:00",
+  "description": "Original study: Conte, S. P. (2026). AI Moderation in Multi-Party Voice Conversations: Architecture, Strategies, and Evaluation (Master's thesis, Politecnico di Milano). Ten groups of three ranked 15 items alone, then discussed by voice for up to 30 minutes under the consensus ground rules of Hall & Watson (1970) and submitted one group ranking, once with an AI moderator that balanced participation and enforced the ground rules, and once without it. Each group did NASA Moon Survival in one session and Lost at Sea in the other, with task and moderator order counterbalanced. Rankings were scored against the expert ranking (error score, lower is better) and against the group's own members (synergy); participation balance was the Gini index of floor-holding time. In this template three members rank the items alone and privately, discuss in text with the ground rules, speaking when they raise a hand (up to 15 member turns), and then the first member submits the group ranking. In the 'Moderator on' condition an AI moderator joins the discussion: it invites the quietest member when participation gets uneven and gently recalls a ground rule when a message breaks one; it does not rank. In 'Moderator off' it is disabled and the ground rules are only stated at the start. Participation inequality uses the thesis's Gini formula on the members' words, which stand in for floor-holding time in a text discussion. Run this template and its sibling (NASA Moon Survival with an AI moderator) together to reproduce the within-group design. Participants are simulated: each is a Model participant, using the free test model until you choose a model, so the first runs only check the design; with the test model every participant takes the sample answer.",
+  "created_at": "2026-11-21T23:07:02.517+00:00",
   "spec": {
     "components": [],
     "conditions": [
@@ -135,11 +135,11 @@
             "action_type": "discussion.message",
             "step": "discuss"
           },
-          "id": "hnf.turn_taking.group_balance",
-          "version": "1.0.0"
+          "id": "hnf.turn_taking.gini",
+          "version": "1.0.1"
         },
-        "id": "balance",
-        "label": "Participation balance",
+        "id": "gini",
+        "label": "Participation inequality (Gini)",
         "scope": "run"
       }
     ],
@@ -276,7 +276,7 @@
               "tie_break": "least_active"
             },
             "id": "hnf.turn_taking.raise_hands",
-            "version": "1.0.0"
+            "version": "1.0.1"
           }
         ],
         "id": "discuss",
@@ -342,8 +342,8 @@
     },
     {
       "bundle_id": "hnf.turn_taking",
-      "version": "1.0.0",
-      "digest": "ae88165ba9d278cdb0cc7b48d72c3b43a370272b9b61cdf32e56ab66e04cad84"
+      "version": "1.0.1",
+      "digest": "23d27bddc52f30ab2e8fcf9c52ecc9b84a6b40363029bcd076b1f8af26c452c2"
     }
   ]
 }

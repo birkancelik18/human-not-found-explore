@@ -1,6 +1,6 @@
 {
   "bundle_id": "hnf.turn_taking",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "author": "Human Not Found",
   "description": "Rules for who speaks next in a group discussion (speaker picks next, raise hands, least active next), and a participation measure that leaves moderators out.",
   "permissions": [
@@ -210,6 +210,51 @@
           {
             "label": "Details",
             "description": "Messages and words per group member, and the evenness of message counts."
+          }
+        ]
+      },
+      "config_schema": {
+        "type": "object",
+        "properties": {
+          "action_type": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120,
+            "title": "Message action type",
+            "default": "discussion.message"
+          },
+          "step": {
+            "type": "string",
+            "maxLength": 120,
+            "title": "Step (empty: whole run)",
+            "default": "",
+            "x-hnf-reference": "step"
+          }
+        },
+        "required": [
+          "action_type",
+          "step"
+        ],
+        "additionalProperties": false
+      }
+    },
+    {
+      "id": "hnf.turn_taking.gini",
+      "family": "evaluator",
+      "entrypoint": "participation_gini",
+      "description": "Participation inequality (Gini)",
+      "about": {
+        "summary": "How unequally the group members shared the discussion, as a Gini coefficient, leaving moderators out, so groups with and without a moderator compare the same people.",
+        "how_it_works": "Counts the words in the discussion messages of every participant whose role is not 'moderator', including members who said nothing, and computes the Gini coefficient: the sum of |t_i - t_j| over every pair of members, divided by 2 n times the total, where t is a member's words and n the number of members. Words stand in for floor-holding time in a text discussion. 0 means everyone wrote the same amount; higher values mean one or a few members took most of the floor (2/3 for three members when one wrote everything).",
+        "outputs": [
+          {
+            "label": "Gini",
+            "unit": "0 to 1",
+            "description": "Gini coefficient of the group members' words; lower is more equal."
+          },
+          {
+            "label": "Details",
+            "description": "Messages and words per group member, and the Gini of message counts."
           }
         ]
       },

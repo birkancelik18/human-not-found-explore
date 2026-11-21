@@ -6,7 +6,7 @@ SIM = ("Participants are simulated: each is a Model participant, using the free 
 
 
 # Packages with a newer version than V.
-VERSIONS = {"hnf.ranking_tasks": "1.0.1", "hnf.moderator": "1.0.1"}
+VERSIONS = {"hnf.ranking_tasks": "1.0.1", "hnf.moderator": "1.0.1", "hnf.turn_taking": "1.0.1"}
 
 
 def ref(component, **config):
@@ -417,14 +417,14 @@ CONTE_SOURCE = (
     "ranking, once with an AI moderator that balanced participation and enforced the ground rules, and once without "
     "it. Each group did NASA Moon Survival in one session and Lost at Sea in the other, with task and moderator order "
     "counterbalanced. Rankings were scored against the expert ranking (error score, lower is better) and against the "
-    "group's own members (synergy); participation balance was measured from speaking time. ")
+    "group's own members (synergy); participation balance was the Gini index of floor-holding time. ")
 CONTE_DESIGN = (
     "In this template three members rank the items alone and privately, discuss in text with the ground rules, "
     "speaking when they raise a hand (up to 15 member turns), and then the first member submits the group ranking. In "
     "the 'Moderator on' condition an AI moderator joins the discussion: it invites the quietest member when "
     "participation gets uneven and gently recalls a ground rule when a message breaks one; it does not rank. In "
-    "'Moderator off' it is disabled and the ground rules are only stated at the start. Participation balance is the "
-    "evenness of the members' words, not the Gini index of speaking time used in the thesis. Run this template and "
+    "'Moderator off' it is disabled and the ground rules are only stated at the start. Participation inequality uses "
+    "the thesis's Gini formula on the members' words, which stand in for floor-holding time in a text discussion. Run this template and "
     "its sibling together to reproduce the within-group design. " + SIM)
 
 
@@ -440,7 +440,7 @@ def moderated_survival(identifier, name, task, prompt, key, sample, sibling):
                 measure("group", "Group error score", "hnf.ranking_tasks.error_score", answer_key=key, step="group"),
                 measure("synergy", "Group synergy", "hnf.ranking_tasks.synergy", individual_step="alone",
                         group_step="group", answer_key=key),
-                measure("balance", "Participation balance", "hnf.turn_taking.group_balance",
+                measure("gini", "Participation inequality (Gini)", "hnf.turn_taking.gini",
                         action_type="discussion.message", step="discuss")]
     return {"id": identifier, "name": name,
             "description": CONTE_SOURCE + CONTE_DESIGN.replace("its sibling", f"its sibling ({sibling})"),
