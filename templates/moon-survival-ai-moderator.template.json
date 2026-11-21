@@ -2,8 +2,8 @@
   "format": "hnf.template.v1",
   "name": "NASA Moon Survival with an AI moderator",
   "author": "Human Not Found",
-  "description": "Original study: Conte, S. P. (2026). AI Moderation in Multi-Party Voice Conversations: Architecture, Strategies, and Evaluation (Master's thesis, Politecnico di Milano). Ten groups of three ranked 15 items alone, then discussed by voice for up to 30 minutes under the consensus ground rules of Hall & Watson (1970) and submitted one group ranking, once with an AI moderator that balanced participation and enforced the ground rules, and once without it. Each group did NASA Moon Survival in one session and Lost at Sea in the other, with task and moderator order counterbalanced. Rankings were scored against the expert ranking (error score, lower is better) and against the group's own members (synergy); participation balance was the Gini index of floor-holding time. In this template three members with personas (a talkative engineering student, an office administrator who takes part at an ordinary pace and a reserved shop assistant; the personas are ours, not the thesis's) rank the items alone and privately, discuss in text with the ground rules, speaking when they raise a hand (up to 15 member turns), and then the first member submits the group ranking. In the 'Moderator on' condition an AI moderator joins the discussion: it invites the quietest member when participation gets uneven and gently recalls a ground rule when a message breaks one; it does not rank. In 'Moderator off' it is disabled and the ground rules are only stated at the start. Participation inequality uses the thesis's Gini formula on the members' words, which stand in for floor-holding time in a text discussion. Run this template and its sibling (Lost at Sea with an AI moderator) together to reproduce the within-group design; every repetition uses the same three personas, so repetitions differ only through the model's own variation. Participants are simulated: each is a Model participant, using the free test model until you choose a model, so the first runs only check the design; with the test model every participant takes the sample answer.",
-  "created_at": "2026-11-21T23:08:53.785+00:00",
+  "description": "Original study: Conte, S. P. (2026). AI Moderation in Multi-Party Voice Conversations: Architecture, Strategies, and Evaluation (Master's thesis, Politecnico di Milano). Ten groups of three ranked 15 items alone, then discussed by voice for up to 30 minutes under the consensus ground rules of Hall & Watson (1970) and submitted one group ranking, once with an AI moderator that balanced participation and enforced the ground rules, and once without it. Each group did NASA Moon Survival in one session and Lost at Sea in the other, with task and moderator order counterbalanced. Rankings were scored against the expert ranking (error score, lower is better) and against the group's own members (synergy); participation balance was the Gini index of floor-holding time. In this template three members with personas (a talkative engineering student, an office administrator who takes part at an ordinary pace and a reserved shop assistant; the personas are ours, not the thesis's) rank the items alone and privately, discuss in text with the ground rules, speaking when they raise a hand, until nobody asks for the floor (they stop once they agree, like pressing 'ready to conclude') or 40 member turns, and then the first member submits the group ranking. In the 'Moderator on' condition an AI moderator follows the thesis's policy: after about 8 minutes of speaking it invites a member under half the group average by name, or opens up the point of a member over twice the average, with a cooldown; after each message it judges conflict, direct requests, off-topic drift and ground-rule breaks, with a severity floor of 0.4; it does not rank. Speaking time is estimated from the members' words at 150 words per minute, and the 2-minute cooldown is our choice, as the thesis does not give its value. In 'Moderator off' it is disabled and the ground rules are only stated at the start. Participation inequality uses the thesis's Gini formula on the members' words, which stand in for floor-holding time in a text discussion. Run this template and its sibling (Lost at Sea with an AI moderator) together to reproduce the within-group design; every repetition uses the same three personas, so repetitions differ only through the model's own variation. Participants are simulated: each is a Model participant, using the free test model until you choose a model, so the first runs only check the design; with the test model every participant takes the sample answer.",
+  "created_at": "2026-11-21T23:35:02.674+00:00",
   "spec": {
     "components": [],
     "conditions": [
@@ -31,10 +31,10 @@
       }
     },
     "execution": {
-      "max_actions_per_run": 150,
+      "max_actions_per_run": 600,
       "max_estimated_cost_usd_per_run": 2.0,
       "max_memory_events": 40,
-      "max_model_calls_per_run": 300,
+      "max_model_calls_per_run": 1200,
       "max_wall_seconds_per_run": 3600,
       "repetitions_per_condition": 10,
       "seed": 1
@@ -136,10 +136,24 @@
             "step": "discuss"
           },
           "id": "hnf.turn_taking.gini",
-          "version": "1.0.1"
+          "version": "1.0.2"
         },
         "id": "gini",
         "label": "Participation inequality (Gini)",
+        "scope": "run"
+      },
+      {
+        "evaluator": {
+          "config": {
+            "action_type": "discussion.message",
+            "step": "discuss",
+            "words_per_minute": 150
+          },
+          "id": "hnf.turn_taking.discussion_minutes",
+          "version": "1.0.2"
+        },
+        "id": "duration",
+        "label": "Discussion length (estimated speaking minutes)",
         "scope": "run"
       }
     ],
@@ -147,7 +161,7 @@
       {
         "agent": {
           "config": {
-            "instructions": "Take part as this person would, in their own way of speaking and of joining in, not as an assistant. Keep their manner throughout the discussion.",
+            "instructions": "Take part as this person would, in their own way of speaking and of joining in, not as an assistant. Keep their manner throughout the discussion. The discussion is in English. When you are asked whether you want to speak next: once your group has agreed on one complete ranking and you have nothing to add, answer false; this tells the group you are ready to conclude.",
             "model_ref": "default",
             "persona": "You are Giulia, a 24-year-old engineering student in Milan. You are confident and talkative: you speak up first, explain your views at length and like to steer the group."
           },
@@ -163,7 +177,7 @@
       {
         "agent": {
           "config": {
-            "instructions": "Take part as this person would, in their own way of speaking and of joining in, not as an assistant. Keep their manner throughout the discussion.",
+            "instructions": "Take part as this person would, in their own way of speaking and of joining in, not as an assistant. Keep their manner throughout the discussion. The discussion is in English. When you are asked whether you want to speak next: once your group has agreed on one complete ranking and you have nothing to add, answer false; this tells the group you are ready to conclude.",
             "model_ref": "default",
             "persona": "You are Marco, a 38-year-old office administrator in Milan who did not go to university. You take part at an ordinary pace: you say what you think briefly and listen to the others."
           },
@@ -179,7 +193,7 @@
       {
         "agent": {
           "config": {
-            "instructions": "Take part as this person would, in their own way of speaking and of joining in, not as an assistant. Keep their manner throughout the discussion.",
+            "instructions": "Take part as this person would, in their own way of speaking and of joining in, not as an assistant. Keep their manner throughout the discussion. The discussion is in English. When you are asked whether you want to speak next: once your group has agreed on one complete ranking and you have nothing to add, answer false; this tells the group you are ready to conclude.",
             "model_ref": "default",
             "persona": "You are Sara, a 29-year-old shop assistant in Milan. You are reserved: you keep your messages short, rarely open a new point and tend to go along with the others unless someone asks for your view."
           },
@@ -198,14 +212,21 @@
             "balance": true,
             "balance_threshold": 0.3,
             "civility": false,
+            "cooldown_minutes": 2,
             "expertise": false,
             "ground_rules": "1. Avoid arguing for your own ranking: present your position clearly and logically, but seriously consider the group's reactions. 2. Avoid win-lose stalemates: when you reach an impasse, look for the next most acceptable alternative for everyone. 3. Do not change your mind only to avoid conflict; resist pressure to yield that has no sound basis. 4. Avoid conflict-reducing techniques such as majority vote, averaging, bargaining or coin flipping; treat differences of opinion as a sign that information is still missing, and ask for it. 5. See differences of opinion as natural and helpful, not as an obstacle. 6. Treat initial agreement as suspect: check that people agree for the same or complementary reasons.",
             "instructions": "The group is doing the NASA Moon Survival task and must agree on one shared ranking.",
+            "min_severity": 0.4,
             "model_ref": "default",
-            "persona": ""
+            "over_ratio": 2.0,
+            "persona": "",
+            "policy": "conte",
+            "under_ratio": 0.5,
+            "warmup_minutes": 8,
+            "words_per_minute": 150
           },
           "id": "hnf.moderator.moderator",
-          "version": "1.0.1"
+          "version": "1.0.2"
         },
         "display_name": "AI moderator",
         "enabled": true,
@@ -271,12 +292,12 @@
             "config": {
               "action_type": "discussion.message",
               "finish": true,
-              "max_turns": 15,
+              "max_turns": 40,
               "quiet_rounds": 2,
               "tie_break": "least_active"
             },
             "id": "hnf.turn_taking.raise_hands",
-            "version": "1.0.1"
+            "version": "1.0.2"
           }
         ],
         "id": "discuss",
@@ -327,8 +348,8 @@
     },
     {
       "bundle_id": "hnf.moderator",
-      "version": "1.0.1",
-      "digest": "595be7e0511dbd1f4858534f276a28f85480b9b5e5a070317aca9d5f52141362"
+      "version": "1.0.2",
+      "digest": "818088f4386a1bbfcd52dc0f79aa32a65ff0286383a4e698dbaf696fb228eba9"
     },
     {
       "bundle_id": "hnf.participants",
@@ -342,8 +363,8 @@
     },
     {
       "bundle_id": "hnf.turn_taking",
-      "version": "1.0.1",
-      "digest": "23d27bddc52f30ab2e8fcf9c52ecc9b84a6b40363029bcd076b1f8af26c452c2"
+      "version": "1.0.2",
+      "digest": "10ce7697cbdf7ec84702b2347911e6c23702d1866d260dd3045e034a9ae45069"
     }
   ]
 }

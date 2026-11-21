@@ -1,6 +1,6 @@
 {
   "bundle_id": "hnf.moderator",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "author": "Human Not Found",
   "description": "An AI moderator for group discussions that follows conversational strategies: balance participation, keep the discussion respectful, ask the right expert.",
   "permissions": [
@@ -20,7 +20,7 @@
       "description": "AI moderator",
       "about": {
         "summary": "A moderator participant that knows when and what to say: it steps in when participation is uneven or a message is disrespectful, and can ask the member best placed to answer.",
-        "how_it_works": "Give this behaviour to a participant with the role 'moderator'. Each goal is a conversational strategy (goal, trigger, behaviour). Balance: when the Gini index of the members' words is above the threshold, it asks for the floor without a model call and invites the quietest member by name. Respect: it asks the model whether the last message was disrespectful and, if so, steps in to remind the group to stay considerate. Ground rules: when rules are filled in, it asks the model whether the last message broke one and, if so, gently recalls the idea of that rule and steers the group back. Expertise: when it picks the next speaker, the model names the member whose public details fit the last message. When it gets the floor with nothing to fix, it briefly sums up or moves the group on. With the hnf.turn_taking rules it is outside the group: never in the rotation, left out of the counts, and asked first after each member's message whether it wants to step in; it reads their turn.status counts. With a Discussion's own round robin or free turns it simply takes its turn and counts the messages in its memory window. Ranking tasks (hnf.ranking_tasks 1.0.1 and later) leave moderators out. Other activities offer their actions to every participant, so in their task steps the moderator answers too: leave its answers out of that step's measures, or compare against a condition without the moderator (disable the participant there). With the free test model every choice takes the action's sample answer.",
+        "how_it_works": "Give this behaviour to a participant with the role 'moderator'. Each goal is a conversational strategy (goal, trigger, behaviour). Balance: when the Gini index of the members' words is above the threshold, it asks for the floor without a model call and invites the quietest member by name. Respect: it asks the model whether the last message was disrespectful and, if so, steps in to remind the group to stay considerate. Ground rules: when rules are filled in, it asks the model whether the last message broke one and, if so, gently recalls the idea of that rule and steers the group back. Expertise: when it picks the next speaker, the model names the member whose public details fit the last message. When it gets the floor with nothing to fix, it briefly sums up or moves the group on. With the hnf.turn_taking rules it is outside the group: never in the rotation, left out of the counts, and asked first after each member's message whether it wants to step in; it reads their turn.status counts. With a Discussion's own round robin or free turns it simply takes its turn and counts the messages in its memory window. Ranking tasks (hnf.ranking_tasks 1.0.1 and later) leave moderators out. Other activities offer their actions to every participant, so in their task steps the moderator answers too: leave its answers out of that step's measures, or compare against a condition without the moderator (disable the participant there). With the free test model every choice takes the action's sample answer. With the 'conte' policy it follows the moderator of Conte (2026) instead of the goals: after the warm-up (speaking time estimated from the members' words at the set words per minute) it invites a member who has spoken under half the group average by name, tied to a concrete point, or, for a member over twice the average, picks up their point and opens it to the others, with a cooldown per reason. After every member message the model judges conflict and direct requests (always answered) and off-topic drift and ground-rule breaks (only from the minimum severity, outside the cooldown); its recent interventions are in the prompt.",
         "actions": [
           {
             "type": "turn.request",
@@ -86,6 +86,57 @@
             "maxLength": 4000,
             "title": "Instructions",
             "default": ""
+          },
+          "policy": {
+            "type": "string",
+            "enum": [
+              "goals",
+              "conte"
+            ],
+            "title": "Policy (goals: the goals above; conte: Conte 2026 filters)",
+            "default": "goals"
+          },
+          "warmup_minutes": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 120,
+            "title": "Conte: minutes of speaking before participation counts",
+            "default": 8
+          },
+          "words_per_minute": {
+            "type": "number",
+            "minimum": 1,
+            "maximum": 1000,
+            "title": "Conte: words per minute used to estimate speaking time",
+            "default": 150
+          },
+          "cooldown_minutes": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 120,
+            "title": "Conte: minutes before stepping in again for the same reason",
+            "default": 2
+          },
+          "under_ratio": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1,
+            "title": "Conte: exclusion below this share of the average",
+            "default": 0.5
+          },
+          "over_ratio": {
+            "type": "number",
+            "minimum": 1,
+            "maximum": 10,
+            "title": "Conte: monopolization above this multiple of the average",
+            "default": 2.0
+          },
+          "min_severity": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1,
+            "title": "Conte: minimum severity for off-topic and ground-rule interventions",
+            "default": 0.4
           }
         },
         "required": [

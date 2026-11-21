@@ -1,6 +1,6 @@
 {
   "bundle_id": "hnf.turn_taking",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "author": "Human Not Found",
   "description": "Rules for who speaks next in a group discussion (speaker picks next, raise hands, least active next), and a participation measure that leaves moderators out.",
   "permissions": [
@@ -279,6 +279,59 @@
         "required": [
           "action_type",
           "step"
+        ],
+        "additionalProperties": false
+      }
+    },
+    {
+      "id": "hnf.turn_taking.discussion_minutes",
+      "family": "evaluator",
+      "entrypoint": "discussion_minutes",
+      "description": "Discussion length (estimated speaking minutes)",
+      "about": {
+        "summary": "How long the group members talked, as speaking time estimated from their words, leaving moderators out.",
+        "how_it_works": "Adds up the words in the discussion messages of every participant whose role is not 'moderator' and divides by the words per minute (150 is a typical speaking rate). A text discussion has no clock, so this estimates how long the same words would take to say aloud.",
+        "outputs": [
+          {
+            "label": "Minutes",
+            "unit": "minutes",
+            "description": "Members' words divided by the words per minute."
+          },
+          {
+            "label": "Details",
+            "description": "Member messages, member words and the rate used."
+          }
+        ]
+      },
+      "config_schema": {
+        "type": "object",
+        "properties": {
+          "action_type": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120,
+            "title": "Message action type",
+            "default": "discussion.message"
+          },
+          "step": {
+            "type": "string",
+            "maxLength": 120,
+            "title": "Step (empty: whole run)",
+            "default": "",
+            "x-hnf-reference": "step"
+          },
+          "words_per_minute": {
+            "type": "number",
+            "minimum": 1,
+            "maximum": 1000,
+            "title": "Words per minute",
+            "default": 150
+          }
+        },
+        "required": [
+          "action_type",
+          "step",
+          "words_per_minute"
         ],
         "additionalProperties": false
       }

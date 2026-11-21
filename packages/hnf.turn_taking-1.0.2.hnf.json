@@ -1,0 +1,349 @@
+{
+  "manifest": {
+    "bundle_id": "hnf.turn_taking",
+    "version": "1.0.2",
+    "author": "Human Not Found",
+    "description": "Rules for who speaks next in a group discussion (speaker picks next, raise hands, least active next), and a participation measure that leaves moderators out.",
+    "permissions": [
+      "read_shared_state",
+      "read_private_actions",
+      "write_state",
+      "emit_event"
+    ],
+    "components": [
+      {
+        "id": "hnf.turn_taking.speaker_selects",
+        "family": "procedure",
+        "entrypoint": "speaker_selects",
+        "description": "Speaker picks next",
+        "about": {
+          "summary": "The turn-taking rules of everyday conversation: the speaker picks who goes next; otherwise anyone may take the floor; otherwise the speaker goes on.",
+          "how_it_works": "Follows Sacks, Schegloff and Jefferson (1974). The first group member in the list speaks first. After each message the speaker names the next speaker (turn.pass), who is invited. If the speaker answers 'anyone', every other participant is asked privately whether they want to speak (turn.request) and the first to say yes gets the floor. If nobody wants it, the previous speaker continues; after the configured number of such quiet rounds in a row the step ends. Moderators (role 'moderator') are never the first speaker and are left out of the counts; after each group member's message they are asked first whether they want to step in, and a speaker may also name them. After each turn the rule publishes turn.status with every group member's messages and words in this step, which the AI moderator reads. Set the memory window (max_memory_events) to at least 40. Use it with a Discussion whose turns are set to procedure.",
+          "actions": [
+            {
+              "type": "turn.pass",
+              "description": "Name who speaks next, or 'anyone' to leave the floor open."
+            },
+            {
+              "type": "turn.request",
+              "description": "When the floor is open: say privately whether you want to speak next."
+            },
+            {
+              "type": "discussion.message",
+              "description": "The chosen participant posts a message (offered by the Discussion activity)."
+            }
+          ],
+          "ends_when": "When the configured number of turns has been taken, or nobody takes the open floor for the configured number of rounds in a row (unless 'End the step' is off)."
+        },
+        "config_schema": {
+          "type": "object",
+          "properties": {
+            "action_type": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 120,
+              "title": "Action that ends a turn",
+              "default": "discussion.message"
+            },
+            "max_turns": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 200,
+              "title": "Group members' turns before the step ends (moderator messages do not count)",
+              "default": 12
+            },
+            "finish": {
+              "type": "boolean",
+              "title": "End the step when the discussion is over",
+              "default": true
+            },
+            "quiet_rounds": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 10,
+              "title": "Quiet rounds before the step ends (nobody wants to speak)",
+              "default": 2
+            }
+          },
+          "required": [
+            "action_type",
+            "max_turns",
+            "finish",
+            "quiet_rounds"
+          ],
+          "additionalProperties": false
+        }
+      },
+      {
+        "id": "hnf.turn_taking.least_active",
+        "family": "procedure",
+        "entrypoint": "least_active",
+        "description": "Least active next",
+        "about": {
+          "summary": "Always gives the floor to the group member who has said the least so far, a policy that balances participation without asking anyone.",
+          "how_it_works": "At the start and after every turn the rule invites the group member with the fewest words in this step (discussion.invite); ties are broken at random with the run's seed, so it is reproducible. Participants whose role is 'moderator' are outside the group: they are never put in the rotation and are left out of the counts, and after each group member's message every moderator is asked privately whether it wants to speak next (turn.request); a yes gives it the next turn. After each turn the rule publishes turn.status with every group member's messages and words in this step, which the AI moderator reads. Use it with a Discussion whose turns are set to procedure.",
+          "actions": [
+            {
+              "type": "discussion.message",
+              "description": "The invited member posts a message (offered by the Discussion activity)."
+            },
+            {
+              "type": "turn.request",
+              "description": "Moderators only: say whether to step in before the next member."
+            }
+          ],
+          "ends_when": "When the configured number of turns has been taken (unless 'End the step' is off)."
+        },
+        "config_schema": {
+          "type": "object",
+          "properties": {
+            "action_type": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 120,
+              "title": "Action that ends a turn",
+              "default": "discussion.message"
+            },
+            "max_turns": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 200,
+              "title": "Group members' turns before the step ends (moderator messages do not count)",
+              "default": 12
+            },
+            "finish": {
+              "type": "boolean",
+              "title": "End the step when the discussion is over",
+              "default": true
+            }
+          },
+          "required": [
+            "action_type",
+            "max_turns",
+            "finish"
+          ],
+          "additionalProperties": false
+        }
+      },
+      {
+        "id": "hnf.turn_taking.raise_hands",
+        "family": "procedure",
+        "entrypoint": "raise_hands",
+        "description": "Raise hands",
+        "about": {
+          "summary": "Self-selection: before each turn everyone may privately raise a hand, and one of those who did gets the floor.",
+          "how_it_works": "The first round asks every group member; moderators never open the discussion. Before each later turn the rule asks every participant except the last speaker, privately, whether they want to speak next (turn.request), so nobody sees the others' answers. Several raised hands is floor competition, recorded in turn.status as competitors: the member with the fewest words so far wins (or one at random with the run's seed). A moderator's raised hand always wins. If nobody raises a hand, the rule asks again, this time including the last speaker, who may go on; after the configured number of quiet rounds in a row the step ends. After each turn the rule publishes turn.status with every group member's messages and words in this step, which the AI moderator reads; moderators (role 'moderator') are left out of those counts. Every turn adds several actions, so allow enough actions per run and set the memory window (max_memory_events) to at least 40. Use it with a Discussion whose turns are set to procedure.",
+          "actions": [
+            {
+              "type": "turn.request",
+              "description": "Say privately whether you want to speak next."
+            },
+            {
+              "type": "discussion.message",
+              "description": "The chosen participant posts a message (offered by the Discussion activity)."
+            }
+          ],
+          "ends_when": "When the configured number of turns has been taken, or nobody wants to speak for the configured number of rounds in a row (unless 'End the step' is off)."
+        },
+        "config_schema": {
+          "type": "object",
+          "properties": {
+            "action_type": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 120,
+              "title": "Action that ends a turn",
+              "default": "discussion.message"
+            },
+            "max_turns": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 200,
+              "title": "Group members' turns before the step ends (moderator messages do not count)",
+              "default": 12
+            },
+            "finish": {
+              "type": "boolean",
+              "title": "End the step when the discussion is over",
+              "default": true
+            },
+            "quiet_rounds": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 10,
+              "title": "Quiet rounds before the step ends (nobody wants to speak)",
+              "default": 2
+            },
+            "tie_break": {
+              "type": "string",
+              "enum": [
+                "least_active",
+                "random"
+              ],
+              "title": "When several raise a hand",
+              "default": "least_active"
+            }
+          },
+          "required": [
+            "action_type",
+            "max_turns",
+            "finish",
+            "quiet_rounds",
+            "tie_break"
+          ],
+          "additionalProperties": false
+        }
+      },
+      {
+        "id": "hnf.turn_taking.group_balance",
+        "family": "evaluator",
+        "entrypoint": "group_balance",
+        "description": "Group participation balance",
+        "about": {
+          "summary": "How evenly the group members contributed to the discussion, leaving moderators out, so groups with and without a moderator compare the same people.",
+          "how_it_works": "Counts the discussion messages and their words of every participant whose role is not 'moderator', including members who said nothing. Evenness is the normalized entropy of the members' shares of words: 1 when everyone wrote the same amount, 0 when one person wrote everything.",
+          "outputs": [
+            {
+              "label": "Evenness",
+              "unit": "0 to 1",
+              "description": "Normalized entropy of the group members' shares of words."
+            },
+            {
+              "label": "Details",
+              "description": "Messages and words per group member, and the evenness of message counts."
+            }
+          ]
+        },
+        "config_schema": {
+          "type": "object",
+          "properties": {
+            "action_type": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 120,
+              "title": "Message action type",
+              "default": "discussion.message"
+            },
+            "step": {
+              "type": "string",
+              "maxLength": 120,
+              "title": "Step (empty: whole run)",
+              "default": "",
+              "x-hnf-reference": "step"
+            }
+          },
+          "required": [
+            "action_type",
+            "step"
+          ],
+          "additionalProperties": false
+        }
+      },
+      {
+        "id": "hnf.turn_taking.gini",
+        "family": "evaluator",
+        "entrypoint": "participation_gini",
+        "description": "Participation inequality (Gini)",
+        "about": {
+          "summary": "How unequally the group members shared the discussion, as a Gini coefficient, leaving moderators out, so groups with and without a moderator compare the same people.",
+          "how_it_works": "Counts the words in the discussion messages of every participant whose role is not 'moderator', including members who said nothing, and computes the Gini coefficient: the sum of |t_i - t_j| over every pair of members, divided by 2 n times the total, where t is a member's words and n the number of members. Words stand in for floor-holding time in a text discussion. 0 means everyone wrote the same amount; higher values mean one or a few members took most of the floor (2/3 for three members when one wrote everything).",
+          "outputs": [
+            {
+              "label": "Gini",
+              "unit": "0 to 1",
+              "description": "Gini coefficient of the group members' words; lower is more equal."
+            },
+            {
+              "label": "Details",
+              "description": "Messages and words per group member, and the Gini of message counts."
+            }
+          ]
+        },
+        "config_schema": {
+          "type": "object",
+          "properties": {
+            "action_type": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 120,
+              "title": "Message action type",
+              "default": "discussion.message"
+            },
+            "step": {
+              "type": "string",
+              "maxLength": 120,
+              "title": "Step (empty: whole run)",
+              "default": "",
+              "x-hnf-reference": "step"
+            }
+          },
+          "required": [
+            "action_type",
+            "step"
+          ],
+          "additionalProperties": false
+        }
+      },
+      {
+        "id": "hnf.turn_taking.discussion_minutes",
+        "family": "evaluator",
+        "entrypoint": "discussion_minutes",
+        "description": "Discussion length (estimated speaking minutes)",
+        "about": {
+          "summary": "How long the group members talked, as speaking time estimated from their words, leaving moderators out.",
+          "how_it_works": "Adds up the words in the discussion messages of every participant whose role is not 'moderator' and divides by the words per minute (150 is a typical speaking rate). A text discussion has no clock, so this estimates how long the same words would take to say aloud.",
+          "outputs": [
+            {
+              "label": "Minutes",
+              "unit": "minutes",
+              "description": "Members' words divided by the words per minute."
+            },
+            {
+              "label": "Details",
+              "description": "Member messages, member words and the rate used."
+            }
+          ]
+        },
+        "config_schema": {
+          "type": "object",
+          "properties": {
+            "action_type": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 120,
+              "title": "Message action type",
+              "default": "discussion.message"
+            },
+            "step": {
+              "type": "string",
+              "maxLength": 120,
+              "title": "Step (empty: whole run)",
+              "default": "",
+              "x-hnf-reference": "step"
+            },
+            "words_per_minute": {
+              "type": "number",
+              "minimum": 1,
+              "maximum": 1000,
+              "title": "Words per minute",
+              "default": 150
+            }
+          },
+          "required": [
+            "action_type",
+            "step",
+            "words_per_minute"
+          ],
+          "additionalProperties": false
+        }
+      }
+    ],
+    "contract_version": "1.0.0",
+    "digest": "sha256:634aee0e2241a493f15c64267e080bdb852a07b49d92670324b39464e40dfead"
+  },
+  "artifact": {
+    "format": "python.source.v1",
+    "source": "\"\"\"Turn-taking rules for group discussion, and a participation measure that leaves moderators out.\n\nEvery rule decides who speaks next and tells the Discussion activity (turns set to \"procedure\") with a\n`discussion.invite` event. After each turn it publishes `turn.status` with the group's counts so far.\nParticipants whose role is \"moderator\" are outside the group: they are never put in the rotation, are left out of\nthe counts, and are asked first after each group member's message whether they want to step in.\n\"\"\"\n\nimport copy\nimport math\nfrom random import Random\n\nNOTHING = {\"effects\": []}\n\n\ndef group(people):\n    return [person[\"id\"] for person in people if person.get(\"role\") != \"moderator\"]\n\n\ndef moderators(people):\n    return [person[\"id\"] for person in people if person.get(\"role\") == \"moderator\"]\n\n\ndef fresh(people):\n    members = group(people)\n    return {\"turn\": 0, \"member_turns\": 0, \"messages\": {key: 0 for key in members}, \"words\": {key: 0 for key in members},\n            \"last\": None, \"last_member\": None, \"phase\": \"speaking\", \"pending\": {}, \"yes\": [], \"quiet\": 0,\n            \"competitors\": [], \"round\": 0}\n\n\ndef tally(state, actor, text):\n    if actor in state[\"messages\"]:\n        state[\"messages\"][actor] += 1\n        state[\"words\"][actor] += len(str(text).split())\n    return state\n\n\ndef status(state, speaker, last_message):\n    return {\"type\": \"emit\", \"topic\": \"turn.status\", \"audience\": \"shared\", \"payload\": {\n        \"speaker\": speaker, \"turn\": state[\"turn\"], \"messages\": dict(state[\"messages\"]), \"words\": dict(state[\"words\"]),\n        \"last_message\": str(last_message)[:1000], \"competitors\": list(state[\"competitors\"])}}\n\n\ndef invite(state, actor):\n    state.update(phase=\"speaking\", pending={}, yes=[])\n    return [{\"type\": \"emit\", \"topic\": \"discussion.invite\", \"audience\": \"shared\", \"payload\": {\"actor_id\": actor}}]\n\n\ndef ask(state, actors, phase):\n    \"\"\"Ask each actor privately whether they want to speak next. With nobody to ask, the last member goes on.\"\"\"\n    if not actors:\n        return invite(state, state[\"last_member\"])\n    state[\"round\"] += 1\n    state.update(phase=phase, yes=[], pending={f\"{phase}.{state['round']}.{actor}\": actor for actor in actors})\n    return [{\"type\": \"offer\", \"id\": offer_id, \"actor_id\": actor, \"actions\": [{\n        \"type\": \"turn.request\", \"prompt\": \"Do you want to speak next? Answer true to ask for the floor, false to listen.\",\n        \"audience\": [actor], \"schema\": {\"type\": \"boolean\"}, \"sample\": True}]} for offer_id, actor in state[\"pending\"].items()]\n\n\ndef offer_pass(state, actor, people):\n    \"\"\"Ask the speaker who finished to pick the next speaker, or leave the floor open.\"\"\"\n    others = [person[\"id\"] for person in people if person[\"id\"] != actor]\n    state[\"round\"] += 1\n    offer_id = f\"pass.{state['round']}\"\n    state.update(phase=\"pass\", yes=[], pending={offer_id: actor})\n    names = \", \".join(f\"{person['id']} ({person.get('display_name', person['id'])})\" for person in people\n                      if person[\"id\"] != actor)\n    return [{\"type\": \"offer\", \"id\": offer_id, \"actor_id\": actor, \"actions\": [{\n        \"type\": \"turn.pass\", \"prompt\": f\"Who should speak next? Name one of {names}, or 'anyone' to leave the floor open.\",\n        \"audience\": \"shared\", \"schema\": {\"enum\": others + [\"anyone\"]}, \"sample\": \"anyone\"}]}]\n\n\ndef quietest(state, candidates, seed):\n    \"\"\"The candidate with the fewest words so far; ties are broken with the run's seed.\"\"\"\n    fewest = min(state[\"words\"].get(key, 0) for key in candidates)\n    tied = [key for key in candidates if state[\"words\"].get(key, 0) == fewest]\n    return Random(seed).choice(tied)\n\n\ndef done(state, effects):\n    return {\"effects\": [{\"type\": \"update\", \"state\": state}] + effects}\n\n\n# The rules ------------------------------------------------------------------\n\ndef opening(kind, request, state):\n    people = request[\"participants\"]\n    if kind == \"least_active\":\n        return invite(state, quietest(state, group(people), request[\"seed\"]))\n    if kind == \"raise_hands\":\n        return ask(state, group(people), \"bids\")  # moderators never open the discussion\n    return invite(state, group(people)[0])\n\n\ndef after_turn(kind, request, state):\n    \"\"\"Choose what happens once a turn is over and no moderator stepped in.\"\"\"\n    people = request[\"participants\"]\n    if kind == \"least_active\":\n        return invite(state, quietest(state, group(people), request[\"seed\"]))\n    if kind == \"raise_hands\":\n        return ask(state, [person[\"id\"] for person in people if person[\"id\"] != state[\"last\"]], \"bids\")\n    return offer_pass(state, state[\"last\"], people)\n\n\ndef winner(kind, request, state, yes):\n    if kind == \"raise_hands\":\n        mods = [key for key in yes if key in moderators(request[\"participants\"])]\n        if mods:\n            return mods[0]\n        if request[\"config\"].get(\"tie_break\") == \"random\":\n            return Random(request[\"seed\"]).choice(yes)\n        return quietest(state, yes, request[\"seed\"])\n    return yes[0]\n\n\ndef nobody(kind, request, state):\n    \"\"\"Nobody asked for the floor: count a quiet round, end the step after enough of them.\"\"\"\n    config = request[\"config\"]\n    state[\"quiet\"] += 1\n    if state[\"quiet\"] >= config[\"quiet_rounds\"]:\n        state.update(phase=\"ended\", pending={}, yes=[])\n        return [{\"type\": \"finish\"}] if config[\"finish\"] else []\n    if kind == \"raise_hands\":  # ask again, this time letting the last speaker go on too\n        return ask(state, [person[\"id\"] for person in request[\"participants\"]], \"bids\")\n    return invite(state, state[\"last_member\"] or group(request[\"participants\"])[0])  # the speaker continues\n\n\ndef react(request, kind):\n    event, config, people = request[\"event\"], request[\"config\"], request[\"participants\"]\n    if event[\"topic\"] == \"run.started\":\n        state = fresh(people)\n        if not group(people):  # only moderators: there is no discussion to run\n            state[\"phase\"] = \"ended\"\n            return done(state, [{\"type\": \"finish\"}] if config[\"finish\"] else [])\n        return done(state, opening(kind, request, state))\n    if event[\"topic\"] != \"action.accepted\":\n        return NOTHING\n    state = copy.deepcopy(request[\"state\"])\n    if state.get(\"phase\") == \"ended\":\n        return NOTHING\n    action_type, actor = event.get(\"action_type\"), event.get(\"actor_id\")\n    if action_type == config[\"action_type\"]:\n        state[\"turn\"] += 1\n        tally(state, actor, event.get(\"payload\", \"\"))\n        state[\"last\"] = actor\n        member = actor in state[\"messages\"]\n        if member:\n            state[\"last_member\"] = actor\n            state[\"member_turns\"] += 1\n        effects = [status(state, actor, event.get(\"payload\", \"\"))]\n        state[\"competitors\"] = []\n        # Only members' messages use up turns, so a moderator does not shorten the group's discussion.\n        if state[\"member_turns\"] >= config[\"max_turns\"]:\n            state.update(phase=\"ended\", pending={}, yes=[])\n            return done(state, effects + ([{\"type\": \"finish\"}] if config[\"finish\"] else []))\n        mods = moderators(people)\n        if member and mods and kind != \"raise_hands\":\n            return done(state, effects + ask(state, mods, \"moderators\"))\n        return done(state, effects + after_turn(kind, request, state))\n    if not request.get(\"own_event\") or event.get(\"offer_id\") not in state.get(\"pending\", {}):\n        return NOTHING\n    del state[\"pending\"][event[\"offer_id\"]]\n    if action_type == \"turn.pass\":\n        if event[\"payload\"] == \"anyone\":\n            # Offers are answered in the order they are made, so shuffle it: the first to say yes is not always\n            # whoever is listed first.\n            others = [person[\"id\"] for person in people if person[\"id\"] != actor]\n            Random(request[\"seed\"]).shuffle(others)\n            return done(state, ask(state, others, \"bids\"))\n        state[\"quiet\"] = 0\n        return done(state, invite(state, event[\"payload\"]))\n    if event.get(\"payload\") is True:\n        state[\"yes\"].append(actor)\n    if state[\"pending\"]:\n        return done(state, [])\n    yes, phase = state[\"yes\"], state[\"phase\"]\n    if phase == \"moderators\":\n        return done(state, invite(state, yes[0]) if yes else after_turn(kind, request, state))\n    if not yes:\n        return done(state, nobody(kind, request, state))\n    state[\"quiet\"] = 0\n    state[\"competitors\"] = list(yes) if len(yes) > 1 else []\n    return done(state, invite(state, winner(kind, request, state, yes)))\n\n\ndef least_active(request):\n    \"\"\"Always invite the group member with the fewest words so far.\"\"\"\n    return react(request, \"least_active\")\n\n\n# Measure ------------------------------------------------------------------------\n\ndef evenness(counts):\n    \"\"\"Normalized Shannon entropy of the shares: 1 when everyone contributes equally, 0 when one person does everything.\"\"\"\n    total = sum(counts)\n    if len(counts) < 2:\n        return 1.0\n    if total == 0:\n        return None\n    entropy = sum(-count / total * math.log(count / total) for count in counts if count)\n    return round(entropy / math.log(len(counts)), 6)\n\n\ndef contributions(request):\n    \"\"\"Discussion messages and words per group member (moderators left out), or None when no member wrote.\"\"\"\n    config = request[\"config\"]\n    members = group(request[\"experiment\"].get(\"participants\", []))\n    messages, words = {key: 0 for key in members}, {key: 0 for key in members}\n    for record in request[\"authorized_events\"]:\n        if (record[\"event_type\"] == \"action_applied\" and record[\"payload\"][\"action_type\"] == config[\"action_type\"]\n                and record[\"actor_id\"] in messages and (not config[\"step\"] or record[\"step_id\"] == config[\"step\"])):\n            messages[record[\"actor_id\"]] += 1\n            words[record[\"actor_id\"]] += len(str(record[\"payload\"][\"value\"]).split())\n    return (messages, words) if sum(messages.values()) else None\n\n\nNO_MESSAGES = {\"status\": \"missing\", \"value\": None,\n               \"details\": {\"reason\": \"No discussion messages from group members were recorded.\"}}\n\n\ndef group_balance(request):\n    counted = contributions(request)\n    if counted is None:\n        return NO_MESSAGES\n    messages, words = counted\n    return {\"status\": \"ok\", \"value\": evenness(list(words.values())), \"unit\": \"evenness (0-1)\", \"details\": {\n        \"messages\": messages, \"words\": words, \"message_evenness\": evenness(list(messages.values()))}}\n\n\ndef gini(counts):\n    \"\"\"Gini coefficient: sum of |t_i - t_j| over all pairs (i, j), divided by 2 n sum(t). 0 is perfectly equal.\"\"\"\n    total = sum(counts)\n    if total == 0:\n        return None\n    return round(sum(abs(a - b) for a in counts for b in counts) / (2 * len(counts) * total), 6)\n\n\ndef participation_gini(request):\n    counted = contributions(request)\n    if counted is None:\n        return NO_MESSAGES\n    messages, words = counted\n    return {\"status\": \"ok\", \"value\": gini(list(words.values())), \"unit\": \"Gini of words (0-1, lower is more equal)\",\n            \"details\": {\"messages\": messages, \"words\": words, \"message_gini\": gini(list(messages.values()))}}\n\n\ndef discussion_minutes(request):\n    \"\"\"Estimated speaking time of the group members: their words divided by the words per minute.\"\"\"\n    counted = contributions(request)\n    if counted is None:\n        return NO_MESSAGES\n    messages, words = counted\n    per_minute = request[\"config\"][\"words_per_minute\"]\n    return {\"status\": \"ok\", \"value\": round(sum(words.values()) / per_minute, 2), \"unit\": \"estimated speaking minutes\",\n            \"details\": {\"member_messages\": sum(messages.values()), \"member_words\": sum(words.values()),\n                        \"words_per_minute\": per_minute}}\n\n\ndef self_test():\n    return {\"ok\": evenness([3, 3, 3]) == 1 and evenness([5, 0]) == 0 and evenness([1]) == 1\n            and discussion_minutes({\"config\": {\"action_type\": \"m\", \"step\": \"\", \"words_per_minute\": 150}, \"experiment\": {\"participants\": [{\"id\": \"p1\"}]}, \"authorized_events\": [{\"event_type\": \"action_applied\", \"actor_id\": \"p1\", \"step_id\": \"s\", \"payload\": {\"action_type\": \"m\", \"value\": \"w \" * 300}}]})[\"value\"] == 2.0\n            and gini([4, 4, 4]) == 0 and gini([0, 0, 9]) == round(2 / 3, 6) and gini([0, 0]) is None}\n\n\ndef raise_hands(request):\n    \"\"\"Before each turn, ask everyone but the last speaker whether they want the floor; pick among the raised hands.\"\"\"\n    return react(request, \"raise_hands\")\n\n\ndef speaker_selects(request):\n    \"\"\"The speaker picks who goes next; 'anyone' opens the floor to raised hands; if nobody wants it, the speaker goes on.\"\"\"\n    return react(request, \"speaker_selects\")\n",
+    "options": {}
+  }
+}
