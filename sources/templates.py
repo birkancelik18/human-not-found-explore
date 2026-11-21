@@ -410,6 +410,18 @@ GROUND_RULES = (
     "treat differences of opinion as a sign that information is still missing, and ask for it. 5. See differences of "
     "opinion as natural and helpful, not as an obstacle. 6. Treat initial agreement as suspect: check that people agree "
     "for the same or complementary reasons.")
+# Our addition, not from the thesis: three adults like its sample (both genders, students and not), who take part
+# with different readiness to speak, so that the moderator's balancing has something to act on.
+CONTE_PERSONAS = [
+    ("Giulia", "You are Giulia, a 24-year-old engineering student in Milan. You are confident and talkative: you speak "
+               "up first, explain your views at length and like to steer the group."),
+    ("Marco", "You are Marco, a 38-year-old office administrator in Milan who did not go to university. You take part "
+              "at an ordinary pace: you say what you think briefly and listen to the others."),
+    ("Sara", "You are Sara, a 29-year-old shop assistant in Milan. You are reserved: you keep your messages short, "
+             "rarely open a new point and tend to go along with the others unless someone asks for your view."),
+]
+CONTE_ROLEPLAY = ("Take part as this person would, in their own way of speaking and of joining in, not as an assistant. "
+                  "Keep their manner throughout the discussion.")
 CONTE_SOURCE = (
     "Original study: Conte, S. P. (2026). AI Moderation in Multi-Party Voice Conversations: Architecture, Strategies, "
     "and Evaluation (Master's thesis, Politecnico di Milano). Ten groups of three ranked 15 items alone, then discussed "
@@ -419,18 +431,22 @@ CONTE_SOURCE = (
     "counterbalanced. Rankings were scored against the expert ranking (error score, lower is better) and against the "
     "group's own members (synergy); participation balance was the Gini index of floor-holding time. ")
 CONTE_DESIGN = (
-    "In this template three members rank the items alone and privately, discuss in text with the ground rules, "
+    "In this template three members with personas (a talkative engineering student, an office administrator who "
+    "takes part at an ordinary pace and a reserved shop assistant; the personas are ours, not the thesis's) rank the items alone and privately, discuss in text with the ground rules, "
     "speaking when they raise a hand (up to 15 member turns), and then the first member submits the group ranking. In "
     "the 'Moderator on' condition an AI moderator joins the discussion: it invites the quietest member when "
     "participation gets uneven and gently recalls a ground rule when a message breaks one; it does not rank. In "
     "'Moderator off' it is disabled and the ground rules are only stated at the start. Participation inequality uses "
     "the thesis's Gini formula on the members' words, which stand in for floor-holding time in a text discussion. Run this template and "
-    "its sibling together to reproduce the within-group design. " + SIM)
+    "its sibling together to reproduce the within-group design; every repetition uses the same three personas, so "
+    "repetitions differ only through the model's own variation. " + SIM)
 
 
 def moderated_survival(identifier, name, task, prompt, key, sample, sibling):
     items = sorted(key)
-    members = people(3)
+    members = [{"id": f"p{i}", "display_name": who, "enabled": True, "role": "participant",
+                "agent": ref("hnf.participants.model", model_ref="default", persona=persona, instructions=CONTE_ROLEPLAY),
+                "private_context": {}} for i, (who, persona) in enumerate(CONTE_PERSONAS, 1)]
     moderator = {"id": "moderator", "display_name": "AI moderator", "enabled": True, "role": "moderator",
                  "agent": ref("hnf.moderator.moderator", model_ref="default", balance=True, civility=False,
                               expertise=False, ground_rules=GROUND_RULES, balance_threshold=0.3, persona="",
