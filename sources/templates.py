@@ -5,8 +5,12 @@ SIM = ("Participants are simulated: each is a Model participant, using the free 
        "model, so the first runs only check the design; with the test model every participant takes the sample answer.")
 
 
+# Packages with a newer version than V.
+VERSIONS = {"hnf.ranking_tasks": "1.0.1", "hnf.moderator": "1.0.1", "hnf.turn_taking": "1.0.1"}
+
+
 def ref(component, **config):
-    return {"id": component, "version": V, "config": config}
+    return {"id": component, "version": VERSIONS.get(component.rsplit(".", 1)[0], V), "config": config}
 
 
 def people(count, roles=None, private=None, instructions=""):
@@ -376,6 +380,119 @@ TEMPLATES = [
                              "hnf.ranking_tasks.ranking", prompt=MOON_PROMPT, items=MOON_ITEMS, mode="group",
                              reporter="", visibility="shared", finish=True)]}],
                   actions=30)},
+]
+
+# AI moderation of survival tasks (Conte, 2026) -----------------------------------------------------------------
+
+# Item names and orders follow Appendix A of the thesis (metric units, as shown to its participants).
+CONTE_MOON_KEY = ["Two oxygen tanks (5 kg each)", "20 litres of water", "Star map", "Food concentrate",
+                  "Solar-powered FM transceiver", "15 metres of nylon rope", "First-aid kit with injection needles",
+                  "Parachute silk", "Self-inflating life raft", "Signal flares", "Two .45-calibre pistols",
+                  "One case of powdered milk", "Portable heating unit", "Magnetic compass", "Box of matches"]
+CONTE_MOON_PROMPT = ("You are a team of astronauts stranded on the Moon after your lander crashed about 300 km from the "
+                     "lunar base, on the lit side of the Moon. These 15 items survived the crash. Rank them by their "
+                     "importance for survival and for reaching the base: 1 is the most important.")
+SEA_KEY = ["Shaving mirror", "Can of petrol (10 litres)", "Can of water (25 litres)", "Case of army rations",
+           "Opaque plastic sheet (2 square metres)", "Chocolate bars (2 packs)", "Sea fishing kit with rod",
+           "Nylon rope (5 metres)", "Floating seat cushion", "Shark repellent", "Bottle of 160-proof rum",
+           "Transistor radio", "Map of the Atlantic Ocean", "Mosquito netting", "Sextant (without accessories)"]
+SEA_PROMPT = ("You chartered a yacht with three friends to cross the Atlantic. In mid-Atlantic a fire broke out; the "
+              "skipper and crew were lost fighting it, the yacht is slowly sinking, and the navigation and radio equipment "
+              "are destroyed. You are probably many hundreds of miles from land. You saved 15 intact items, along with a "
+              "life raft and a box of matches. Rank the items by their importance while you wait to be rescued: 1 is the "
+              "most important.")
+# Hall & Watson (1970) consensus instructions, as read out in Conte (2026), Appendix A.3.
+GROUND_RULES = (
+    "1. Avoid arguing for your own ranking: present your position clearly and logically, but seriously consider the "
+    "group's reactions. 2. Avoid win-lose stalemates: when you reach an impasse, look for the next most acceptable "
+    "alternative for everyone. 3. Do not change your mind only to avoid conflict; resist pressure to yield that has no "
+    "sound basis. 4. Avoid conflict-reducing techniques such as majority vote, averaging, bargaining or coin flipping; "
+    "treat differences of opinion as a sign that information is still missing, and ask for it. 5. See differences of "
+    "opinion as natural and helpful, not as an obstacle. 6. Treat initial agreement as suspect: check that people agree "
+    "for the same or complementary reasons.")
+# Our addition, not from the thesis: three adults like its sample (both genders, students and not), who take part
+# with different readiness to speak, so that the moderator's balancing has something to act on.
+CONTE_PERSONAS = [
+    ("Giulia", "You are Giulia, a 24-year-old engineering student in Milan. You are confident and talkative: you speak "
+               "up first, explain your views at length and like to steer the group."),
+    ("Marco", "You are Marco, a 38-year-old office administrator in Milan who did not go to university. You take part "
+              "at an ordinary pace: you say what you think briefly and listen to the others."),
+    ("Sara", "You are Sara, a 29-year-old shop assistant in Milan. You are reserved: you keep your messages short, "
+             "rarely open a new point and tend to go along with the others unless someone asks for your view."),
+]
+CONTE_ROLEPLAY = ("Take part as this person would, in their own way of speaking and of joining in, not as an assistant. "
+                  "Keep their manner throughout the discussion.")
+CONTE_SOURCE = (
+    "Original study: Conte, S. P. (2026). AI Moderation in Multi-Party Voice Conversations: Architecture, Strategies, "
+    "and Evaluation (Master's thesis, Politecnico di Milano). Ten groups of three ranked 15 items alone, then discussed "
+    "by voice for up to 30 minutes under the consensus ground rules of Hall & Watson (1970) and submitted one group "
+    "ranking, once with an AI moderator that balanced participation and enforced the ground rules, and once without "
+    "it. Each group did NASA Moon Survival in one session and Lost at Sea in the other, with task and moderator order "
+    "counterbalanced. Rankings were scored against the expert ranking (error score, lower is better) and against the "
+    "group's own members (synergy); participation balance was the Gini index of floor-holding time. ")
+CONTE_DESIGN = (
+    "In this template three members with personas (a talkative engineering student, an office administrator who "
+    "takes part at an ordinary pace and a reserved shop assistant; the personas are ours, not the thesis's) rank the items alone and privately, discuss in text with the ground rules, "
+    "speaking when they raise a hand (up to 15 member turns), and then the first member submits the group ranking. In "
+    "the 'Moderator on' condition an AI moderator joins the discussion: it invites the quietest member when "
+    "participation gets uneven and gently recalls a ground rule when a message breaks one; it does not rank. In "
+    "'Moderator off' it is disabled and the ground rules are only stated at the start. Participation inequality uses "
+    "the thesis's Gini formula on the members' words, which stand in for floor-holding time in a text discussion. Run this template and "
+    "its sibling together to reproduce the within-group design; every repetition uses the same three personas, so "
+    "repetitions differ only through the model's own variation. " + SIM)
+
+
+def moderated_survival(identifier, name, task, prompt, key, sample, sibling):
+    items = sorted(key)
+    members = [{"id": f"p{i}", "display_name": who, "enabled": True, "role": "participant",
+                "agent": ref("hnf.participants.model", model_ref="default", persona=persona, instructions=CONTE_ROLEPLAY),
+                "private_context": {}} for i, (who, persona) in enumerate(CONTE_PERSONAS, 1)]
+    moderator = {"id": "moderator", "display_name": "AI moderator", "enabled": True, "role": "moderator",
+                 "agent": ref("hnf.moderator.moderator", model_ref="default", balance=True, civility=False,
+                              expertise=False, ground_rules=GROUND_RULES, balance_threshold=0.3, persona="",
+                              instructions=f"The group is doing the {task} task and must agree on one shared ranking."),
+                 "private_context": {}}
+    measures = [measure("individual", "Individual error score", "hnf.ranking_tasks.error_score", answer_key=key, step="alone"),
+                measure("group", "Group error score", "hnf.ranking_tasks.error_score", answer_key=key, step="group"),
+                measure("synergy", "Group synergy", "hnf.ranking_tasks.synergy", individual_step="alone",
+                        group_step="group", answer_key=key),
+                measure("gini", "Participation inequality (Gini)", "hnf.turn_taking.gini",
+                        action_type="discussion.message", step="discuss")]
+    return {"id": identifier, "name": name,
+            "description": CONTE_SOURCE + CONTE_DESIGN.replace("its sibling", f"its sibling ({sibling})"),
+            "spec": spec(identifier, name,
+                         f"{task}: rank alone, discuss under consensus ground rules with or without an AI moderator, "
+                         "then rank as a group; scored against the expert ranking.",
+                         "Does an AI moderator that balances participation and enforces consensus ground rules change "
+                         "the quality of the group's decision and how evenly members take part?",
+                         members + [moderator], measures,
+                         steps=[{"id": "alone", "title": "Rank alone", "components": [ref(
+                                    "hnf.ranking_tasks.ranking", prompt=prompt, items=items, mode="individual",
+                                    reporter="", visibility="private", finish=True)]},
+                                {"id": "discuss", "title": "Discuss", "components": [
+                                    ref("hnf.group_discussion.discussion", turns="procedure", rounds=5, finish=False,
+                                        prompt=(prompt + " Discuss the ranking with your group and reach a consensus on "
+                                                "one shared ranking. Ground rules: " + GROUND_RULES),
+                                        sample=sample),
+                                    ref("hnf.turn_taking.raise_hands", action_type="discussion.message", max_turns=15,
+                                        finish=True, quiet_rounds=2, tie_break="least_active")]},
+                                {"id": "group", "title": "Rank as a group", "components": [ref(
+                                    "hnf.ranking_tasks.ranking", prompt=prompt, items=items, mode="group",
+                                    reporter="", visibility="shared", finish=True)]}],
+                         conditions=[condition("moderator_on", "Moderator on"),
+                                     condition("moderator_off", "Moderator off", ("/participants/3/enabled", False))],
+                         actions=150)}
+
+
+TEMPLATES += [
+    moderated_survival("moon-survival-ai-moderator", "NASA Moon Survival with an AI moderator", "NASA Moon Survival",
+                       CONTE_MOON_PROMPT, CONTE_MOON_KEY,
+                       "I would put the oxygen and the water first; why would anyone rank them differently?",
+                       "Lost at Sea with an AI moderator"),
+    moderated_survival("lost-at-sea-ai-moderator", "Lost at Sea with an AI moderator", "Lost at Sea",
+                       SEA_PROMPT, SEA_KEY,
+                       "I would put the mirror and the petrol first so we can signal; why would anyone disagree?",
+                       "NASA Moon Survival with an AI moderator"),
 ]
 
 # Recent high-citation studies (2015-2026) -----------------------------------------------------------------------

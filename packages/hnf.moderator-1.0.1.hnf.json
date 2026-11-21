@@ -1,0 +1,112 @@
+{
+  "manifest": {
+    "bundle_id": "hnf.moderator",
+    "version": "1.0.1",
+    "author": "Human Not Found",
+    "description": "An AI moderator for group discussions that follows conversational strategies: balance participation, keep the discussion respectful, ask the right expert.",
+    "permissions": [
+      "read_shared_state",
+      "model_call"
+    ],
+    "components": [
+      {
+        "id": "hnf.moderator.moderator",
+        "family": "agent",
+        "entrypoint": "moderator",
+        "description": "AI moderator",
+        "about": {
+          "summary": "A moderator participant that knows when and what to say: it steps in when participation is uneven or a message is disrespectful, and can ask the member best placed to answer.",
+          "how_it_works": "Give this behaviour to a participant with the role 'moderator'. Each goal is a conversational strategy (goal, trigger, behaviour). Balance: when the Gini index of the members' words is above the threshold, it asks for the floor without a model call and invites the quietest member by name. Respect: it asks the model whether the last message was disrespectful and, if so, steps in to remind the group to stay considerate. Ground rules: when rules are filled in, it asks the model whether the last message broke one and, if so, gently recalls the idea of that rule and steers the group back. Expertise: when it picks the next speaker, the model names the member whose public details fit the last message. When it gets the floor with nothing to fix, it briefly sums up or moves the group on. With the hnf.turn_taking rules it is outside the group: never in the rotation, left out of the counts, and asked first after each member's message whether it wants to step in; it reads their turn.status counts. With a Discussion's own round robin or free turns it simply takes its turn and counts the messages in its memory window. Ranking tasks (hnf.ranking_tasks 1.0.1 and later) leave moderators out. Other activities offer their actions to every participant, so in their task steps the moderator answers too: leave its answers out of that step's measures, or compare against a condition without the moderator (disable the participant there). With the free test model every choice takes the action's sample answer.",
+          "actions": [
+            {
+              "type": "turn.request",
+              "description": "Ask for the floor when a goal's trigger fires."
+            },
+            {
+              "type": "turn.pass",
+              "description": "Name the quietest member, or the best-placed one."
+            },
+            {
+              "type": "discussion.message",
+              "description": "A short moderator message: invite someone, restate respect, or sum up."
+            }
+          ]
+        },
+        "config_schema": {
+          "type": "object",
+          "properties": {
+            "model_ref": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 4000,
+              "title": "Model",
+              "default": "default",
+              "x-hnf-reference": "model"
+            },
+            "balance": {
+              "type": "boolean",
+              "title": "Goal: balance participation (invite the quietest member)",
+              "default": true
+            },
+            "civility": {
+              "type": "boolean",
+              "title": "Goal: keep the discussion respectful",
+              "default": true
+            },
+            "expertise": {
+              "type": "boolean",
+              "title": "Goal: ask the member whose details fit the point",
+              "default": false
+            },
+            "ground_rules": {
+              "type": "string",
+              "maxLength": 4000,
+              "title": "Goal: ground rules to enforce (empty: off)",
+              "default": ""
+            },
+            "balance_threshold": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1,
+              "title": "Unevenness that triggers an invitation (Gini of words, 0 to 1)",
+              "default": 0.3
+            },
+            "persona": {
+              "type": "string",
+              "maxLength": 4000,
+              "title": "Persona (how the moderator comes across)",
+              "default": ""
+            },
+            "instructions": {
+              "type": "string",
+              "maxLength": 4000,
+              "title": "Instructions",
+              "default": ""
+            }
+          },
+          "required": [
+            "model_ref",
+            "balance",
+            "civility",
+            "expertise",
+            "balance_threshold",
+            "persona",
+            "instructions"
+          ],
+          "additionalProperties": false
+        }
+      }
+    ],
+    "contract_version": "1.0.0",
+    "digest": "sha256:c3ed25ad95bac4eb21fca89c0073b4cff29eaef75e69b453dbe5965e15df2710"
+  },
+  "artifact": {
+    "format": "python.source.v1",
+    "source": "\"\"\"AI moderator: a participant behaviour that follows conversational strategies (goal -> trigger -> behaviour).\n\nGoals: balance participation (uneven words, measured by a Gini index -> invite the quietest member), civility\n(a disrespectful message -> remind the group to stay respectful), ground rules (a message that breaks the\ngroup's rules -> recall the rule gently) and expertise (a point that fits someone's public\ndetails -> ask them). It reads the group's counts from the `turn.status` events that the `hnf.turn_taking` rules\npublish, or counts the discussion messages in its memory when no rule publishes them.\n\"\"\"\n\nROLE = (\"You are the moderator of a group discussion, not one of its members. You do not argue for an answer of your \"\n        \"own; you help the group talk well. Keep every message to one or two short sentences.\")\nNO_TRIGGER = (\"Nothing needs fixing right now: briefly sum up where the group stands, or move it on to the next \"\n              \"open point, without giving your own opinion.\")\n\n\ndef gini(values):\n    \"\"\"0 when everyone contributed the same, towards 1 when one person did everything.\"\"\"\n    values = list(values)\n    total = sum(values)\n    if not values or total == 0:\n        return 0.0\n    differences = sum(abs(a - b) for a in values for b in values)\n    return differences / (2 * len(values) * total)\n\n\ndef members(observation):\n    return [person for person in observation[\"participants\"] if person.get(\"role\") != \"moderator\"]\n\n\ndef counts(observation):\n    \"\"\"Words per group member in this discussion, and the last message said.\"\"\"\n    memory = observation.get(\"memory\", [])\n    ids = [person[\"id\"] for person in members(observation)]\n    for item in reversed(memory):\n        if item.get(\"topic\") == \"turn.status\" and isinstance(item.get(\"payload\"), dict):\n            words = item[\"payload\"].get(\"words\", {})\n            return {key: words.get(key, 0) for key in ids}, item[\"payload\"].get(\"last_message\", \"\")\n    words, last = {key: 0 for key in ids}, \"\"\n    for item in memory:\n        if item.get(\"topic\") == \"action.accepted\" and item.get(\"action_type\") == \"discussion.message\":\n            last = str(item.get(\"payload\", \"\"))\n            if item.get(\"actor_id\") in words:\n                words[item[\"actor_id\"]] += len(last.split())\n    return words, last\n\n\ndef name(observation, key):\n    return next((person.get(\"display_name\", key) for person in observation[\"participants\"] if person[\"id\"] == key), key)\n\n\ndef quietest(words, allowed=None):\n    candidates = [key for key in words if allowed is None or key in allowed]\n    return min(candidates, key=lambda key: words[key]) if candidates else None\n\n\ndef system(config, *parts):\n    text = \" \".join(part.strip() for part in (ROLE, config[\"persona\"], config[\"instructions\"], *parts) if part.strip())\n    return text[:8000]\n\n\ndef people_details(observation):\n    return \"; \".join(f\"{person.get('display_name', person['id'])} ({person['id']}): {person.get('attributes', {})}\"\n                     for person in members(observation))\n\n\ndef moderator(request):\n    config, observation, invocation = request[\"config\"], request[\"observation\"], request[\"invocation_id\"]\n    action = observation[\"allowed_actions\"][0]\n    words, last = counts(observation)\n    unbalanced = config[\"balance\"] and sum(words.values()) > 0 and gini(words.values()) > config[\"balance_threshold\"]\n    quiet = quietest(words)\n\n    def answer(value):\n        return {\"invocation_id\": invocation, \"action_type\": action[\"type\"], \"payload\": value}\n\n    def ask_model(*parts, prompt=None):\n        reply = {\"invocation_id\": invocation, \"request_model\": True, \"system\": system(config, *parts)}\n        if prompt:\n            reply[\"action_prompt\"] = prompt\n        return reply\n\n    rules = config.get(\"ground_rules\", \"\").strip()\n    if action[\"type\"] == \"turn.request\":\n        if unbalanced:\n            return answer(True)\n        checks = ([\"it was rude, hostile or disrespectful and needs a response about tone\"] if config[\"civility\"] else []) + (\n            [\"it breaks one of the group's ground rules\"] if rules else [])\n        if checks:\n            context = [f\"The group's ground rules: {rules}\"] if rules else []\n            return ask_model(*context, f\"The last message was: {last!r}\", prompt=(\n                f\"Answer true only if the last message needs you to step in because {' or '.join(checks)}; \"\n                \"otherwise answer false.\"))\n        return answer(False)\n    if action[\"type\"] == \"turn.pass\":\n        allowed = action[\"schema\"].get(\"enum\", [])\n        if config[\"expertise\"]:\n            return ask_model(f\"The group: {people_details(observation)}.\", f\"The last message was: {last!r}\", prompt=(\n                \"Name the participant whose details make them best placed to speak to the last message.\"))\n        choice = quietest(words, allowed)\n        return answer(choice if choice else \"anyone\")\n    if action[\"type\"] == \"discussion.message\":\n        if unbalanced and quiet:\n            trigger = f\"Participation is uneven. Invite {name(observation, quiet)} by name to share their view.\"\n        else:\n            trigger = NO_TRIGGER\n        extra = []\n        if config[\"civility\"]:\n            extra.append(\"If the last message was disrespectful, first remind the group to stay respectful and considerate.\")\n        if rules:\n            extra.append(f\"The group's ground rules: {rules} If the last message breaks one, gently recall the idea \"\n                         \"of that rule (not its number) as a reminder, not a reproach, and steer the group back.\")\n        if config[\"expertise\"]:\n            extra.append(f\"If someone's details make them the right person for the current point, ask them: {people_details(observation)}.\")\n        return ask_model(trigger, *extra)\n    return ask_model()\n\n\ndef self_test():\n    base = {\"model_ref\": \"default\", \"balance\": True, \"civility\": False, \"expertise\": False, \"balance_threshold\": 0.3,\n            \"persona\": \"\", \"instructions\": \"\"}\n    observation = {\"participants\": [{\"id\": \"p1\"}, {\"id\": \"p2\"}], \"memory\": [],\n                   \"allowed_actions\": [{\"type\": \"turn.request\", \"schema\": {}}]}\n    def bid(config):\n        return moderator({\"config\": config, \"observation\": observation, \"invocation_id\": \"i\"})\n    return {\"ok\": gini([1, 1, 1]) == 0 and abs(gini([0, 0, 9]) - 2 / 3) < 1e-9 and gini([]) == 0\n            and bid(base).get(\"payload\") is False\n            and \"No majority votes.\" in bid({**base, \"ground_rules\": \"No majority votes.\"}).get(\"system\", \"\")}\n",
+    "options": {
+      "hnf.moderator.moderator": {
+        "model": true
+      }
+    }
+  }
+}

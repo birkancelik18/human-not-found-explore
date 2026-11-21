@@ -1,6 +1,6 @@
 {
   "bundle_id": "hnf.moderator",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "author": "Human Not Found",
   "description": "An AI moderator for group discussions that follows conversational strategies: balance participation, keep the discussion respectful, ask the right expert.",
   "permissions": [
@@ -20,7 +20,7 @@
       "description": "AI moderator",
       "about": {
         "summary": "A moderator participant that knows when and what to say: it steps in when participation is uneven or a message is disrespectful, and can ask the member best placed to answer.",
-        "how_it_works": "Give this behaviour to a participant with the role 'moderator'. Each goal is a conversational strategy (goal, trigger, behaviour). Balance: when the Gini index of the members' words is above the threshold, it asks for the floor without a model call and invites the quietest member by name. Respect: it asks the model whether the last message was disrespectful and, if so, steps in to remind the group to stay considerate. Expertise: when it picks the next speaker, the model names the member whose public details fit the last message. When it gets the floor with nothing to fix, it briefly sums up or moves the group on. With the hnf.turn_taking rules it is outside the group: never in the rotation, left out of the counts, and asked first after each member's message whether it wants to step in; it reads their turn.status counts. With a Discussion's own round robin or free turns it simply takes its turn and counts the messages in its memory window. Activities offer their actions to every participant, so in a task step (for example a ranking) the moderator answers too: leave its answers out of that step's measures, or compare against a condition without the moderator (disable the participant there). With the free test model every choice takes the action's sample answer.",
+        "how_it_works": "Give this behaviour to a participant with the role 'moderator'. Each goal is a conversational strategy (goal, trigger, behaviour). Balance: when the Gini index of the members' words is above the threshold, it asks for the floor without a model call and invites the quietest member by name. Respect: it asks the model whether the last message was disrespectful and, if so, steps in to remind the group to stay considerate. Ground rules: when rules are filled in, it asks the model whether the last message broke one and, if so, gently recalls the idea of that rule and steers the group back. Expertise: when it picks the next speaker, the model names the member whose public details fit the last message. When it gets the floor with nothing to fix, it briefly sums up or moves the group on. With the hnf.turn_taking rules it is outside the group: never in the rotation, left out of the counts, and asked first after each member's message whether it wants to step in; it reads their turn.status counts. With a Discussion's own round robin or free turns it simply takes its turn and counts the messages in its memory window. Ranking tasks (hnf.ranking_tasks 1.0.1 and later) leave moderators out. Other activities offer their actions to every participant, so in their task steps the moderator answers too: leave its answers out of that step's measures, or compare against a condition without the moderator (disable the participant there). With the free test model every choice takes the action's sample answer.",
         "actions": [
           {
             "type": "turn.request",
@@ -61,6 +61,12 @@
             "type": "boolean",
             "title": "Goal: ask the member whose details fit the point",
             "default": false
+          },
+          "ground_rules": {
+            "type": "string",
+            "maxLength": 4000,
+            "title": "Goal: ground rules to enforce (empty: off)",
+            "default": ""
           },
           "balance_threshold": {
             "type": "number",
