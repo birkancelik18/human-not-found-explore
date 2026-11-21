@@ -6,12 +6,13 @@ NOTHING = {"effects": []}
 def ranking_task(request):
     """Individual mode: everyone ranks at the same time. Group mode: one reporter submits the group's ranking."""
     config, event = request["config"], request["event"]
-    people = [person["id"] for person in request["participants"]]
+    # A moderator (role 'moderator') runs the discussion; it does not rank, so it never skews the scores.
+    people = [person["id"] for person in request["participants"] if person.get("role") != "moderator"]
     items = config["items"]
     if config["mode"] == "group":
         reporter = config["reporter"] or people[0]
         if reporter not in people:
-            raise ValueError("The reporter must be an enabled participant.")
+            raise ValueError("The reporter must be an enabled participant who is not a moderator.")
         actors, kind = [reporter], "ranking.group_submit"
         note = "You report the group's ranking: submit the order your group agreed on."
     else:
@@ -106,4 +107,9 @@ def ranking_change(request):
 
 
 def self_test():
-    return {"ok": error(["a", "b", "c"], ["a", "b", "c"]) == 0 and error(["c", "b", "a"], ["a", "b", "c"]) == 4}
+    started = ranking_task({"config": {"items": ["a", "b"], "mode": "individual", "prompt": "Rank.", "visibility": "private",
+                                       "finish": True, "reporter": ""}, "event": {"topic": "run.started"}, "state": {},
+                            "participants": [{"id": "p1", "role": "participant"}, {"id": "m", "role": "moderator"}]})
+    offered = [effect["actor_id"] for effect in started["effects"]]
+    return {"ok": error(["a", "b", "c"], ["a", "b", "c"]) == 0 and error(["c", "b", "a"], ["a", "b", "c"]) == 4
+            and offered == ["p1"]}

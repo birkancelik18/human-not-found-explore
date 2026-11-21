@@ -1,6 +1,6 @@
 {
   "bundle_id": "hnf.ranking_tasks",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "author": "Human Not Found",
   "description": "Ranking tasks alone or as a group, with error score, group synergy and ranking change measures.",
   "permissions": [
@@ -17,7 +17,7 @@
       "description": "Ranking task",
       "about": {
         "summary": "Participants put a list of items in order of importance, each on their own or as a group.",
-        "how_it_works": "Individual mode: every participant ranks all items at the same time. Group mode: the group's ranking is submitted once, by a reporter (the first enabled participant unless one is chosen), who submits the order the group agreed on; put a Discussion step before it so the group can reach that order. Every ranking must contain every item exactly once. Rankings are seen by everyone or only by the participant who submitted them.",
+        "how_it_works": "Individual mode: every participant ranks all items at the same time. Group mode: the group's ranking is submitted once, by a reporter (the first enabled participant unless one is chosen), who submits the order the group agreed on; put a Discussion step before it so the group can reach that order. Every ranking must contain every item exactly once. Rankings are seen by everyone or only by the participant who submitted them. Participants whose role is 'moderator' never rank and cannot be the reporter, so an AI moderator does not change the scores.",
         "actions": [
           {
             "type": "ranking.submit",

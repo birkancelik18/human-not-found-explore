@@ -1,7 +1,8 @@
 """AI moderator: a participant behaviour that follows conversational strategies (goal -> trigger -> behaviour).
 
 Goals: balance participation (uneven words, measured by a Gini index -> invite the quietest member), civility
-(a disrespectful message -> remind the group to stay respectful) and expertise (a point that fits someone's public
+(a disrespectful message -> remind the group to stay respectful), ground rules (a message that breaks the
+group's rules -> recall the rule gently) and expertise (a point that fits someone's public
 details -> ask them). It reads the group's counts from the `turn.status` events that the `hnf.turn_taking` rules
 publish, or counts the discussion messages in its memory when no rule publishes them.
 """
@@ -78,13 +79,17 @@ def moderator(request):
             reply["action_prompt"] = prompt
         return reply
 
+    rules = config.get("ground_rules", "").strip()
     if action["type"] == "turn.request":
         if unbalanced:
             return answer(True)
-        if config["civility"]:
-            return ask_model(f"The last message was: {last!r}", prompt=(
-                "Answer true only if the last message was rude, hostile or disrespectful and needs a response about "
-                "tone; otherwise answer false."))
+        checks = (["it was rude, hostile or disrespectful and needs a response about tone"] if config["civility"] else []) + (
+            ["it breaks one of the group's ground rules"] if rules else [])
+        if checks:
+            context = [f"The group's ground rules: {rules}"] if rules else []
+            return ask_model(*context, f"The last message was: {last!r}", prompt=(
+                f"Answer true only if the last message needs you to step in because {' or '.join(checks)}; "
+                "otherwise answer false."))
         return answer(False)
     if action["type"] == "turn.pass":
         allowed = action["schema"].get("enum", [])
@@ -101,6 +106,9 @@ def moderator(request):
         extra = []
         if config["civility"]:
             extra.append("If the last message was disrespectful, first remind the group to stay respectful and considerate.")
+        if rules:
+            extra.append(f"The group's ground rules: {rules} If the last message breaks one, gently recall the idea "
+                         "of that rule (not its number) as a reminder, not a reproach, and steer the group back.")
         if config["expertise"]:
             extra.append(f"If someone's details make them the right person for the current point, ask them: {people_details(observation)}.")
         return ask_model(trigger, *extra)
@@ -108,4 +116,12 @@ def moderator(request):
 
 
 def self_test():
-    return {"ok": gini([1, 1, 1]) == 0 and abs(gini([0, 0, 9]) - 2 / 3) < 1e-9 and gini([]) == 0}
+    base = {"model_ref": "default", "balance": True, "civility": False, "expertise": False, "balance_threshold": 0.3,
+            "persona": "", "instructions": ""}
+    observation = {"participants": [{"id": "p1"}, {"id": "p2"}], "memory": [],
+                   "allowed_actions": [{"type": "turn.request", "schema": {}}]}
+    def bid(config):
+        return moderator({"config": config, "observation": observation, "invocation_id": "i"})
+    return {"ok": gini([1, 1, 1]) == 0 and abs(gini([0, 0, 9]) - 2 / 3) < 1e-9 and gini([]) == 0
+            and bid(base).get("payload") is False
+            and "No majority votes." in bid({**base, "ground_rules": "No majority votes."}).get("system", "")}

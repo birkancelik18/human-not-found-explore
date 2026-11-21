@@ -3,7 +3,7 @@
   "name": "NASA Moon Survival Task",
   "author": "Human Not Found",
   "description": "Original study: Hall, J., & Watson, W. H. (1970). The effects of a normative intervention on group decision-making performance. Human Relations, 23(4), 299-317. Members of five-person groups first ranked 15 items salvaged from a crash landing on the moon by their importance for survival, then reached a group ranking by consensus; rankings were scored against the order given by NASA experts, and groups were compared with their own members. Hall and Watson tested whether brief instructions on how to reach consensus improved group performance. The task is a classic group-decision exercise used in team research and training; ranking tasks are rare in our survey of 500 multi-participant experiments. In this template five participants rank the items alone and privately, discuss over two rounds, and then one member (the reporter) submits the ranking the group agreed on. There is no normative-intervention condition. Error scores add up how many places each item is from the expert ranking (lower is better); synergy compares the group with its average and best member. Participants are simulated: each is a Model participant, using the free test model until you choose a model, so the first runs only check the design; with the test model every participant takes the sample answer.",
-  "created_at": "2026-11-18T01:13:22.408+00:00",
+  "created_at": "2026-11-21T22:13:38.829+00:00",
   "spec": {
     "components": [],
     "conditions": [
@@ -54,7 +54,7 @@
             "step": "alone"
           },
           "id": "hnf.ranking_tasks.error_score",
-          "version": "1.0.0"
+          "version": "1.0.1"
         },
         "id": "individual",
         "label": "Individual error score",
@@ -83,7 +83,7 @@
             "step": "group"
           },
           "id": "hnf.ranking_tasks.error_score",
-          "version": "1.0.0"
+          "version": "1.0.1"
         },
         "id": "group",
         "label": "Group error score",
@@ -113,7 +113,7 @@
             "individual_step": "alone"
           },
           "id": "hnf.ranking_tasks.synergy",
-          "version": "1.0.0"
+          "version": "1.0.1"
         },
         "id": "synergy",
         "label": "Group synergy",
@@ -236,7 +236,7 @@
               "visibility": "private"
             },
             "id": "hnf.ranking_tasks.ranking",
-            "version": "1.0.0"
+            "version": "1.0.1"
           }
         ],
         "id": "alone",
@@ -287,7 +287,7 @@
               "visibility": "shared"
             },
             "id": "hnf.ranking_tasks.ranking",
-            "version": "1.0.0"
+            "version": "1.0.1"
           }
         ],
         "id": "group",
@@ -309,8 +309,8 @@
     },
     {
       "bundle_id": "hnf.ranking_tasks",
-      "version": "1.0.0",
-      "digest": "a27394217e2609b1a640db1e3e1a5d2afa619ff56220bc40a88cd0ad3583f45a"
+      "version": "1.0.1",
+      "digest": "e5a7c95e742bcb85fe981fe800db284525232a5f64f372b74145eaa1abcaa90f"
     }
   ]
 }

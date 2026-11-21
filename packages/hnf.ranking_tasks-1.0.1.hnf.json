@@ -1,0 +1,275 @@
+{
+  "manifest": {
+    "bundle_id": "hnf.ranking_tasks",
+    "version": "1.0.1",
+    "author": "Human Not Found",
+    "description": "Ranking tasks alone or as a group, with error score, group synergy and ranking change measures.",
+    "permissions": [
+      "read_shared_state",
+      "read_private_actions",
+      "write_state",
+      "emit_event"
+    ],
+    "components": [
+      {
+        "id": "hnf.ranking_tasks.ranking",
+        "family": "mechanic",
+        "entrypoint": "ranking_task",
+        "description": "Ranking task",
+        "about": {
+          "summary": "Participants put a list of items in order of importance, each on their own or as a group.",
+          "how_it_works": "Individual mode: every participant ranks all items at the same time. Group mode: the group's ranking is submitted once, by a reporter (the first enabled participant unless one is chosen), who submits the order the group agreed on; put a Discussion step before it so the group can reach that order. Every ranking must contain every item exactly once. Rankings are seen by everyone or only by the participant who submitted them. Participants whose role is 'moderator' never rank and cannot be the reporter, so an AI moderator does not change the scores.",
+          "actions": [
+            {
+              "type": "ranking.submit",
+              "description": "Individual mode: submit your own ranking of all items."
+            },
+            {
+              "type": "ranking.group_submit",
+              "description": "Group mode (reporter only): submit the group's ranking."
+            }
+          ],
+          "ends_when": "When every participant (individual mode) or the reporter (group mode) has submitted (unless 'End the step' is off)."
+        },
+        "config_schema": {
+          "type": "object",
+          "properties": {
+            "prompt": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 4000,
+              "title": "Instructions",
+              "default": "Rank the items by how important they are."
+            },
+            "items": {
+              "type": "array",
+              "title": "Items",
+              "minItems": 2,
+              "maxItems": 30,
+              "items": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 200
+              },
+              "default": [
+                "Water",
+                "Map",
+                "Flashlight"
+              ],
+              "uniqueItems": true
+            },
+            "mode": {
+              "type": "string",
+              "enum": [
+                "individual",
+                "group"
+              ],
+              "title": "Who ranks",
+              "default": "individual"
+            },
+            "reporter": {
+              "type": "string",
+              "maxLength": 120,
+              "title": "Group reporter (group mode; empty: first enabled participant)",
+              "default": "",
+              "x-hnf-reference": "participant"
+            },
+            "visibility": {
+              "type": "string",
+              "enum": [
+                "shared",
+                "private"
+              ],
+              "title": "Who sees the answers",
+              "default": "private"
+            },
+            "finish": {
+              "type": "boolean",
+              "title": "End the step when the rankings are in",
+              "default": true
+            }
+          },
+          "required": [
+            "prompt",
+            "items",
+            "mode",
+            "reporter",
+            "visibility",
+            "finish"
+          ],
+          "additionalProperties": false
+        }
+      },
+      {
+        "id": "hnf.ranking_tasks.error_score",
+        "family": "evaluator",
+        "entrypoint": "error_score",
+        "description": "Error score",
+        "about": {
+          "summary": "How far rankings are from an answer key: the sum of absolute differences in rank, lower is better.",
+          "how_it_works": "For each ranking, adds up how many places each item is from its place in the answer key. Uses each participant's latest individual ranking and the group ranking in the chosen step. The value is the group's error score if a group ranking was submitted, otherwise the mean individual error score.",
+          "outputs": [
+            {
+              "label": "Error score",
+              "unit": "rank places",
+              "description": "Group error score, or the mean individual error score when there is no group ranking."
+            },
+            {
+              "label": "Details",
+              "description": "Group error, error per participant, mean and best individual error."
+            }
+          ]
+        },
+        "config_schema": {
+          "type": "object",
+          "properties": {
+            "answer_key": {
+              "type": "array",
+              "title": "Answer key (correct order)",
+              "minItems": 2,
+              "maxItems": 30,
+              "items": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 200
+              },
+              "default": [
+                "Water",
+                "Map",
+                "Flashlight"
+              ],
+              "uniqueItems": true
+            },
+            "step": {
+              "type": "string",
+              "maxLength": 120,
+              "title": "Step (empty: whole run)",
+              "default": "",
+              "x-hnf-reference": "step"
+            }
+          },
+          "required": [
+            "answer_key",
+            "step"
+          ],
+          "additionalProperties": false
+        }
+      },
+      {
+        "id": "hnf.ranking_tasks.synergy",
+        "family": "evaluator",
+        "entrypoint": "group_synergy",
+        "description": "Group synergy",
+        "about": {
+          "summary": "Whether the group ranked better than its average member and its best member.",
+          "how_it_works": "Compares the group ranking's error score with the members' error scores from an earlier individual step. The value is the mean individual error minus the group error: above 0 means the group did better than its average member. The details also compare the group with its best member (better than best is often called strong synergy).",
+          "outputs": [
+            {
+              "label": "Gain over average member",
+              "unit": "rank places",
+              "description": "Mean individual error minus group error."
+            },
+            {
+              "label": "Details",
+              "description": "Group error, mean and best individual error, and whether the group beat the average and the best member."
+            }
+          ]
+        },
+        "config_schema": {
+          "type": "object",
+          "properties": {
+            "individual_step": {
+              "type": "string",
+              "maxLength": 120,
+              "title": "Individual ranking step",
+              "default": "",
+              "x-hnf-reference": "step"
+            },
+            "group_step": {
+              "type": "string",
+              "maxLength": 120,
+              "title": "Group ranking step",
+              "default": "",
+              "x-hnf-reference": "step"
+            },
+            "answer_key": {
+              "type": "array",
+              "title": "Answer key (correct order)",
+              "minItems": 2,
+              "maxItems": 30,
+              "items": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 200
+              },
+              "default": [
+                "Water",
+                "Map",
+                "Flashlight"
+              ],
+              "uniqueItems": true
+            }
+          },
+          "required": [
+            "individual_step",
+            "group_step",
+            "answer_key"
+          ],
+          "additionalProperties": false
+        }
+      },
+      {
+        "id": "hnf.ranking_tasks.change",
+        "family": "evaluator",
+        "entrypoint": "ranking_change",
+        "description": "Ranking change",
+        "about": {
+          "summary": "How far each participant's ranking moved between two steps.",
+          "how_it_works": "For each participant who ranked in both steps, adds up how many places each item moved. If the later step has a group ranking, each member's earlier ranking is compared with the group ranking.",
+          "outputs": [
+            {
+              "label": "Mean change",
+              "unit": "rank places",
+              "description": "Mean total movement per participant."
+            },
+            {
+              "label": "Details",
+              "description": "Movement per participant."
+            }
+          ]
+        },
+        "config_schema": {
+          "type": "object",
+          "properties": {
+            "step_before": {
+              "type": "string",
+              "maxLength": 120,
+              "title": "Step before",
+              "default": "",
+              "x-hnf-reference": "step"
+            },
+            "step_after": {
+              "type": "string",
+              "maxLength": 120,
+              "title": "Step after",
+              "default": "",
+              "x-hnf-reference": "step"
+            }
+          },
+          "required": [
+            "step_before",
+            "step_after"
+          ],
+          "additionalProperties": false
+        }
+      }
+    ],
+    "contract_version": "1.0.0",
+    "digest": "sha256:f429002295ffc2387f85e276b53a31e09d8a513565dc1c4357863f57fc223a01"
+  },
+  "artifact": {
+    "format": "python.source.v1",
+    "source": "\"\"\"Ranking tasks: order a list of items alone or as a group; error score, group synergy and ranking change.\"\"\"\n\nNOTHING = {\"effects\": []}\n\n\ndef ranking_task(request):\n    \"\"\"Individual mode: everyone ranks at the same time. Group mode: one reporter submits the group's ranking.\"\"\"\n    config, event = request[\"config\"], request[\"event\"]\n    # A moderator (role 'moderator') runs the discussion; it does not rank, so it never skews the scores.\n    people = [person[\"id\"] for person in request[\"participants\"] if person.get(\"role\") != \"moderator\"]\n    items = config[\"items\"]\n    if config[\"mode\"] == \"group\":\n        reporter = config[\"reporter\"] or people[0]\n        if reporter not in people:\n            raise ValueError(\"The reporter must be an enabled participant who is not a moderator.\")\n        actors, kind = [reporter], \"ranking.group_submit\"\n        note = \"You report the group's ranking: submit the order your group agreed on.\"\n    else:\n        actors, kind = people, \"ranking.submit\"\n        note = \"Rank the items on your own.\"\n    if event[\"topic\"] == \"run.started\":\n        return {\"effects\": [{\"type\": \"offer\", \"id\": \"rank.\" + person, \"actor_id\": person, \"actions\": [{\n            \"type\": kind, \"audience\": \"shared\" if config[\"visibility\"] == \"shared\" else [],\n            \"prompt\": f\"{config['prompt']}\\n{note} Put every item in order, most important first: {'; '.join(items)}\",\n            \"schema\": {\"type\": \"array\", \"items\": {\"type\": \"string\", \"enum\": items}, \"uniqueItems\": True,\n                       \"minItems\": len(items), \"maxItems\": len(items)},\n            \"sample\": list(items)}]} for person in actors]}\n    if not (event[\"topic\"] == \"action.accepted\" and request[\"own_event\"] and event[\"action_type\"] == kind):\n        return NOTHING\n    answered = sorted({*request[\"state\"].get(\"answered\", []), event[\"actor_id\"]})\n    done = set(answered) >= set(actors)\n    return {\"effects\": [{\"type\": \"update\", \"state\": {\"answered\": answered}}]\n            + ([{\"type\": \"finish\"}] if done and config[\"finish\"] else [])}\n\n\n# Measures -------------------------------------------------------------------\n\ndef missing(reason):\n    return {\"status\": \"missing\", \"value\": None, \"details\": {\"reason\": reason}}\n\n\ndef rankings(request, step, kinds=(\"ranking.submit\", \"ranking.group_submit\")):\n    \"\"\"The latest ranking per participant (and the group ranking) in a step; empty step means the whole run.\"\"\"\n    individual, group = {}, None\n    for record in request[\"authorized_events\"]:\n        if (record[\"event_type\"] == \"action_applied\" and record[\"payload\"][\"action_type\"] in kinds\n                and (not step or record[\"step_id\"] == step)):\n            if record[\"payload\"][\"action_type\"] == \"ranking.group_submit\":\n                group = record[\"payload\"][\"value\"]\n            else:\n                individual[record[\"actor_id\"]] = record[\"payload\"][\"value\"]\n    return individual, group\n\n\ndef error(ranking, key):\n    \"\"\"Sum of absolute differences between each item's rank and its rank in the key (items in both only).\"\"\"\n    position = {item: index for index, item in enumerate(key)}\n    return sum(abs(index - position[item]) for index, item in enumerate(ranking) if item in position)\n\n\ndef mean(values):\n    return round(sum(values) / len(values), 6) if values else None\n\n\ndef error_score(request):\n    config = request[\"config\"]\n    individual, group = rankings(request, config[\"step\"])\n    if not individual and group is None:\n        return missing(\"No ranking was submitted in this step.\")\n    scores = {actor: error(value, config[\"answer_key\"]) for actor, value in sorted(individual.items())}\n    group_error = error(group, config[\"answer_key\"]) if group is not None else None\n    value = group_error if group_error is not None else mean(list(scores.values()))\n    return {\"status\": \"ok\", \"value\": value, \"unit\": \"error score (lower is better)\", \"details\": {\n        \"group\": group_error, \"by_participant\": scores, \"mean_individual\": mean(list(scores.values())),\n        \"best_individual\": min(scores.values()) if scores else None}}\n\n\ndef group_synergy(request):\n    config = request[\"config\"]\n    individual, _ = rankings(request, config[\"individual_step\"], (\"ranking.submit\",))\n    _, group = rankings(request, config[\"group_step\"], (\"ranking.group_submit\",))\n    if not individual or group is None:\n        return missing(\"Synergy needs individual rankings in the individual step and a group ranking in the group step.\")\n    scores = [error(value, config[\"answer_key\"]) for value in individual.values()]\n    group_error = error(group, config[\"answer_key\"])\n    average, best = mean(scores), min(scores)\n    return {\"status\": \"ok\", \"value\": round(average - group_error, 6), \"unit\": \"points better than the average member\",\n            \"details\": {\"group_error\": group_error, \"mean_individual_error\": average, \"best_individual_error\": best,\n                        \"better_than_average\": group_error < average, \"better_than_best\": group_error < best,\n                        \"gain_over_best\": best - group_error}}\n\n\ndef ranking_change(request):\n    config = request[\"config\"]\n    if not config[\"step_before\"] or not config[\"step_after\"]:\n        return missing(\"Choose the steps before and after.\")\n    before, _ = rankings(request, config[\"step_before\"])\n    after, group_after = rankings(request, config[\"step_after\"])\n    moved = {actor: error(after[actor], before[actor]) for actor in sorted(before.keys() & after.keys())}\n    if group_after is not None:\n        # A group ranking counts as a new ranking for every member who ranked alone before.\n        moved.update({actor: error(group_after, ranking) for actor, ranking in before.items() if actor not in after})\n    if not moved:\n        return missing(\"No participant ranked in both steps.\")\n    return {\"status\": \"ok\", \"value\": mean(list(moved.values())), \"unit\": \"mean rank positions moved\",\n            \"details\": {\"by_participant\": moved}}\n\n\ndef self_test():\n    started = ranking_task({\"config\": {\"items\": [\"a\", \"b\"], \"mode\": \"individual\", \"prompt\": \"Rank.\", \"visibility\": \"private\",\n                                       \"finish\": True, \"reporter\": \"\"}, \"event\": {\"topic\": \"run.started\"}, \"state\": {},\n                            \"participants\": [{\"id\": \"p1\", \"role\": \"participant\"}, {\"id\": \"m\", \"role\": \"moderator\"}]})\n    offered = [effect[\"actor_id\"] for effect in started[\"effects\"]]\n    return {\"ok\": error([\"a\", \"b\", \"c\"], [\"a\", \"b\", \"c\"]) == 0 and error([\"c\", \"b\", \"a\"], [\"a\", \"b\", \"c\"]) == 4\n            and offered == [\"p1\"]}\n",
+    "options": {}
+  }
+}

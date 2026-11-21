@@ -1,0 +1,349 @@
+{
+  "format": "hnf.template.v1",
+  "name": "NASA Moon Survival with an AI moderator",
+  "author": "Human Not Found",
+  "description": "Original study: Conte, S. P. (2026). AI Moderation in Multi-Party Voice Conversations: Architecture, Strategies, and Evaluation (Master's thesis, Politecnico di Milano). Ten groups of three ranked 15 items alone, then discussed by voice for up to 30 minutes under the consensus ground rules of Hall & Watson (1970) and submitted one group ranking, once with an AI moderator that balanced participation and enforced the ground rules, and once without it. Each group did NASA Moon Survival in one session and Lost at Sea in the other, with task and moderator order counterbalanced. Rankings were scored against the expert ranking (error score, lower is better) and against the group's own members (synergy); participation balance was measured from speaking time. In this template three members rank the items alone and privately, discuss in text with the ground rules, speaking when they raise a hand (up to 15 member turns), and then the first member submits the group ranking. In the 'Moderator on' condition an AI moderator joins the discussion: it invites the quietest member when participation gets uneven and gently recalls a ground rule when a message breaks one; it does not rank. In 'Moderator off' it is disabled and the ground rules are only stated at the start. Participation balance is the evenness of the members' words, not the Gini index of speaking time used in the thesis. Run this template and its sibling (Lost at Sea with an AI moderator) together to reproduce the within-group design. Participants are simulated: each is a Model participant, using the free test model until you choose a model, so the first runs only check the design; with the test model every participant takes the sample answer.",
+  "created_at": "2026-11-21T22:13:38.842+00:00",
+  "spec": {
+    "components": [],
+    "conditions": [
+      {
+        "id": "moderator_on",
+        "label": "Moderator on",
+        "overrides": []
+      },
+      {
+        "id": "moderator_off",
+        "label": "Moderator off",
+        "overrides": [
+          {
+            "path": "/participants/3/enabled",
+            "value": false
+          }
+        ]
+      }
+    ],
+    "description": "NASA Moon Survival: rank alone, discuss under consensus ground rules with or without an AI moderator, then rank as a group; scored against the expert ranking.",
+    "environment": {
+      "initial_state": {
+        "private_by_participant": {},
+        "shared": {}
+      }
+    },
+    "execution": {
+      "max_actions_per_run": 150,
+      "max_estimated_cost_usd_per_run": 2.0,
+      "max_memory_events": 40,
+      "max_model_calls_per_run": 300,
+      "max_wall_seconds_per_run": 3600,
+      "repetitions_per_condition": 10,
+      "seed": 1
+    },
+    "experiment_id": "moon-survival-ai-moderator",
+    "measurements": [
+      {
+        "evaluator": {
+          "config": {
+            "answer_key": [
+              "Two oxygen tanks (5 kg each)",
+              "20 litres of water",
+              "Star map",
+              "Food concentrate",
+              "Solar-powered FM transceiver",
+              "15 metres of nylon rope",
+              "First-aid kit with injection needles",
+              "Parachute silk",
+              "Self-inflating life raft",
+              "Signal flares",
+              "Two .45-calibre pistols",
+              "One case of powdered milk",
+              "Portable heating unit",
+              "Magnetic compass",
+              "Box of matches"
+            ],
+            "step": "alone"
+          },
+          "id": "hnf.ranking_tasks.error_score",
+          "version": "1.0.1"
+        },
+        "id": "individual",
+        "label": "Individual error score",
+        "scope": "run"
+      },
+      {
+        "evaluator": {
+          "config": {
+            "answer_key": [
+              "Two oxygen tanks (5 kg each)",
+              "20 litres of water",
+              "Star map",
+              "Food concentrate",
+              "Solar-powered FM transceiver",
+              "15 metres of nylon rope",
+              "First-aid kit with injection needles",
+              "Parachute silk",
+              "Self-inflating life raft",
+              "Signal flares",
+              "Two .45-calibre pistols",
+              "One case of powdered milk",
+              "Portable heating unit",
+              "Magnetic compass",
+              "Box of matches"
+            ],
+            "step": "group"
+          },
+          "id": "hnf.ranking_tasks.error_score",
+          "version": "1.0.1"
+        },
+        "id": "group",
+        "label": "Group error score",
+        "scope": "run"
+      },
+      {
+        "evaluator": {
+          "config": {
+            "answer_key": [
+              "Two oxygen tanks (5 kg each)",
+              "20 litres of water",
+              "Star map",
+              "Food concentrate",
+              "Solar-powered FM transceiver",
+              "15 metres of nylon rope",
+              "First-aid kit with injection needles",
+              "Parachute silk",
+              "Self-inflating life raft",
+              "Signal flares",
+              "Two .45-calibre pistols",
+              "One case of powdered milk",
+              "Portable heating unit",
+              "Magnetic compass",
+              "Box of matches"
+            ],
+            "group_step": "group",
+            "individual_step": "alone"
+          },
+          "id": "hnf.ranking_tasks.synergy",
+          "version": "1.0.1"
+        },
+        "id": "synergy",
+        "label": "Group synergy",
+        "scope": "run"
+      },
+      {
+        "evaluator": {
+          "config": {
+            "action_type": "discussion.message",
+            "step": "discuss"
+          },
+          "id": "hnf.turn_taking.group_balance",
+          "version": "1.0.0"
+        },
+        "id": "balance",
+        "label": "Participation balance",
+        "scope": "run"
+      }
+    ],
+    "participants": [
+      {
+        "agent": {
+          "config": {
+            "instructions": "",
+            "model_ref": "default",
+            "persona": ""
+          },
+          "id": "hnf.participants.model",
+          "version": "1.0.0"
+        },
+        "display_name": "Participant 1",
+        "enabled": true,
+        "id": "p1",
+        "private_context": {},
+        "role": "participant"
+      },
+      {
+        "agent": {
+          "config": {
+            "instructions": "",
+            "model_ref": "default",
+            "persona": ""
+          },
+          "id": "hnf.participants.model",
+          "version": "1.0.0"
+        },
+        "display_name": "Participant 2",
+        "enabled": true,
+        "id": "p2",
+        "private_context": {},
+        "role": "participant"
+      },
+      {
+        "agent": {
+          "config": {
+            "instructions": "",
+            "model_ref": "default",
+            "persona": ""
+          },
+          "id": "hnf.participants.model",
+          "version": "1.0.0"
+        },
+        "display_name": "Participant 3",
+        "enabled": true,
+        "id": "p3",
+        "private_context": {},
+        "role": "participant"
+      },
+      {
+        "agent": {
+          "config": {
+            "balance": true,
+            "balance_threshold": 0.3,
+            "civility": false,
+            "expertise": false,
+            "ground_rules": "1. Avoid arguing for your own ranking: present your position clearly and logically, but seriously consider the group's reactions. 2. Avoid win-lose stalemates: when you reach an impasse, look for the next most acceptable alternative for everyone. 3. Do not change your mind only to avoid conflict; resist pressure to yield that has no sound basis. 4. Avoid conflict-reducing techniques such as majority vote, averaging, bargaining or coin flipping; treat differences of opinion as a sign that information is still missing, and ask for it. 5. See differences of opinion as natural and helpful, not as an obstacle. 6. Treat initial agreement as suspect: check that people agree for the same or complementary reasons.",
+            "instructions": "The group is doing the NASA Moon Survival task and must agree on one shared ranking.",
+            "model_ref": "default",
+            "persona": ""
+          },
+          "id": "hnf.moderator.moderator",
+          "version": "1.0.1"
+        },
+        "display_name": "AI moderator",
+        "enabled": true,
+        "id": "moderator",
+        "private_context": {},
+        "role": "moderator"
+      }
+    ],
+    "research": {
+      "hypotheses": [],
+      "question": "Does an AI moderator that balances participation and enforces consensus ground rules change the quality of the group's decision and how evenly members take part?"
+    },
+    "schema_version": "2.0.0",
+    "steps": [
+      {
+        "components": [
+          {
+            "config": {
+              "finish": true,
+              "items": [
+                "15 metres of nylon rope",
+                "20 litres of water",
+                "Box of matches",
+                "First-aid kit with injection needles",
+                "Food concentrate",
+                "Magnetic compass",
+                "One case of powdered milk",
+                "Parachute silk",
+                "Portable heating unit",
+                "Self-inflating life raft",
+                "Signal flares",
+                "Solar-powered FM transceiver",
+                "Star map",
+                "Two .45-calibre pistols",
+                "Two oxygen tanks (5 kg each)"
+              ],
+              "mode": "individual",
+              "prompt": "You are a team of astronauts stranded on the Moon after your lander crashed about 300 km from the lunar base, on the lit side of the Moon. These 15 items survived the crash. Rank them by their importance for survival and for reaching the base: 1 is the most important.",
+              "reporter": "",
+              "visibility": "private"
+            },
+            "id": "hnf.ranking_tasks.ranking",
+            "version": "1.0.1"
+          }
+        ],
+        "id": "alone",
+        "title": "Rank alone"
+      },
+      {
+        "components": [
+          {
+            "config": {
+              "finish": false,
+              "prompt": "You are a team of astronauts stranded on the Moon after your lander crashed about 300 km from the lunar base, on the lit side of the Moon. These 15 items survived the crash. Rank them by their importance for survival and for reaching the base: 1 is the most important. Discuss the ranking with your group and reach a consensus on one shared ranking. Ground rules: 1. Avoid arguing for your own ranking: present your position clearly and logically, but seriously consider the group's reactions. 2. Avoid win-lose stalemates: when you reach an impasse, look for the next most acceptable alternative for everyone. 3. Do not change your mind only to avoid conflict; resist pressure to yield that has no sound basis. 4. Avoid conflict-reducing techniques such as majority vote, averaging, bargaining or coin flipping; treat differences of opinion as a sign that information is still missing, and ask for it. 5. See differences of opinion as natural and helpful, not as an obstacle. 6. Treat initial agreement as suspect: check that people agree for the same or complementary reasons.",
+              "rounds": 5,
+              "sample": "I would put the oxygen and the water first; why would anyone rank them differently?",
+              "turns": "procedure"
+            },
+            "id": "hnf.group_discussion.discussion",
+            "version": "1.0.0"
+          },
+          {
+            "config": {
+              "action_type": "discussion.message",
+              "finish": true,
+              "max_turns": 15,
+              "quiet_rounds": 2,
+              "tie_break": "least_active"
+            },
+            "id": "hnf.turn_taking.raise_hands",
+            "version": "1.0.0"
+          }
+        ],
+        "id": "discuss",
+        "title": "Discuss"
+      },
+      {
+        "components": [
+          {
+            "config": {
+              "finish": true,
+              "items": [
+                "15 metres of nylon rope",
+                "20 litres of water",
+                "Box of matches",
+                "First-aid kit with injection needles",
+                "Food concentrate",
+                "Magnetic compass",
+                "One case of powdered milk",
+                "Parachute silk",
+                "Portable heating unit",
+                "Self-inflating life raft",
+                "Signal flares",
+                "Solar-powered FM transceiver",
+                "Star map",
+                "Two .45-calibre pistols",
+                "Two oxygen tanks (5 kg each)"
+              ],
+              "mode": "group",
+              "prompt": "You are a team of astronauts stranded on the Moon after your lander crashed about 300 km from the lunar base, on the lit side of the Moon. These 15 items survived the crash. Rank them by their importance for survival and for reaching the base: 1 is the most important.",
+              "reporter": "",
+              "visibility": "shared"
+            },
+            "id": "hnf.ranking_tasks.ranking",
+            "version": "1.0.1"
+          }
+        ],
+        "id": "group",
+        "title": "Rank as a group"
+      }
+    ],
+    "title": "NASA Moon Survival with an AI moderator"
+  },
+  "packages": [
+    {
+      "bundle_id": "hnf.group_discussion",
+      "version": "1.0.0",
+      "digest": "8635dc4a94885045a34cc5d9d3027f32f9e802a32ec07f49041ed2e47bc7403a"
+    },
+    {
+      "bundle_id": "hnf.moderator",
+      "version": "1.0.1",
+      "digest": "595be7e0511dbd1f4858534f276a28f85480b9b5e5a070317aca9d5f52141362"
+    },
+    {
+      "bundle_id": "hnf.participants",
+      "version": "1.0.0",
+      "digest": "3eba369193895ce162da928faffcb34ce74512a9c74d86bf2acc252f11fbcaee"
+    },
+    {
+      "bundle_id": "hnf.ranking_tasks",
+      "version": "1.0.1",
+      "digest": "e5a7c95e742bcb85fe981fe800db284525232a5f64f372b74145eaa1abcaa90f"
+    },
+    {
+      "bundle_id": "hnf.turn_taking",
+      "version": "1.0.0",
+      "digest": "ae88165ba9d278cdb0cc7b48d72c3b43a370272b9b61cdf32e56ab66e04cad84"
+    }
+  ]
+}
