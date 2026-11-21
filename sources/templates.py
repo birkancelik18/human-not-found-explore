@@ -421,9 +421,12 @@ CONTE_PERSONAS = [
              "rarely open a new point and tend to go along with the others unless someone asks for your view."),
 ]
 CONTE_ROLEPLAY = ("Take part as this person would, in their own way of speaking and of joining in, not as an assistant. "
-                  "Keep their manner throughout the discussion. The discussion is in English. When you are asked "
-                  "whether you want to speak next: once your group has agreed on one complete ranking and you have "
-                  "nothing to add, answer false; this tells the group you are ready to conclude.")
+                  "Keep their manner throughout the discussion. The discussion is in English. In the discussion your "
+                  "group of three must agree on one shared ranking of the {task} items. When you are asked whether you "
+                  "want to speak next, answer true whenever you have something to say: your view, a disagreement, a "
+                  "question or a reaction, and always while the group has not yet discussed and agreed on a full "
+                  "ranking. Answer false only once your group has agreed on one complete ranking and you have nothing "
+                  "to add; this tells the group you are ready to conclude.")
 CONTE_SOURCE = (
     "Original study: Conte, S. P. (2026). AI Moderation in Multi-Party Voice Conversations: Architecture, Strategies, "
     "and Evaluation (Master's thesis, Politecnico di Milano). Ten groups of three ranked 15 items alone, then discussed "
@@ -451,7 +454,7 @@ CONTE_DESIGN = (
 def moderated_survival(identifier, name, task, prompt, key, sample, sibling):
     items = sorted(key)
     members = [{"id": f"p{i}", "display_name": who, "enabled": True, "role": "participant",
-                "agent": ref("hnf.participants.model", model_ref="default", persona=persona, instructions=CONTE_ROLEPLAY),
+                "agent": ref("hnf.participants.model", model_ref="default", persona=persona, instructions=CONTE_ROLEPLAY.format(task=task)),
                 "private_context": {}} for i, (who, persona) in enumerate(CONTE_PERSONAS, 1)]
     moderator = {"id": "moderator", "display_name": "AI moderator", "enabled": True, "role": "moderator",
                  "agent": ref("hnf.moderator.moderator", model_ref="default", balance=True, civility=False,

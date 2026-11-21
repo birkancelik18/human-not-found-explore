@@ -3,7 +3,7 @@
   "name": "NASA Moon Survival with an AI moderator",
   "author": "Human Not Found",
   "description": "Original study: Conte, S. P. (2026). AI Moderation in Multi-Party Voice Conversations: Architecture, Strategies, and Evaluation (Master's thesis, Politecnico di Milano). Ten groups of three ranked 15 items alone, then discussed by voice for up to 30 minutes under the consensus ground rules of Hall & Watson (1970) and submitted one group ranking, once with an AI moderator that balanced participation and enforced the ground rules, and once without it. Each group did NASA Moon Survival in one session and Lost at Sea in the other, with task and moderator order counterbalanced. Rankings were scored against the expert ranking (error score, lower is better) and against the group's own members (synergy); participation balance was the Gini index of floor-holding time. In this template three members with personas (a talkative engineering student, an office administrator who takes part at an ordinary pace and a reserved shop assistant; the personas are ours, not the thesis's) rank the items alone and privately, discuss in text with the ground rules, speaking when they raise a hand, until nobody asks for the floor (they stop once they agree, like pressing 'ready to conclude') or 40 member turns, and then the first member submits the group ranking. In the 'Moderator on' condition an AI moderator follows the thesis's policy: after about 8 minutes of speaking it invites a member under half the group average by name, or opens up the point of a member over twice the average, with a cooldown; after each message it judges conflict, direct requests, off-topic drift and ground-rule breaks, with a severity floor of 0.4; it does not rank. Speaking time is estimated from the members' words at 150 words per minute, and the 2-minute cooldown is our choice, as the thesis does not give its value. In 'Moderator off' it is disabled and the ground rules are only stated at the start. Participation inequality uses the thesis's Gini formula on the members' words, which stand in for floor-holding time in a text discussion. Run this template and its sibling (Lost at Sea with an AI moderator) together to reproduce the within-group design; every repetition uses the same three personas, so repetitions differ only through the model's own variation. Participants are simulated: each is a Model participant, using the free test model until you choose a model, so the first runs only check the design; with the test model every participant takes the sample answer.",
-  "created_at": "2026-11-21T23:49:01.434+00:00",
+  "created_at": "2026-11-21T23:54:59.853+00:00",
   "spec": {
     "components": [],
     "conditions": [
@@ -161,7 +161,7 @@
       {
         "agent": {
           "config": {
-            "instructions": "Take part as this person would, in their own way of speaking and of joining in, not as an assistant. Keep their manner throughout the discussion. The discussion is in English. When you are asked whether you want to speak next: once your group has agreed on one complete ranking and you have nothing to add, answer false; this tells the group you are ready to conclude.",
+            "instructions": "Take part as this person would, in their own way of speaking and of joining in, not as an assistant. Keep their manner throughout the discussion. The discussion is in English. In the discussion your group of three must agree on one shared ranking of the NASA Moon Survival items. When you are asked whether you want to speak next, answer true whenever you have something to say: your view, a disagreement, a question or a reaction, and always while the group has not yet discussed and agreed on a full ranking. Answer false only once your group has agreed on one complete ranking and you have nothing to add; this tells the group you are ready to conclude.",
             "model_ref": "default",
             "persona": "You are Giulia, a 24-year-old engineering student in Milan. You are confident and talkative: you speak up first, explain your views at length and like to steer the group."
           },
@@ -177,7 +177,7 @@
       {
         "agent": {
           "config": {
-            "instructions": "Take part as this person would, in their own way of speaking and of joining in, not as an assistant. Keep their manner throughout the discussion. The discussion is in English. When you are asked whether you want to speak next: once your group has agreed on one complete ranking and you have nothing to add, answer false; this tells the group you are ready to conclude.",
+            "instructions": "Take part as this person would, in their own way of speaking and of joining in, not as an assistant. Keep their manner throughout the discussion. The discussion is in English. In the discussion your group of three must agree on one shared ranking of the NASA Moon Survival items. When you are asked whether you want to speak next, answer true whenever you have something to say: your view, a disagreement, a question or a reaction, and always while the group has not yet discussed and agreed on a full ranking. Answer false only once your group has agreed on one complete ranking and you have nothing to add; this tells the group you are ready to conclude.",
             "model_ref": "default",
             "persona": "You are Marco, a 38-year-old office administrator in Milan who did not go to university. You take part at an ordinary pace: you say what you think briefly and listen to the others."
           },
@@ -193,7 +193,7 @@
       {
         "agent": {
           "config": {
-            "instructions": "Take part as this person would, in their own way of speaking and of joining in, not as an assistant. Keep their manner throughout the discussion. The discussion is in English. When you are asked whether you want to speak next: once your group has agreed on one complete ranking and you have nothing to add, answer false; this tells the group you are ready to conclude.",
+            "instructions": "Take part as this person would, in their own way of speaking and of joining in, not as an assistant. Keep their manner throughout the discussion. The discussion is in English. In the discussion your group of three must agree on one shared ranking of the NASA Moon Survival items. When you are asked whether you want to speak next, answer true whenever you have something to say: your view, a disagreement, a question or a reaction, and always while the group has not yet discussed and agreed on a full ranking. Answer false only once your group has agreed on one complete ranking and you have nothing to add; this tells the group you are ready to conclude.",
             "model_ref": "default",
             "persona": "You are Sara, a 29-year-old shop assistant in Milan. You are reserved: you keep your messages short, rarely open a new point and tend to go along with the others unless someone asks for your view."
           },
