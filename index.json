@@ -1357,6 +1357,112 @@
       }
     },
     {
+      "path": "packages/hnf.moderator-1.0.1.hnf.json",
+      "digest": "sha256:90babab7b5f585a2427293e97030283e44b66e775e7865625414a7e8d4ba241b",
+      "added_at": "2026-11-21T23:15:29+01:00",
+      "manifest": {
+        "bundle_id": "hnf.moderator",
+        "version": "1.0.1",
+        "author": "Human Not Found",
+        "description": "An AI moderator for group discussions that follows conversational strategies: balance participation, keep the discussion respectful, ask the right expert.",
+        "permissions": [
+          "read_shared_state",
+          "model_call"
+        ],
+        "components": [
+          {
+            "id": "hnf.moderator.moderator",
+            "family": "agent",
+            "entrypoint": "moderator",
+            "description": "AI moderator",
+            "about": {
+              "summary": "A moderator participant that knows when and what to say: it steps in when participation is uneven or a message is disrespectful, and can ask the member best placed to answer.",
+              "how_it_works": "Give this behaviour to a participant with the role 'moderator'. Each goal is a conversational strategy (goal, trigger, behaviour). Balance: when the Gini index of the members' words is above the threshold, it asks for the floor without a model call and invites the quietest member by name. Respect: it asks the model whether the last message was disrespectful and, if so, steps in to remind the group to stay considerate. Ground rules: when rules are filled in, it asks the model whether the last message broke one and, if so, gently recalls the idea of that rule and steers the group back. Expertise: when it picks the next speaker, the model names the member whose public details fit the last message. When it gets the floor with nothing to fix, it briefly sums up or moves the group on. With the hnf.turn_taking rules it is outside the group: never in the rotation, left out of the counts, and asked first after each member's message whether it wants to step in; it reads their turn.status counts. With a Discussion's own round robin or free turns it simply takes its turn and counts the messages in its memory window. Ranking tasks (hnf.ranking_tasks 1.0.1 and later) leave moderators out. Other activities offer their actions to every participant, so in their task steps the moderator answers too: leave its answers out of that step's measures, or compare against a condition without the moderator (disable the participant there). With the free test model every choice takes the action's sample answer.",
+              "actions": [
+                {
+                  "type": "turn.request",
+                  "description": "Ask for the floor when a goal's trigger fires."
+                },
+                {
+                  "type": "turn.pass",
+                  "description": "Name the quietest member, or the best-placed one."
+                },
+                {
+                  "type": "discussion.message",
+                  "description": "A short moderator message: invite someone, restate respect, or sum up."
+                }
+              ]
+            },
+            "config_schema": {
+              "type": "object",
+              "properties": {
+                "model_ref": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 4000,
+                  "title": "Model",
+                  "default": "default",
+                  "x-hnf-reference": "model"
+                },
+                "balance": {
+                  "type": "boolean",
+                  "title": "Goal: balance participation (invite the quietest member)",
+                  "default": true
+                },
+                "civility": {
+                  "type": "boolean",
+                  "title": "Goal: keep the discussion respectful",
+                  "default": true
+                },
+                "expertise": {
+                  "type": "boolean",
+                  "title": "Goal: ask the member whose details fit the point",
+                  "default": false
+                },
+                "ground_rules": {
+                  "type": "string",
+                  "maxLength": 4000,
+                  "title": "Goal: ground rules to enforce (empty: off)",
+                  "default": ""
+                },
+                "balance_threshold": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 1,
+                  "title": "Unevenness that triggers an invitation (Gini of words, 0 to 1)",
+                  "default": 0.3
+                },
+                "persona": {
+                  "type": "string",
+                  "maxLength": 4000,
+                  "title": "Persona (how the moderator comes across)",
+                  "default": ""
+                },
+                "instructions": {
+                  "type": "string",
+                  "maxLength": 4000,
+                  "title": "Instructions",
+                  "default": ""
+                }
+              },
+              "required": [
+                "model_ref",
+                "balance",
+                "civility",
+                "expertise",
+                "balance_threshold",
+                "persona",
+                "instructions"
+              ],
+              "additionalProperties": false
+            }
+          }
+        ],
+        "contract_version": "1.0.0",
+        "digest": "sha256:c3ed25ad95bac4eb21fca89c0073b4cff29eaef75e69b453dbe5965e15df2710"
+      }
+    },
+    {
       "path": "packages/hnf.participants-1.0.0.hnf.json",
       "digest": "sha256:1235faa09087c15252b8d91ff39c985e47a24638e7adae31cee016ae2b7caf49",
       "added_at": "2026-11-18T02:14:42+01:00",
@@ -1949,6 +2055,279 @@
       }
     },
     {
+      "path": "packages/hnf.ranking_tasks-1.0.1.hnf.json",
+      "digest": "sha256:9a3f7d0298179dbf23523f3b8d20d0f446af7f5b42d53de7282d7bd70dc5f753",
+      "added_at": "2026-11-21T23:15:29+01:00",
+      "manifest": {
+        "bundle_id": "hnf.ranking_tasks",
+        "version": "1.0.1",
+        "author": "Human Not Found",
+        "description": "Ranking tasks alone or as a group, with error score, group synergy and ranking change measures.",
+        "permissions": [
+          "read_shared_state",
+          "read_private_actions",
+          "write_state",
+          "emit_event"
+        ],
+        "components": [
+          {
+            "id": "hnf.ranking_tasks.ranking",
+            "family": "mechanic",
+            "entrypoint": "ranking_task",
+            "description": "Ranking task",
+            "about": {
+              "summary": "Participants put a list of items in order of importance, each on their own or as a group.",
+              "how_it_works": "Individual mode: every participant ranks all items at the same time. Group mode: the group's ranking is submitted once, by a reporter (the first enabled participant unless one is chosen), who submits the order the group agreed on; put a Discussion step before it so the group can reach that order. Every ranking must contain every item exactly once. Rankings are seen by everyone or only by the participant who submitted them. Participants whose role is 'moderator' never rank and cannot be the reporter, so an AI moderator does not change the scores.",
+              "actions": [
+                {
+                  "type": "ranking.submit",
+                  "description": "Individual mode: submit your own ranking of all items."
+                },
+                {
+                  "type": "ranking.group_submit",
+                  "description": "Group mode (reporter only): submit the group's ranking."
+                }
+              ],
+              "ends_when": "When every participant (individual mode) or the reporter (group mode) has submitted (unless 'End the step' is off)."
+            },
+            "config_schema": {
+              "type": "object",
+              "properties": {
+                "prompt": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 4000,
+                  "title": "Instructions",
+                  "default": "Rank the items by how important they are."
+                },
+                "items": {
+                  "type": "array",
+                  "title": "Items",
+                  "minItems": 2,
+                  "maxItems": 30,
+                  "items": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 200
+                  },
+                  "default": [
+                    "Water",
+                    "Map",
+                    "Flashlight"
+                  ],
+                  "uniqueItems": true
+                },
+                "mode": {
+                  "type": "string",
+                  "enum": [
+                    "individual",
+                    "group"
+                  ],
+                  "title": "Who ranks",
+                  "default": "individual"
+                },
+                "reporter": {
+                  "type": "string",
+                  "maxLength": 120,
+                  "title": "Group reporter (group mode; empty: first enabled participant)",
+                  "default": "",
+                  "x-hnf-reference": "participant"
+                },
+                "visibility": {
+                  "type": "string",
+                  "enum": [
+                    "shared",
+                    "private"
+                  ],
+                  "title": "Who sees the answers",
+                  "default": "private"
+                },
+                "finish": {
+                  "type": "boolean",
+                  "title": "End the step when the rankings are in",
+                  "default": true
+                }
+              },
+              "required": [
+                "prompt",
+                "items",
+                "mode",
+                "reporter",
+                "visibility",
+                "finish"
+              ],
+              "additionalProperties": false
+            }
+          },
+          {
+            "id": "hnf.ranking_tasks.error_score",
+            "family": "evaluator",
+            "entrypoint": "error_score",
+            "description": "Error score",
+            "about": {
+              "summary": "How far rankings are from an answer key: the sum of absolute differences in rank, lower is better.",
+              "how_it_works": "For each ranking, adds up how many places each item is from its place in the answer key. Uses each participant's latest individual ranking and the group ranking in the chosen step. The value is the group's error score if a group ranking was submitted, otherwise the mean individual error score.",
+              "outputs": [
+                {
+                  "label": "Error score",
+                  "unit": "rank places",
+                  "description": "Group error score, or the mean individual error score when there is no group ranking."
+                },
+                {
+                  "label": "Details",
+                  "description": "Group error, error per participant, mean and best individual error."
+                }
+              ]
+            },
+            "config_schema": {
+              "type": "object",
+              "properties": {
+                "answer_key": {
+                  "type": "array",
+                  "title": "Answer key (correct order)",
+                  "minItems": 2,
+                  "maxItems": 30,
+                  "items": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 200
+                  },
+                  "default": [
+                    "Water",
+                    "Map",
+                    "Flashlight"
+                  ],
+                  "uniqueItems": true
+                },
+                "step": {
+                  "type": "string",
+                  "maxLength": 120,
+                  "title": "Step (empty: whole run)",
+                  "default": "",
+                  "x-hnf-reference": "step"
+                }
+              },
+              "required": [
+                "answer_key",
+                "step"
+              ],
+              "additionalProperties": false
+            }
+          },
+          {
+            "id": "hnf.ranking_tasks.synergy",
+            "family": "evaluator",
+            "entrypoint": "group_synergy",
+            "description": "Group synergy",
+            "about": {
+              "summary": "Whether the group ranked better than its average member and its best member.",
+              "how_it_works": "Compares the group ranking's error score with the members' error scores from an earlier individual step. The value is the mean individual error minus the group error: above 0 means the group did better than its average member. The details also compare the group with its best member (better than best is often called strong synergy).",
+              "outputs": [
+                {
+                  "label": "Gain over average member",
+                  "unit": "rank places",
+                  "description": "Mean individual error minus group error."
+                },
+                {
+                  "label": "Details",
+                  "description": "Group error, mean and best individual error, and whether the group beat the average and the best member."
+                }
+              ]
+            },
+            "config_schema": {
+              "type": "object",
+              "properties": {
+                "individual_step": {
+                  "type": "string",
+                  "maxLength": 120,
+                  "title": "Individual ranking step",
+                  "default": "",
+                  "x-hnf-reference": "step"
+                },
+                "group_step": {
+                  "type": "string",
+                  "maxLength": 120,
+                  "title": "Group ranking step",
+                  "default": "",
+                  "x-hnf-reference": "step"
+                },
+                "answer_key": {
+                  "type": "array",
+                  "title": "Answer key (correct order)",
+                  "minItems": 2,
+                  "maxItems": 30,
+                  "items": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 200
+                  },
+                  "default": [
+                    "Water",
+                    "Map",
+                    "Flashlight"
+                  ],
+                  "uniqueItems": true
+                }
+              },
+              "required": [
+                "individual_step",
+                "group_step",
+                "answer_key"
+              ],
+              "additionalProperties": false
+            }
+          },
+          {
+            "id": "hnf.ranking_tasks.change",
+            "family": "evaluator",
+            "entrypoint": "ranking_change",
+            "description": "Ranking change",
+            "about": {
+              "summary": "How far each participant's ranking moved between two steps.",
+              "how_it_works": "For each participant who ranked in both steps, adds up how many places each item moved. If the later step has a group ranking, each member's earlier ranking is compared with the group ranking.",
+              "outputs": [
+                {
+                  "label": "Mean change",
+                  "unit": "rank places",
+                  "description": "Mean total movement per participant."
+                },
+                {
+                  "label": "Details",
+                  "description": "Movement per participant."
+                }
+              ]
+            },
+            "config_schema": {
+              "type": "object",
+              "properties": {
+                "step_before": {
+                  "type": "string",
+                  "maxLength": 120,
+                  "title": "Step before",
+                  "default": "",
+                  "x-hnf-reference": "step"
+                },
+                "step_after": {
+                  "type": "string",
+                  "maxLength": 120,
+                  "title": "Step after",
+                  "default": "",
+                  "x-hnf-reference": "step"
+                }
+              },
+              "required": [
+                "step_before",
+                "step_after"
+              ],
+              "additionalProperties": false
+            }
+          }
+        ],
+        "contract_version": "1.0.0",
+        "digest": "sha256:f429002295ffc2387f85e276b53a31e09d8a513565dc1c4357863f57fc223a01"
+      }
+    },
+    {
       "path": "packages/hnf.survey_measures-1.0.0.hnf.json",
       "digest": "sha256:104823a129f0867747c60916bcae9727c08c40eb30cfb33306e1cb89165c8f64",
       "added_at": "2026-11-19T13:11:30+01:00",
@@ -2498,6 +2877,300 @@
         "contract_version": "1.0.0",
         "digest": "sha256:67b01716053d2186766c32668a12d48753eb82beee51df5bfaaa04f8e16badf5"
       }
+    },
+    {
+      "path": "packages/hnf.turn_taking-1.0.1.hnf.json",
+      "digest": "sha256:74371c7aa8ea6183399de4c9d749ff17e05332ec97f11a181d6898a8a282695c",
+      "added_at": "2026-11-22T00:08:31+01:00",
+      "manifest": {
+        "bundle_id": "hnf.turn_taking",
+        "version": "1.0.1",
+        "author": "Human Not Found",
+        "description": "Rules for who speaks next in a group discussion (speaker picks next, raise hands, least active next), and a participation measure that leaves moderators out.",
+        "permissions": [
+          "read_shared_state",
+          "read_private_actions",
+          "write_state",
+          "emit_event"
+        ],
+        "components": [
+          {
+            "id": "hnf.turn_taking.speaker_selects",
+            "family": "procedure",
+            "entrypoint": "speaker_selects",
+            "description": "Speaker picks next",
+            "about": {
+              "summary": "The turn-taking rules of everyday conversation: the speaker picks who goes next; otherwise anyone may take the floor; otherwise the speaker goes on.",
+              "how_it_works": "Follows Sacks, Schegloff and Jefferson (1974). The first group member in the list speaks first. After each message the speaker names the next speaker (turn.pass), who is invited. If the speaker answers 'anyone', every other participant is asked privately whether they want to speak (turn.request) and the first to say yes gets the floor. If nobody wants it, the previous speaker continues; after the configured number of such quiet rounds in a row the step ends. Moderators (role 'moderator') are never the first speaker and are left out of the counts; after each group member's message they are asked first whether they want to step in, and a speaker may also name them. After each turn the rule publishes turn.status with every group member's messages and words in this step, which the AI moderator reads. Set the memory window (max_memory_events) to at least 40. Use it with a Discussion whose turns are set to procedure.",
+              "actions": [
+                {
+                  "type": "turn.pass",
+                  "description": "Name who speaks next, or 'anyone' to leave the floor open."
+                },
+                {
+                  "type": "turn.request",
+                  "description": "When the floor is open: say privately whether you want to speak next."
+                },
+                {
+                  "type": "discussion.message",
+                  "description": "The chosen participant posts a message (offered by the Discussion activity)."
+                }
+              ],
+              "ends_when": "When the configured number of turns has been taken, or nobody takes the open floor for the configured number of rounds in a row (unless 'End the step' is off)."
+            },
+            "config_schema": {
+              "type": "object",
+              "properties": {
+                "action_type": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 120,
+                  "title": "Action that ends a turn",
+                  "default": "discussion.message"
+                },
+                "max_turns": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 200,
+                  "title": "Group members' turns before the step ends (moderator messages do not count)",
+                  "default": 12
+                },
+                "finish": {
+                  "type": "boolean",
+                  "title": "End the step when the discussion is over",
+                  "default": true
+                },
+                "quiet_rounds": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 10,
+                  "title": "Quiet rounds before the step ends (nobody wants to speak)",
+                  "default": 2
+                }
+              },
+              "required": [
+                "action_type",
+                "max_turns",
+                "finish",
+                "quiet_rounds"
+              ],
+              "additionalProperties": false
+            }
+          },
+          {
+            "id": "hnf.turn_taking.least_active",
+            "family": "procedure",
+            "entrypoint": "least_active",
+            "description": "Least active next",
+            "about": {
+              "summary": "Always gives the floor to the group member who has said the least so far, a policy that balances participation without asking anyone.",
+              "how_it_works": "At the start and after every turn the rule invites the group member with the fewest words in this step (discussion.invite); ties are broken at random with the run's seed, so it is reproducible. Participants whose role is 'moderator' are outside the group: they are never put in the rotation and are left out of the counts, and after each group member's message every moderator is asked privately whether it wants to speak next (turn.request); a yes gives it the next turn. After each turn the rule publishes turn.status with every group member's messages and words in this step, which the AI moderator reads. Use it with a Discussion whose turns are set to procedure.",
+              "actions": [
+                {
+                  "type": "discussion.message",
+                  "description": "The invited member posts a message (offered by the Discussion activity)."
+                },
+                {
+                  "type": "turn.request",
+                  "description": "Moderators only: say whether to step in before the next member."
+                }
+              ],
+              "ends_when": "When the configured number of turns has been taken (unless 'End the step' is off)."
+            },
+            "config_schema": {
+              "type": "object",
+              "properties": {
+                "action_type": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 120,
+                  "title": "Action that ends a turn",
+                  "default": "discussion.message"
+                },
+                "max_turns": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 200,
+                  "title": "Group members' turns before the step ends (moderator messages do not count)",
+                  "default": 12
+                },
+                "finish": {
+                  "type": "boolean",
+                  "title": "End the step when the discussion is over",
+                  "default": true
+                }
+              },
+              "required": [
+                "action_type",
+                "max_turns",
+                "finish"
+              ],
+              "additionalProperties": false
+            }
+          },
+          {
+            "id": "hnf.turn_taking.raise_hands",
+            "family": "procedure",
+            "entrypoint": "raise_hands",
+            "description": "Raise hands",
+            "about": {
+              "summary": "Self-selection: before each turn everyone may privately raise a hand, and one of those who did gets the floor.",
+              "how_it_works": "The first round asks every group member; moderators never open the discussion. Before each later turn the rule asks every participant except the last speaker, privately, whether they want to speak next (turn.request), so nobody sees the others' answers. Several raised hands is floor competition, recorded in turn.status as competitors: the member with the fewest words so far wins (or one at random with the run's seed). A moderator's raised hand always wins. If nobody raises a hand, the rule asks again, this time including the last speaker, who may go on; after the configured number of quiet rounds in a row the step ends. After each turn the rule publishes turn.status with every group member's messages and words in this step, which the AI moderator reads; moderators (role 'moderator') are left out of those counts. Every turn adds several actions, so allow enough actions per run and set the memory window (max_memory_events) to at least 40. Use it with a Discussion whose turns are set to procedure.",
+              "actions": [
+                {
+                  "type": "turn.request",
+                  "description": "Say privately whether you want to speak next."
+                },
+                {
+                  "type": "discussion.message",
+                  "description": "The chosen participant posts a message (offered by the Discussion activity)."
+                }
+              ],
+              "ends_when": "When the configured number of turns has been taken, or nobody wants to speak for the configured number of rounds in a row (unless 'End the step' is off)."
+            },
+            "config_schema": {
+              "type": "object",
+              "properties": {
+                "action_type": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 120,
+                  "title": "Action that ends a turn",
+                  "default": "discussion.message"
+                },
+                "max_turns": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 200,
+                  "title": "Group members' turns before the step ends (moderator messages do not count)",
+                  "default": 12
+                },
+                "finish": {
+                  "type": "boolean",
+                  "title": "End the step when the discussion is over",
+                  "default": true
+                },
+                "quiet_rounds": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 10,
+                  "title": "Quiet rounds before the step ends (nobody wants to speak)",
+                  "default": 2
+                },
+                "tie_break": {
+                  "type": "string",
+                  "enum": [
+                    "least_active",
+                    "random"
+                  ],
+                  "title": "When several raise a hand",
+                  "default": "least_active"
+                }
+              },
+              "required": [
+                "action_type",
+                "max_turns",
+                "finish",
+                "quiet_rounds",
+                "tie_break"
+              ],
+              "additionalProperties": false
+            }
+          },
+          {
+            "id": "hnf.turn_taking.group_balance",
+            "family": "evaluator",
+            "entrypoint": "group_balance",
+            "description": "Group participation balance",
+            "about": {
+              "summary": "How evenly the group members contributed to the discussion, leaving moderators out, so groups with and without a moderator compare the same people.",
+              "how_it_works": "Counts the discussion messages and their words of every participant whose role is not 'moderator', including members who said nothing. Evenness is the normalized entropy of the members' shares of words: 1 when everyone wrote the same amount, 0 when one person wrote everything.",
+              "outputs": [
+                {
+                  "label": "Evenness",
+                  "unit": "0 to 1",
+                  "description": "Normalized entropy of the group members' shares of words."
+                },
+                {
+                  "label": "Details",
+                  "description": "Messages and words per group member, and the evenness of message counts."
+                }
+              ]
+            },
+            "config_schema": {
+              "type": "object",
+              "properties": {
+                "action_type": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 120,
+                  "title": "Message action type",
+                  "default": "discussion.message"
+                },
+                "step": {
+                  "type": "string",
+                  "maxLength": 120,
+                  "title": "Step (empty: whole run)",
+                  "default": "",
+                  "x-hnf-reference": "step"
+                }
+              },
+              "required": [
+                "action_type",
+                "step"
+              ],
+              "additionalProperties": false
+            }
+          },
+          {
+            "id": "hnf.turn_taking.gini",
+            "family": "evaluator",
+            "entrypoint": "participation_gini",
+            "description": "Participation inequality (Gini)",
+            "about": {
+              "summary": "How unequally the group members shared the discussion, as a Gini coefficient, leaving moderators out, so groups with and without a moderator compare the same people.",
+              "how_it_works": "Counts the words in the discussion messages of every participant whose role is not 'moderator', including members who said nothing, and computes the Gini coefficient: the sum of |t_i - t_j| over every pair of members, divided by 2 n times the total, where t is a member's words and n the number of members. Words stand in for floor-holding time in a text discussion. 0 means everyone wrote the same amount; higher values mean one or a few members took most of the floor (2/3 for three members when one wrote everything).",
+              "outputs": [
+                {
+                  "label": "Gini",
+                  "unit": "0 to 1",
+                  "description": "Gini coefficient of the group members' words; lower is more equal."
+                },
+                {
+                  "label": "Details",
+                  "description": "Messages and words per group member, and the Gini of message counts."
+                }
+              ]
+            },
+            "config_schema": {
+              "type": "object",
+              "properties": {
+                "action_type": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 120,
+                  "title": "Message action type",
+                  "default": "discussion.message"
+                },
+                "step": {
+                  "type": "string",
+                  "maxLength": 120,
+                  "title": "Step (empty: whole run)",
+                  "default": "",
+                  "x-hnf-reference": "step"
+                }
+              },
+              "required": [
+                "action_type",
+                "step"
+              ],
+              "additionalProperties": false
+            }
+          }
+        ],
+        "contract_version": "1.0.0",
+        "digest": "sha256:43895fe65bc86bf4838b69c7ca28ca3f3d8419a9420347cbf7eeae8079cbe5d2"
+      }
     }
   ],
   "templates": [
@@ -2835,8 +3508,100 @@
       ]
     },
     {
+      "path": "templates/lost-at-sea-ai-moderator.template.json",
+      "digest": "sha256:9571e7e37c474c7f9e0426cc6ea7ea3d1c23500479e74521229ec7ad82fbd85f",
+      "added_at": "2026-11-21T23:15:29+01:00",
+      "id": "lost-at-sea-ai-moderator",
+      "name": "Lost at Sea with an AI moderator",
+      "author": "Human Not Found",
+      "description": "Original study: Conte, S. P. (2026). AI Moderation in Multi-Party Voice Conversations: Architecture, Strategies, and Evaluation (Master's thesis, Politecnico di Milano). Ten groups of three ranked 15 items alone, then discussed by voice for up to 30 minutes under the consensus ground rules of Hall & Watson (1970) and submitted one group ranking, once with an AI moderator that balanced participation and enforced the ground rules, and once without it. Each group did NASA Moon Survival in one session and Lost at Sea in the other, with task and moderator order counterbalanced. Rankings were scored against the expert ranking (error score, lower is better) and against the group's own members (synergy); participation balance was the Gini index of floor-holding time. In this template three members with personas (a talkative engineering student, an office administrator who takes part at an ordinary pace and a reserved shop assistant; the personas are ours, not the thesis's) rank the items alone and privately, discuss in text with the ground rules, speaking when they raise a hand (up to 15 member turns), and then the first member submits the group ranking. In the 'Moderator on' condition an AI moderator joins the discussion: it invites the quietest member when participation gets uneven and gently recalls a ground rule when a message breaks one; it does not rank. In 'Moderator off' it is disabled and the ground rules are only stated at the start. Participation inequality uses the thesis's Gini formula on the members' words, which stand in for floor-holding time in a text discussion. Run this template and its sibling (NASA Moon Survival with an AI moderator) together to reproduce the within-group design; every repetition uses the same three personas, so repetitions differ only through the model's own variation. Participants are simulated: each is a Model participant, using the free test model until you choose a model, so the first runs only check the design; with the test model every participant takes the sample answer.",
+      "packages": [
+        {
+          "bundle_id": "hnf.group_discussion",
+          "version": "1.0.0",
+          "digest": "8635dc4a94885045a34cc5d9d3027f32f9e802a32ec07f49041ed2e47bc7403a"
+        },
+        {
+          "bundle_id": "hnf.moderator",
+          "version": "1.0.1",
+          "digest": "595be7e0511dbd1f4858534f276a28f85480b9b5e5a070317aca9d5f52141362"
+        },
+        {
+          "bundle_id": "hnf.participants",
+          "version": "1.0.0",
+          "digest": "3eba369193895ce162da928faffcb34ce74512a9c74d86bf2acc252f11fbcaee"
+        },
+        {
+          "bundle_id": "hnf.ranking_tasks",
+          "version": "1.0.1",
+          "digest": "e5a7c95e742bcb85fe981fe800db284525232a5f64f372b74145eaa1abcaa90f"
+        },
+        {
+          "bundle_id": "hnf.turn_taking",
+          "version": "1.0.1",
+          "digest": "23d27bddc52f30ab2e8fcf9c52ecc9b84a6b40363029bcd076b1f8af26c452c2"
+        }
+      ],
+      "components": [
+        "hnf.group_discussion.discussion",
+        "hnf.moderator.moderator",
+        "hnf.participants.model",
+        "hnf.ranking_tasks.error_score",
+        "hnf.ranking_tasks.ranking",
+        "hnf.ranking_tasks.synergy",
+        "hnf.turn_taking.gini",
+        "hnf.turn_taking.raise_hands"
+      ]
+    },
+    {
+      "path": "templates/moon-survival-ai-moderator.template.json",
+      "digest": "sha256:b4bafb85aabf11ba3b1e49fb0d8024a10591432411264514e0bb21e08abd8d5c",
+      "added_at": "2026-11-21T23:15:29+01:00",
+      "id": "moon-survival-ai-moderator",
+      "name": "NASA Moon Survival with an AI moderator",
+      "author": "Human Not Found",
+      "description": "Original study: Conte, S. P. (2026). AI Moderation in Multi-Party Voice Conversations: Architecture, Strategies, and Evaluation (Master's thesis, Politecnico di Milano). Ten groups of three ranked 15 items alone, then discussed by voice for up to 30 minutes under the consensus ground rules of Hall & Watson (1970) and submitted one group ranking, once with an AI moderator that balanced participation and enforced the ground rules, and once without it. Each group did NASA Moon Survival in one session and Lost at Sea in the other, with task and moderator order counterbalanced. Rankings were scored against the expert ranking (error score, lower is better) and against the group's own members (synergy); participation balance was the Gini index of floor-holding time. In this template three members with personas (a talkative engineering student, an office administrator who takes part at an ordinary pace and a reserved shop assistant; the personas are ours, not the thesis's) rank the items alone and privately, discuss in text with the ground rules, speaking when they raise a hand (up to 15 member turns), and then the first member submits the group ranking. In the 'Moderator on' condition an AI moderator joins the discussion: it invites the quietest member when participation gets uneven and gently recalls a ground rule when a message breaks one; it does not rank. In 'Moderator off' it is disabled and the ground rules are only stated at the start. Participation inequality uses the thesis's Gini formula on the members' words, which stand in for floor-holding time in a text discussion. Run this template and its sibling (Lost at Sea with an AI moderator) together to reproduce the within-group design; every repetition uses the same three personas, so repetitions differ only through the model's own variation. Participants are simulated: each is a Model participant, using the free test model until you choose a model, so the first runs only check the design; with the test model every participant takes the sample answer.",
+      "packages": [
+        {
+          "bundle_id": "hnf.group_discussion",
+          "version": "1.0.0",
+          "digest": "8635dc4a94885045a34cc5d9d3027f32f9e802a32ec07f49041ed2e47bc7403a"
+        },
+        {
+          "bundle_id": "hnf.moderator",
+          "version": "1.0.1",
+          "digest": "595be7e0511dbd1f4858534f276a28f85480b9b5e5a070317aca9d5f52141362"
+        },
+        {
+          "bundle_id": "hnf.participants",
+          "version": "1.0.0",
+          "digest": "3eba369193895ce162da928faffcb34ce74512a9c74d86bf2acc252f11fbcaee"
+        },
+        {
+          "bundle_id": "hnf.ranking_tasks",
+          "version": "1.0.1",
+          "digest": "e5a7c95e742bcb85fe981fe800db284525232a5f64f372b74145eaa1abcaa90f"
+        },
+        {
+          "bundle_id": "hnf.turn_taking",
+          "version": "1.0.1",
+          "digest": "23d27bddc52f30ab2e8fcf9c52ecc9b84a6b40363029bcd076b1f8af26c452c2"
+        }
+      ],
+      "components": [
+        "hnf.group_discussion.discussion",
+        "hnf.moderator.moderator",
+        "hnf.participants.model",
+        "hnf.ranking_tasks.error_score",
+        "hnf.ranking_tasks.ranking",
+        "hnf.ranking_tasks.synergy",
+        "hnf.turn_taking.gini",
+        "hnf.turn_taking.raise_hands"
+      ]
+    },
+    {
       "path": "templates/moon-survival.template.json",
-      "digest": "sha256:303964c10c41bbce8eaadeda63f66cd367ac5ab8b6e6caf3bcba840e33971d65",
+      "digest": "sha256:ab985260d5ab2e394036b0b24c89f9cf6355cb709622fa7eb671ec4fbdce2f24",
       "added_at": "2026-11-18T02:14:42+01:00",
       "id": "moon-survival",
       "name": "NASA Moon Survival Task",
@@ -2855,8 +3620,8 @@
         },
         {
           "bundle_id": "hnf.ranking_tasks",
-          "version": "1.0.0",
-          "digest": "a27394217e2609b1a640db1e3e1a5d2afa619ff56220bc40a88cd0ad3583f45a"
+          "version": "1.0.1",
+          "digest": "e5a7c95e742bcb85fe981fe800db284525232a5f64f372b74145eaa1abcaa90f"
         }
       ],
       "components": [
